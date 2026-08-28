@@ -752,6 +752,8 @@ const UI = {
   starTitle:{ja:"GitHub でスターを付ける",en:"Star this project on GitHub"},
   pngBusy:{ja:"書き出し中…",en:"Rendering…"},
   pngFail:{ja:"PNG の書き出しに失敗",en:"PNG export failed"},
+  pngTooBig:{ja:"この端末には大きすぎる",en:"Too large for this device"},
+  pngReduced:{ja:"× {n} で書き出した（端末の上限）",en:"Exported at × {n} (device limit)"},
   notePng:{ja:"PNG は倍率をかけた実寸で書き出す。印刷や、SVG を読めない場所に貼るとき用。",
            en:"PNG is written out at the canvas size times the scale. For print, or anywhere SVG will not go."},
   copied:{ja:"コピーした",en:"Copied"},
@@ -901,6 +903,7 @@ function doRender(){
       ? (T(UI.vmax)+S.turing.lastMax.toExponential(2)
          + (S.turing.lastMax<0.01 ? T(UI.dead) : ""))
       : "";
+    updateScaleOptions(W,H);
     $("recipe").value = cur+" / "+W+"×"+H+"\n"
       + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
 }
@@ -962,38 +965,99 @@ $("dlsvg").addEventListener("click",()=>{
   a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
+/* canvas の上限は実装ごとに違う。iOS Safari は面積 16,777,216px で
+   頭打ちだが、デスクトップの Chrome はその十数倍まで通る。
+
+   端末の容量を先に測る実装にすると、PNG を書き出さない人にも大きな
+   確保を強いることになる（それこそ避けたかった事故）。だから測らない。
+   選択肢の絞り込みは机上の上限だけで行い、実際に使う canvas を作った
+   ときに確かめる。確保はどのみち1回必要なので、余分な確保は起きない。 */
+// ブラウザの上限ではなく、道具としての上限。8192px / 6700万px（約268MB）。
+// 16000×16000 は Chrome なら通るが、1GiB 確保して数百MB の PNG が出るだけで
+// 使い道がない。ここを超える組み合わせは最初から出さない。
+const PNG_HARD_SIDE=8192, PNG_HARD_PX=6.7e7;
+function pngFits(W,H,sc){
+  const w=W*sc, h=H*sc;
+  return w<=PNG_HARD_SIDE && h<=PNG_HARD_SIDE && w*h<=PNG_HARD_PX;
+}
+
+/* 確保して隅に印を書き、読み戻せるかで判定する。
+   上限を超えた canvas は例外を投げるか、描いても中身が入らない。
+   使える場合はその canvas をそのまま返す（作り直さない）。 */
+function makeCanvas(W,H){
+  if(!pngFits(W,H,1)) return null;
+  let c=null;
+  try{
+    c=document.createElement("canvas"); c.width=W; c.height=H;
+    if(c.width!==W||c.height!==H) throw 0;
+    const x=c.getContext("2d"); if(!x) throw 0;
+    x.fillStyle="#010203"; x.fillRect(W-1,H-1,1,1);
+    const d=x.getImageData(W-1,H-1,1,1).data;
+    if(!(d[0]===1&&d[1]===2&&d[2]===3)) throw 0;
+    x.clearRect(W-1,H-1,1,1);
+    return c;
+  }catch(e){
+    if(c){ c.width=0; c.height=0; }
+    return null;
+  }
+}
+
+/* 倍率の選択肢に実寸を出し、机上の上限を超えるものを無効にする */
+function updateScaleOptions(W,H){
+  const sel=$("pngScale");
+  let best=null;
+  for(const o of sel.options){
+    const sc=parseInt(o.value), ok=pngFits(W,H,sc);
+    o.disabled=!ok;
+    o.textContent = "× "+sc+(ok ? "  "+(W*sc)+"×"+(H*sc) : "");
+    if(ok) best=o.value;
+  }
+  if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled && best!=null) sel.value=best;
+}
+
 /* SVG を canvas に描いて PNG にする。
    外部リソースを一切参照していないので canvas が汚染されず toBlob が通る。
    地を透明にしていれば PNG もアルファ付きで出る。 */
 function exportPNG(){
   flush();
-  const scale=parseInt($("pngScale").value)||2;
-  const W=Math.round(parseInt($("cw").value)*scale), H=Math.round(parseInt($("ch").value)*scale);
+  const cw=parseInt($("cw").value), ch=parseInt($("ch").value);
+  const want=parseInt($("pngScale").value)||2;
   const btn=$("dlpng"), label=T(UI.savePng);
   btn.disabled=true; btn.textContent=T(UI.pngBusy);
   const done=(msg)=>{ btn.disabled=false; btn.textContent=msg||label;
-    if(msg) setTimeout(()=>{btn.textContent=label;},1600); };
+    if(msg) setTimeout(()=>{btn.textContent=label;},2000); };
+
+  // 実際に使う canvas を、大きい方から順に確保できるまで試す。
+  // ×1 でも確保できない端末なら、そこで諦めて知らせる。
+  let c=null, scale=want;
+  for(; scale>=1; scale--){
+    c=makeCanvas(Math.round(cw*scale), Math.round(ch*scale));
+    if(c) break;
+  }
+  if(!c){ done(T(UI.pngTooBig)); return; }
+
+  const W=c.width, H=c.height;
   const url=URL.createObjectURL(new Blob([lastSVG],{type:"image/svg+xml;charset=utf-8"}));
   const img=new Image();
+  const cleanup=()=>{ URL.revokeObjectURL(url); c.width=0; c.height=0; };
   img.onload=()=>{
     try{
-      const c=document.createElement("canvas"); c.width=W; c.height=H;
       const ctx=c.getContext("2d");
       ctx.imageSmoothingEnabled=true;
       ctx.drawImage(img,0,0,W,H);
       c.toBlob(bl=>{
-        URL.revokeObjectURL(url);
-        if(!bl){ done(T(UI.pngFail)); return; }
+        if(!bl){ cleanup(); done(T(UI.pngFail)); return; }
         const a=document.createElement("a");
         a.href=URL.createObjectURL(bl);
         a.download="pattern-"+cur+"-"+W+"x"+H+".png";
         a.click();
         setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-        done();
+        cleanup();
+        done(scale<want ? T(UI.pngReduced).replace("{n}",scale) : null);
       },"image/png");
-    }catch(e){ URL.revokeObjectURL(url); done(T(UI.pngFail)); }
+    }catch(e){ cleanup(); done(T(UI.pngFail)); }
   };
-  img.onerror=()=>{ URL.revokeObjectURL(url); done(T(UI.pngFail)); };
+  img.onerror=()=>{ cleanup(); done(T(UI.pngFail)); };
   img.src=url;
 }
 $("dlpng").addEventListener("click",exportPNG);
