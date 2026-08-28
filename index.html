@@ -159,6 +159,16 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
       <button class="primary" id="dlsvg"></button>
       <button id="copysvg"></button>
     </div>
+    <div class="grid2" style="margin-top:8px">
+      <button id="dlpng"></button>
+      <select id="pngScale" aria-label="PNG scale">
+        <option value="1">× 1</option>
+        <option value="2" selected>× 2</option>
+        <option value="3">× 3</option>
+        <option value="4">× 4</option>
+      </select>
+    </div>
+    <p class="note" id="uiNotePng"></p>
     <p class="note" id="uiNoteExport"></p>
   </fieldset>
 
@@ -726,6 +736,11 @@ const UI = {
   reset:{ja:"既定値に戻す",en:"Reset"},
   save:{ja:"SVG を保存",en:"Save SVG"},
   copy:{ja:"SVG をコピー",en:"Copy SVG"},
+  savePng:{ja:"PNG を保存",en:"Save PNG"},
+  pngBusy:{ja:"書き出し中…",en:"Rendering…"},
+  pngFail:{ja:"PNG の書き出しに失敗",en:"PNG export failed"},
+  notePng:{ja:"PNG は倍率をかけた実寸で書き出す。印刷や、SVG を読めない場所に貼るとき用。",
+           en:"PNG is written out at the canvas size times the scale. For print, or anywhere SVG will not go."},
   copied:{ja:"コピーした",en:"Copied"},
   copyFail:{ja:"コピー失敗",en:"Copy failed"},
   w:{ja:"幅",en:"Width"},
@@ -767,6 +782,7 @@ function applyLang(){
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
   set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
   set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy");
+  set("dlpng","savePng"); set("uiNotePng","notePng");
   set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
@@ -931,6 +947,42 @@ $("dlsvg").addEventListener("click",()=>{
   a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
+/* SVG を canvas に描いて PNG にする。
+   外部リソースを一切参照していないので canvas が汚染されず toBlob が通る。
+   地を透明にしていれば PNG もアルファ付きで出る。 */
+function exportPNG(){
+  flush();
+  const scale=parseInt($("pngScale").value)||2;
+  const W=Math.round(parseInt($("cw").value)*scale), H=Math.round(parseInt($("ch").value)*scale);
+  const btn=$("dlpng"), label=T(UI.savePng);
+  btn.disabled=true; btn.textContent=T(UI.pngBusy);
+  const done=(msg)=>{ btn.disabled=false; btn.textContent=msg||label;
+    if(msg) setTimeout(()=>{btn.textContent=label;},1600); };
+  const url=URL.createObjectURL(new Blob([lastSVG],{type:"image/svg+xml;charset=utf-8"}));
+  const img=new Image();
+  img.onload=()=>{
+    try{
+      const c=document.createElement("canvas"); c.width=W; c.height=H;
+      const ctx=c.getContext("2d");
+      ctx.imageSmoothingEnabled=true;
+      ctx.drawImage(img,0,0,W,H);
+      c.toBlob(bl=>{
+        URL.revokeObjectURL(url);
+        if(!bl){ done(T(UI.pngFail)); return; }
+        const a=document.createElement("a");
+        a.href=URL.createObjectURL(bl);
+        a.download="pattern-"+cur+"-"+W+"x"+H+".png";
+        a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+        done();
+      },"image/png");
+    }catch(e){ URL.revokeObjectURL(url); done(T(UI.pngFail)); }
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); done(T(UI.pngFail)); };
+  img.src=url;
+}
+$("dlpng").addEventListener("click",exportPNG);
+
 $("copysvg").addEventListener("click",async()=>{
   flush();
   try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent=T(UI.copied); }
