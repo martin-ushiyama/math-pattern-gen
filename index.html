@@ -3,26 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pattern Lab — 数学から、模様が生まれる。</title>
+<title>Math Pattern Gen — 数学から、模様が生まれる。</title>
 <meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
-<link rel="canonical" href="https://martin-ushiyama.github.io/pattern-lab/">
+<link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Pattern Lab">
-<meta property="og:title" content="Pattern Lab — 数学から、模様が生まれる。">
+<meta property="og:site_name" content="Math Pattern Gen">
+<meta property="og:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
 <meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
-<meta property="og:url" content="https://martin-ushiyama.github.io/pattern-lab/">
+<meta property="og:url" content="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:image" content="https://martin-ushiyama.github.io/pattern-lab/assets/brand/ogp.png">
+<meta property="og:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@mrtn">
-<meta name="twitter:title" content="Pattern Lab — 数学から、模様が生まれる。">
+<meta name="twitter:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
 <meta name="twitter:description" content="11種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
-<meta name="twitter:image" content="https://martin-ushiyama.github.io/pattern-lab/assets/brand/ogp.png">
+<meta name="twitter:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
 <meta name="twitter:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
 <link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
@@ -37,8 +37,8 @@
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;line-height:1.6}
 header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-header h1{margin:0;font-size:0;line-height:0;flex:0 1 auto;min-width:0;max-width:224px}
-header h1 svg{display:block;width:100%;height:auto}
+header h1{margin:0;font-size:0;line-height:0;flex:0 1 auto;min-width:0;max-width:294px}
+header h1 > svg{display:block;width:100%;height:auto}
 header .sub{color:var(--gray);font-size:12px}
 header .right{margin-left:auto;display:flex;align-items:center;gap:14px;white-space:nowrap;flex:none}
 header .by{color:var(--gray);font-size:12px}
@@ -109,11 +109,20 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
      折り返すとヘッダーが高くなり、パターンがその分下がる */
   header{padding:10px 12px;gap:6px;flex-wrap:nowrap}
   header .sub{display:none}
-  header h1{max-width:155px}
+  header h1{max-width:230px}
   header .right{gap:6px;margin-left:auto}
   header .gh{padding:3px 6px;font-size:11px;gap:4px}
   header .by{font-size:11px}
   .lang button{padding:4px 6px;font-size:10px;letter-spacing:.04em}
+}
+@media (max-width:420px){
+  /* 長い名前を潰さず、リンクも残すため、狭い画面だけ2段にする。 */
+  header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px}
+  header h1{max-width:283.5px;grid-column:1;grid-row:1}
+  header .right{display:contents}
+  header .lang{grid-column:2;grid-row:1;justify-self:end}
+  header .gh{grid-column:1;grid-row:2;justify-self:start}
+  header .by{grid-column:2;grid-row:2;justify-self:end}
 }
 /* ── PC ── スライダーを触っている間もパターンを見えたままにする ──
    grid item の sticky はグリッドエリア内で動くので、align-self:start と
@@ -126,14 +135,14 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 <body>
 
 <header>
-  <h1 id="logo" aria-label="Pattern Lab"></h1>
+  <h1 id="logo" aria-label="Math Pattern Gen"></h1>
   <span class="sub" id="uiSub"></span>
   <span class="right">
     <span class="lang" role="group" aria-label="Language">
       <button id="langJa" type="button" aria-pressed="true">JA</button>
       <button id="langEn" type="button" aria-pressed="false">EN</button>
     </span>
-    <a class="gh" id="ghlink" href="https://github.com/martin-ushiyama/pattern-lab"
+    <a class="gh" id="ghlink" href="https://github.com/martin-ushiyama/math-pattern-gen"
        target="_blank" rel="noopener noreferrer"><span class="star">★</span><span id="ghtxt">GitHub</span></a>
     <span class="by">by <a href="https://x.com/mrtn" target="_blank" rel="noopener noreferrer">@mrtn</a></span>
   </span>
@@ -258,6 +267,9 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
    このツール自身が作る絵と同じ「点の集合」で字を組む。1 が点、0 が空白。
    N は斜めを引かず、左上の肩だけで折る。 */
 const GLYPH={
+  M:["101","111","111","101","101"],
+  H:["101","101","111","101","101"],
+  G:["011","100","101","101","011"],
   P:["110","101","111","100","100"],
   A:["110","101","111","101","101"],
   T:["111","010","010","010","010"],
@@ -287,6 +299,18 @@ function logoSVG(text,opt){
     // 消えているセルも薄く残す。格子が見えて「点で組んだ」ことが伝わる
     + '<g fill="'+o.color+'" fill-opacity="'+o.fade+'">'+circles(off)+'</g>'
     + '<g fill="'+o.color+'">'+circles(on)+'</g></svg>';
+}
+
+// 「Gen」を小さくし、主ロゴとベースラインを揃える。
+function brandLogoSVG(opt){
+  const o=Object.assign({cell:5,r:1.9},opt||{}), scale=.7;
+  const main=logoSVG("MATH PATTERN",o);
+  const suffix=logoSVG("GEN",Object.assign({},o,{cell:o.cell*scale,r:o.r*scale}));
+  const width=s=>Number(s.match(/viewBox="0 0 ([\d.]+)/)[1]);
+  const x=width(main)+o.cell*3, y=5*o.cell*(1-scale);
+  const W=x+width(suffix), H=5*o.cell;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'
+    +main+suffix.replace('<svg ','<svg x="'+x+'" y="'+y+'" ')+'</svg>';
 }
 
 /* ── 共通: ドット配列 → 濃淡3段の SVG ───────────────────────── */
@@ -853,13 +877,13 @@ const $ = id => document.getElementById(id);
    文言は {ja, en} の対で持ち、T() で今の言語を引く。
    既定はブラウザの言語。選ぶと localStorage に残る。 */
 let LANG = (function(){
-  try{ const v=localStorage.getItem("patternlab.lang"); if(v==="ja"||v==="en") return v; }catch(e){}
+  try{ const v=localStorage.getItem("math-pattern-gen.lang") || localStorage.getItem("patternlab.lang"); if(v==="ja"||v==="en") return v; }catch(e){}
   return (navigator.language||"").toLowerCase().startsWith("ja") ? "ja" : "en";
 })();
 const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
 
 const UI = {
-  title:{ja:"Pattern Lab — 数学から、模様が生まれる。",en:"Pattern Lab — Patterns, born from math."},
+  title:{ja:"Math Pattern Gen — 数学から、模様が生まれる。",en:"Math Pattern Gen — Patterns, born from math."},
   sub:{ja:"数学から、模様が生まれる。",en:"Patterns, born from math."},
   legStruct:{ja:"構造",en:"Structure"},
   legParams:{ja:"かたち",en:"Shape"},
@@ -987,7 +1011,7 @@ function applyLang(){
 function setLang(v){
   if(v===LANG) return;
   LANG=v;
-  try{ localStorage.setItem("patternlab.lang", v); }catch(e){}
+  try{ localStorage.setItem("math-pattern-gen.lang", v); }catch(e){}
   applyLang();
 }
 let cur="polar", P={};
@@ -1379,7 +1403,7 @@ $("copysvg").addEventListener("click",async()=>{
   setTimeout(()=>{$("copysvg").textContent=T(UI.copy);},1400);
 });
 
-$("logo").innerHTML=logoSVG("PATTERN LAB");
+$("logo").innerHTML=brandLogoSVG();
 $("langJa").addEventListener("click",()=>setLang("ja"));
 $("langEn").addEventListener("click",()=>setLang("en"));
 

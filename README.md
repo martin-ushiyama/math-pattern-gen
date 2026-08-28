@@ -1,14 +1,14 @@
-# Pattern Lab
+# Math Pattern Gen
 
-[![Pattern Lab — 数学から、模様が生まれる。青い極格子の背景とドットロゴ](assets/readme/key-visual.png)](https://martin-ushiyama.github.io/pattern-lab/)
+[![Math Pattern Gen — 数学から、模様が生まれる。青い極格子の背景とドットロゴ](assets/readme/key-visual.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
 
 ## 数学から、模様が生まれる。
 
 点の間隔を変える。波を重ねる。色を選ぶ。
 
-Pattern Labは、数学のしくみから背景パターンをつくる、小さな実験室です。11種類の構造を触りながら、波や布、干渉模様の表情を探れます。気に入ったら、SVGやPNGで持ち出して、バナーやスライドの背景に。
+Math Pattern Genは、数学のしくみから背景パターンをつくる、小さな実験室です。11種類の構造を触りながら、波や布、干渉模様の表情を探れます。気に入ったら、SVGやPNGで持ち出して、バナーやスライドの背景に。
 
-**[ブラウザでつくってみる →](https://martin-ushiyama.github.io/pattern-lab/)**
+**[ブラウザでつくってみる →](https://martin-ushiyama.github.io/math-pattern-gen/)**
 
 インストールも、アカウント登録も不要。青とクリーム色の模様から始まります。
 
@@ -21,11 +21,11 @@ Pattern Labは、数学のしくみから背景パターンをつくる、小さ
 
 下の画面は「モアレ」。2枚の格子のわずかなずれから、大きなリズムが生まれます。
 
-![Pattern Labの操作画面。左にモアレの調整スライダー、右にライム色の干渉模様](assets/readme/screen.png)
+![Math Pattern Genの操作画面。左にモアレの調整スライダー、右にライム色の干渉模様](assets/readme/screen.png)
 
 ## ひとつの道具から、こんな表情
 
-同じ点の集まりでも、数式と配色が変わると、印象も変わる。どれもPattern Labでつくった背景です。
+同じ点の集まりでも、数式と配色が変わると、印象も変わる。どれもMath Pattern Genでつくった背景です。
 
 ### 色を効かせる
 
@@ -89,13 +89,13 @@ OGP・SNS、noteの見出し、帯バナー、スライド、正方形、縦長�
 
 各構造の`gen(p, W, H)`がドットの配列`{x, y, r}`を返し、共通処理が粒径を3段階に分けてSVGのパスへまとめます。構造を追加するには、パラメータの定義と生成関数を書いて`ORDER`へ名前を加えるだけ。数万個の点も、最大3本のパスで描きます。
 
-ロゴも、模様と同じ点の集まり。3×5のドットで字を組み、faviconにはその「P」を使っています。共有用のOGP画像とアイコンは[`assets/brand/`](assets/brand/)に置いています。
+ロゴも、模様と同じ点の集まり。3×5のドットで字を組み、faviconには、青い点が曲線に沿って流れる小さな模様を使っています。共有用のOGP画像とアイコンは[`assets/brand/`](assets/brand/)に置いています。
 
 ## つくった人
 
 [@mrtn](https://x.com/mrtn)
 
-気に入ったら、[GitHubのスター](https://github.com/martin-ushiyama/pattern-lab)で応援してもらえるとうれしいです。
+気に入ったら、[GitHubのスター](https://github.com/martin-ushiyama/math-pattern-gen)で応援してもらえるとうれしいです。
 
 ## ライセンス
 
