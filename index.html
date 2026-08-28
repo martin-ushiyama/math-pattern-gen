@@ -23,6 +23,10 @@ header .by{color:var(--gray);font-size:12px}
   letter-spacing:.06em;background:#fff;color:var(--gray);cursor:pointer}
 .lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
 header .by a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+header .gh{display:inline-flex;align-items:center;gap:5px;color:var(--ink);text-decoration:none;
+  font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+header .gh:hover{background:var(--card)}
+header .gh .star{font-size:12px;line-height:1}
 header .by a:hover{border-bottom-color:var(--ink)}
 .wrap{display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
 .main{min-width:0}
@@ -77,10 +81,11 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 }
 @media (max-width:620px){
   /* ロゴ・言語切替・作者名を1行に収める。折り返すと縦位置が揃わない */
-  header{padding:12px 16px;gap:10px}
+  header{padding:10px 16px;gap:6px 10px}
   header .sub{display:none}
   header h1 svg{height:20px}
-  header .right{gap:10px}
+  header .right{gap:8px;margin-left:auto}
+  header .gh{padding:3px 8px}
 }
 </style>
 </head>
@@ -94,6 +99,8 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
       <button id="langJa" type="button" aria-pressed="true">JA</button>
       <button id="langEn" type="button" aria-pressed="false">EN</button>
     </span>
+    <a class="gh" id="ghlink" href="https://github.com/martin-ushiyama/pattern-lab"
+       target="_blank" rel="noopener noreferrer"><span class="star">★</span><span id="ghtxt">GitHub</span></a>
     <span class="by">by <a href="https://x.com/mrtn" target="_blank" rel="noopener noreferrer">@mrtn</a></span>
   </span>
 </header>
@@ -737,6 +744,7 @@ const UI = {
   save:{ja:"SVG を保存",en:"Save SVG"},
   copy:{ja:"SVG をコピー",en:"Copy SVG"},
   savePng:{ja:"PNG を保存",en:"Save PNG"},
+  starTitle:{ja:"GitHub でスターを付ける",en:"Star this project on GitHub"},
   pngBusy:{ja:"書き出し中…",en:"Rendering…"},
   pngFail:{ja:"PNG の書き出しに失敗",en:"PNG export failed"},
   notePng:{ja:"PNG は倍率をかけた実寸で書き出す。印刷や、SVG を読めない場所に貼るとき用。",
@@ -783,6 +791,8 @@ function applyLang(){
   set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
   set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy");
   set("dlpng","savePng"); set("uiNotePng","notePng");
+  $("ghlink").title = T(UI.starTitle);
+  $("ghlink").setAttribute("aria-label", T(UI.starTitle));
   set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
