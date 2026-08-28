@@ -13,10 +13,10 @@
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;line-height:1.6}
 header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-header h1{margin:0;font-size:0;line-height:0}
-header h1 svg{display:block;height:26px;width:auto}
+header h1{margin:0;font-size:0;line-height:0;flex:0 1 auto;min-width:0;max-width:224px}
+header h1 svg{display:block;width:100%;height:auto}
 header .sub{color:var(--gray);font-size:12px}
-header .right{margin-left:auto;display:flex;align-items:center;gap:14px;white-space:nowrap}
+header .right{margin-left:auto;display:flex;align-items:center;gap:14px;white-space:nowrap;flex:none}
 header .by{color:var(--gray);font-size:12px}
 .lang{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .lang button{border:0;border-radius:0;padding:4px 9px;font-size:11px;font-weight:800;
@@ -81,11 +81,15 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 }
 @media (max-width:620px){
   /* ロゴ・言語切替・作者名を1行に収める。折り返すと縦位置が揃わない */
-  header{padding:10px 16px;gap:6px 10px}
+  /* 1行に収める。項目を消さず、全体を少しずつ詰める。
+     折り返すとヘッダーが高くなり、パターンがその分下がる */
+  header{padding:10px 12px;gap:6px;flex-wrap:nowrap}
   header .sub{display:none}
-  header h1 svg{height:20px}
-  header .right{gap:8px;margin-left:auto}
-  header .gh{padding:3px 8px}
+  header h1{max-width:155px}
+  header .right{gap:6px;margin-left:auto}
+  header .gh{padding:3px 6px;font-size:11px;gap:4px}
+  header .by{font-size:11px}
+  .lang button{padding:4px 6px;font-size:10px;letter-spacing:.04em}
 }
 </style>
 </head>
