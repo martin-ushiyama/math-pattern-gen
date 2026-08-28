@@ -1314,15 +1314,15 @@ $("preview").addEventListener("pointermove",(e)=>{
     // 動かすのはドットのパスだけ。SVG ごと動かすと地とグラデまで動く。
     // ずらす量はポインタの生の差分ではなく、実際に反映された値から出す。
     // そうしないと端で頭打ちになったあとも動き続け、離した瞬間に戻る
-    const ax=(P[drag.keys[0]]-drag.px)/drag.scale;
-    const ay=(P[drag.keys[1]]-drag.py)/drag.scale;
+    // SVG の中の要素に当てる CSS transform は user unit（viewBox 座標）で
+    // 解釈される。表示が縮んでいても割ってはいけない
+    const ax=P[drag.keys[0]]-drag.px, ay=P[drag.keys[1]]-drag.py;
     const t="translate("+ax+"px,"+ay+"px)";
     for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform=t;
     // パスを動かすと、その user space に乗っているグラデーションも一緒に動く。
-    // 逆向きの gradientTransform で画面座標に留める
+    // 同じ座標系なので、そのまま逆向きに戻す
     const fg=$("preview").querySelector('linearGradient[id^="fg-"]');
-    if(fg) fg.setAttribute("gradientTransform",
-      "translate("+(-ax*drag.scale)+","+(-ay*drag.scale)+")");
+    if(fg) fg.setAttribute("gradientTransform","translate("+(-ax)+","+(-ay)+")");
   }
 });
 
