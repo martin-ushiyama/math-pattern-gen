@@ -16,7 +16,12 @@ header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-
 header h1{margin:0;font-size:0;line-height:0}
 header h1 svg{display:block;height:26px;width:auto}
 header .sub{color:var(--gray);font-size:12px}
-header .by{margin-left:auto;color:var(--gray);font-size:12px;white-space:nowrap}
+header .right{margin-left:auto;display:flex;align-items:center;gap:14px;white-space:nowrap}
+header .by{color:var(--gray);font-size:12px}
+.lang{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.lang button{border:0;border-radius:0;padding:4px 9px;font-size:11px;font-weight:800;
+  letter-spacing:.06em;background:#fff;color:var(--gray);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
 header .by a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
 header .by a:hover{border-bottom-color:var(--ink)}
 .wrap{display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
@@ -53,7 +58,7 @@ button.primary:hover{filter:brightness(.94)}
   color:var(--gray);font-size:11px;margin:0 0 16px}
 code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:11px;
   background:var(--card);padding:1px 4px;border-radius:3px;color:var(--ink)}
-#params:empty::after{content:"パラメータなし";color:var(--gray);font-size:12px}
+#params:empty::after{content:attr(data-empty);color:var(--gray);font-size:12px}
 #recipe{width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;line-height:1.5;
   border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--panel);color:var(--gray);
   resize:vertical;min-height:64px}
@@ -64,92 +69,94 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 
 <header>
   <h1 id="logo" aria-label="Pattern Lab"></h1>
-  <span class="sub">数学的な背景パターンの生成器 — 乱数を使わないので、同じパラメータからは常に同じ絵が出る</span>
-  <span class="by">by <a href="https://x.com/mrtn" target="_blank" rel="noopener noreferrer">@mrtn</a></span>
+  <span class="sub" id="uiSub"></span>
+  <span class="right">
+    <span class="lang" role="group" aria-label="Language">
+      <button id="langJa" type="button" aria-pressed="true">JA</button>
+      <button id="langEn" type="button" aria-pressed="false">EN</button>
+    </span>
+    <span class="by">by <a href="https://x.com/mrtn" target="_blank" rel="noopener noreferrer">@mrtn</a></span>
+  </span>
 </header>
 
 <div class="wrap">
 <div class="panel">
 
   <fieldset>
-    <legend>構造</legend>
+    <legend id="uiLegStruct"></legend>
     <select id="struct"></select>
     <p class="note" id="structNote"></p>
   </fieldset>
 
   <fieldset>
-    <legend>パラメータ</legend>
+    <legend id="uiLegParams"></legend>
     <div id="params"></div>
     <div class="grid2" style="margin-top:12px">
-      <button id="shuffle">振ってみる</button>
-      <button id="reset">既定値に戻す</button>
+      <button id="shuffle"></button>
+      <button id="reset"></button>
     </div>
   </fieldset>
 
   <fieldset>
-    <legend>キャンバス</legend>
+    <legend id="uiLegCanvas"></legend>
     <label>
       <select id="preset">
-        <option value="1200x630">OGP・SNS 1200 × 630</option>
-        <option value="1280x670">note 見出し 1280 × 670</option>
-        <option value="1111x278">帯バナー 1111 × 278</option>
-        <option value="1920x1080">スライド 1920 × 1080</option>
-        <option value="1080x1080">正方形 1080 × 1080</option>
-        <option value="1080x1920">縦 1080 × 1920</option>
-        <option value="custom">カスタム</option>
+        <option value="1200x630"></option>
+        <option value="1280x670"></option>
+        <option value="1111x278"></option>
+        <option value="1920x1080"></option>
+        <option value="1080x1080"></option>
+        <option value="1080x1920"></option>
+        <option value="custom"></option>
       </select>
     </label>
     <div class="grid2">
-      <label><span class="name">幅</span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
-      <label><span class="name">高さ</span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
+      <label><span class="name" id="uiW"></span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
+      <label><span class="name" id="uiH"></span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
     </div>
   </fieldset>
 
   <fieldset>
-    <legend>色</legend>
+    <legend id="uiLegColor"></legend>
     <div class="grid2">
-      <label><span class="name">ドット</span><input type="color" id="fg" value="#1b1b26"></label>
-      <label><span class="name">地</span><input type="color" id="bg" value="#f4f4f5"></label>
+      <label><span class="name" id="uiFg"></span><input type="color" id="fg" value="#1b1b26"></label>
+      <label><span class="name" id="uiBg"></span><input type="color" id="bg" value="#f4f4f5"></label>
     </div>
     <label class="row" style="margin-top:4px">
       <input type="checkbox" id="transparent" style="width:auto;accent-color:var(--accent)">
-      <span class="name">地を透明にする（他の絵に重ねるとき）</span>
+      <span class="name" id="uiTransparent"></span>
     </label>
     <div class="grid3" style="margin-top:6px">
-      <label><span class="name" style="font-size:11px">小</span><input type="number" id="op0" value="0.30" min="0" max="1" step="0.02"></label>
-      <label><span class="name" style="font-size:11px">中</span><input type="number" id="op1" value="0.68" min="0" max="1" step="0.02"></label>
-      <label><span class="name" style="font-size:11px">大</span><input type="number" id="op2" value="1.00" min="0" max="1" step="0.02"></label>
+      <label><span class="name" style="font-size:11px" id="uiOp0"></span><input type="number" id="op0" value="0.30" min="0" max="1" step="0.02"></label>
+      <label><span class="name" style="font-size:11px" id="uiOp1"></span><input type="number" id="op1" value="0.68" min="0" max="1" step="0.02"></label>
+      <label><span class="name" style="font-size:11px" id="uiOp2"></span><input type="number" id="op2" value="1.00" min="0" max="1" step="0.02"></label>
     </div>
-    <p class="note">粒径で3段に分け、段ごとに不透明度を変えている。レンジを広げるほど濃淡が強い。</p>
+    <p class="note" id="uiNoteOp"></p>
   </fieldset>
 
   <fieldset>
-    <legend>書き出し</legend>
+    <legend id="uiLegExport"></legend>
     <div class="grid2">
-      <button class="primary" id="dlsvg">SVG を保存</button>
-      <button id="copysvg">SVG をコピー</button>
+      <button class="primary" id="dlsvg"></button>
+      <button id="copysvg"></button>
     </div>
-    <p class="note">デザインツールへはファイルを読み込むか、コピーしてそのままペースト。ベクターなので拡大しても粗くならない。</p>
+    <p class="note" id="uiNoteExport"></p>
   </fieldset>
 
   <fieldset>
-    <legend>レシピ</legend>
+    <legend id="uiLegRecipe"></legend>
     <textarea id="recipe" readonly spellcheck="false"></textarea>
-    <p class="note">気に入った設定はこれごと控えておく。URL のハッシュにも同じ状態が入る。</p>
+    <p class="note" id="uiNoteRecipe"></p>
   </fieldset>
 
 </div>
 
 <div class="stage">
-  <div class="hint">
-    設計原則 — <strong>粒立ちを残す</strong>（最大粒径 ≦ 格子間隔 × 0.55。潰れたら分割数を減らす）／
-    <strong>四辺を貫いて画面全体を覆う</strong>／
-    <strong>中心・特異点は画面の外に置く</strong>。中心が画面内に見えると「物体が置いてある」絵になる。
-  </div>
+  <div class="hint" id="uiPrinciples"></div>
   <div class="preview" id="preview"></div>
   <div class="meta">
-    <span>ドット <b id="mCount">–</b></span>
-    <span>サイズ <b id="mSize">–</b></span>
+    <span><span id="uiMCount"></span> <b id="mCount">–</b></span>
+    <span><span id="uiMSize"></span> <b id="mSize">–</b></span>
     <span>SVG <b id="mBytes">–</b></span>
     <span id="mBusy"></span>
   </div>
@@ -222,27 +229,27 @@ const S = {};
 
 /* 極格子（ギヨシェ）。半径も角度も一定ピッチ、濃淡は解析関数だけ */
 S.polar = {
-  label:"極格子（ギヨシェ）",
-  note:"同心円を一定ピッチで並べ、cos(kθ + ar) で濃淡をかける。平坦部を作ると帯が塗りに変わり、縁は同じ式から連続的にハーフトーンになる。",
-  doc:"<b>極格子</b> — <code>r = r₀ + i·dr</code>／<code>dθ = ds/r</code>（等弧長。点の間隔が全域で一定でスポークが出ない）または <code>dθ</code> 一定（等角。放射状のスジが立つ）。濃淡は <code>0.5 + 0.5·cos(k·θ + a·r)</code>。<br><b>平坦部</b> <code>hi</code> を 1 未満にするとそこから上は粒径が最大に張り付いて<b>塗り</b>になる。0.58 で画面のおよそ半分、0.26 で大半。塗りにするには <code>rmax</code> を 8 前後まで上げる。<br><b>被覆</b> <code>r0</code> ≦ 中心に最も近い画面内の点までの距離、<code>r1</code> ≧ 四隅までの最大距離。満たさないと画面のどこかに届かない。",
+  label:{ja:"極格子（ギヨシェ）",en:"Polar lattice (guilloché)"},
+  note:{ja:"同心円を一定ピッチで並べ、cos(kθ + ar) で濃淡をかける。平坦部を作ると帯が塗りに変わり、縁は同じ式から連続的にハーフトーンになる。",en:"Concentric rings at a constant pitch, shaded by cos(kθ + ar). Add a plateau and the band turns solid, while its edge falls off into halftone from the very same expression."},
+  doc:{ja:"<b>極格子</b> — <code>r = r₀ + i·dr</code>／<code>dθ = ds/r</code>（等弧長。点の間隔が全域で一定でスポークが出ない）または <code>dθ</code> 一定（等角。放射状のスジが立つ）。濃淡は <code>0.5 + 0.5·cos(k·θ + a·r)</code>。<br><b>平坦部</b> <code>hi</code> を 1 未満にするとそこから上は粒径が最大に張り付いて<b>塗り</b>になる。0.58 で画面のおよそ半分、0.26 で大半。塗りにするには <code>rmax</code> を 8 前後まで上げる。<br><b>被覆</b> <code>r0</code> ≦ 中心に最も近い画面内の点までの距離、<code>r1</code> ≧ 四隅までの最大距離。満たさないと画面のどこかに届かない。",en:"<b>Polar lattice</b> — <code>r = r₀ + i·dr</code> with <code>dθ = ds/r</code> (equal arc length: spacing is uniform everywhere and no spokes appear) or constant <code>dθ</code> (equal angle: radial streaks stand up). Tone is <code>0.5 + 0.5·cos(k·θ + a·r)</code>.<br><b>Plateau</b> — set <code>hi</code> below 1 and everything above it pins to the maximum dot size, becoming a <b>solid</b>. 0.58 fills roughly half the canvas, 0.26 most of it. Raise <code>rmax</code> to around 8 so the dots actually touch.<br><b>Coverage</b> — <code>r0</code> ≤ the distance to the nearest on-canvas point, <code>r1</code> ≥ the distance to the farthest corner. Miss either and part of the canvas stays empty."},
   params:[
-    {k:"cx",  l:"中心 x",        min:-1200,max:2600,step:10, d:1300},
-    {k:"cy",  l:"中心 y",        min:-1200,max:2200,step:10, d:760},
-    {k:"r0",  l:"内半径 r0",     min:20,  max:900,  step:10, d:160},
-    {k:"r1",  l:"外半径 r1",     min:200, max:2600, step:10, d:1520},
-    {k:"dr",  l:"リング間隔 dr", min:6,   max:60,   step:1,  d:15},
-    {k:"ds",  l:"弧の点間隔 ds", min:4,   max:40,   step:1,  d:11},
-    {k:"mode",l:"角度ピッチ",    opts:[["arc","等弧長（スポークなし）"],["angle","等角（スポークが立つ）"]], d:"arc"},
-    {k:"dth", l:"等角の分割数",  min:80,  max:1400, step:20, d:560},
-    {k:"k",   l:"周方向の本数 k",min:1,   max:14,   step:1,  d:3},
-    {k:"a",   l:"ねじれ a",      min:0,   max:0.08, step:0.002,d:0.014},
-    {k:"ph",  l:"位相",          min:0,   max:6.28, step:0.05, d:0.9},
-    {k:"beat",l:"うなり",        min:0,   max:1.2,  step:0.05, d:0},
-    {k:"lo",  l:"平坦部 lo",     min:0,   max:0.6,  step:0.02, d:0},
-    {k:"hi",  l:"平坦部 hi",     min:0.2, max:1,    step:0.02, d:1},
-    {k:"rmin",l:"最小粒径",      min:0.2, max:3,    step:0.1,  d:0.6},
-    {k:"rmax",l:"最大粒径",      min:1,   max:10,   step:0.2,  d:4.6},
-    {k:"pow", l:"階調カーブ",    min:0.4, max:3,    step:0.05, d:1.7}
+    {k:"cx",  l:{ja:"中心 x",en:"Center x"},        min:-1200,max:2600,step:10, d:1300},
+    {k:"cy",  l:{ja:"中心 y",en:"Center y"},        min:-1200,max:2200,step:10, d:760},
+    {k:"r0",  l:{ja:"内半径 r0",en:"Inner radius r0"},     min:20,  max:900,  step:10, d:160},
+    {k:"r1",  l:{ja:"外半径 r1",en:"Outer radius r1"},     min:200, max:2600, step:10, d:1520},
+    {k:"dr",  l:{ja:"リング間隔 dr",en:"Ring pitch dr"}, min:6,   max:60,   step:1,  d:15},
+    {k:"ds",  l:{ja:"弧の点間隔 ds",en:"Arc spacing ds"}, min:4,   max:40,   step:1,  d:11},
+    {k:"mode",l:{ja:"角度ピッチ",en:"Angular pitch"},    opts:[["arc",{ja:"等弧長（スポークなし）",en:"Equal arc length (no spokes)"}],["angle",{ja:"等角（スポークが立つ）",en:"Equal angle (spokes appear)"}]], d:"arc"},
+    {k:"dth", l:{ja:"等角の分割数",en:"Angular divisions"},  min:80,  max:1400, step:20, d:560},
+    {k:"k",   l:{ja:"周方向の本数 k",en:"Angular count k"},min:1,   max:14,   step:1,  d:3},
+    {k:"a",   l:{ja:"ねじれ a",en:"Twist a"},      min:0,   max:0.08, step:0.002,d:0.014},
+    {k:"ph",  l:{ja:"位相",en:"Phase"},          min:0,   max:6.28, step:0.05, d:0.9},
+    {k:"beat",l:{ja:"うなり",en:"Beat"},        min:0,   max:1.2,  step:0.05, d:0},
+    {k:"lo",  l:{ja:"平坦部 lo",en:"Plateau lo"},     min:0,   max:0.6,  step:0.02, d:0},
+    {k:"hi",  l:{ja:"平坦部 hi",en:"Plateau hi"},     min:0.2, max:1,    step:0.02, d:1},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},      min:0.2, max:3,    step:0.1,  d:0.6},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},      min:1,   max:10,   step:0.2,  d:4.6},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"},    min:0.4, max:3,    step:0.05, d:1.7}
   ],
   gen(p,W,H){
     const out=[], env=win(p.r0-20, p.r1+20, 0.6);
@@ -265,25 +272,25 @@ S.polar = {
 
 /* ねじれたリボン。射影の潰れがそのまま濃淡になる */
 S.ribbon = {
-  label:"ねじれたリボン（線織面の正射影）",
-  note:"3次元のリボンを正射影する。edge-on になった瞬間に幅方向の格子が軸へ潰れ、そこが自動的に濃くなる。濃淡を塗っているのではない。",
-  doc:"<b>ねじれたリボン</b> — 軸 <code>P(u)</code> に沿って幅方向 <code>v</code> を伸ばし、その方向を軸まわりに <code>τ(u)</code> だけ回す。正射影すると <code>cos τ → 0</code> で格子が潰れて濃くなる。<br>粒径は <b>射影の潰れ</b> <code>|cos τ|</code> と <b>奥行き</b> の2要素。<br>⚠ <b>幅の分割</b>を増やすと行間より粒が大きくなり塗りに潰れる。17〜22 が適正。",
+  label:{ja:"ねじれたリボン（線織面の正射影）",en:"Twisted ribbon (ruled surface, orthographic)"},
+  note:{ja:"3次元のリボンを正射影する。edge-on になった瞬間に幅方向の格子が軸へ潰れ、そこが自動的に濃くなる。濃淡を塗っているのではない。",en:"A 3D ribbon under orthographic projection. The instant it turns edge-on, the width-wise lattice collapses onto the axis and that band darkens by itself. The tone is not painted in."},
+  doc:{ja:"<b>ねじれたリボン</b> — 軸 <code>P(u)</code> に沿って幅方向 <code>v</code> を伸ばし、その方向を軸まわりに <code>τ(u)</code> だけ回す。正射影すると <code>cos τ → 0</code> で格子が潰れて濃くなる。<br>粒径は <b>射影の潰れ</b> <code>|cos τ|</code> と <b>奥行き</b> の2要素。<br>⚠ <b>幅の分割</b>を増やすと行間より粒が大きくなり塗りに潰れる。17〜22 が適正。",en:"<b>Twisted ribbon</b> — the width direction <code>v</code> extends along the axis <code>P(u)</code>, rotated about that axis by <code>τ(u)</code>. Under orthographic projection the lattice collapses and darkens as <code>cos τ → 0</code>.<br>Dot size comes from two factors: <b>foreshortening</b> <code>|cos τ|</code> and <b>depth</b>.<br>⚠ Raise the <b>width divisions</b> and the dots grow larger than the row spacing, collapsing into a solid. 17 to 22 is the usable range."},
   params:[
-    {k:"Nu",  l:"軸方向の分割",  min:60, max:600, step:10, d:300},
-    {k:"Nv",  l:"幅方向の分割",  min:6,  max:60,  step:1,  d:17},
-    {k:"HW",  l:"半幅",          min:40, max:400, step:5,  d:210},
-    {k:"len", l:"軸の長さ",      min:600,max:2600,step:20, d:1760},
-    {k:"x0",  l:"始点 x",        min:-800,max:600,step:10, d:-260},
-    {k:"y0",  l:"始点 y",        min:-200,max:900, step:10, d:430},
-    {k:"drop",l:"軸の下り",      min:-600,max:600, step:10, d:250},
-    {k:"bend",l:"軸の反り",      min:0,  max:400, step:10, d:150},
-    {k:"bf",  l:"反りの周期",    min:0.4,max:3,   step:0.1, d:1.1},
-    {k:"turn",l:"ねじれ回転数",  min:0.2,max:4,   step:0.1, d:2.2},
-    {k:"tau0",l:"ねじれ初期角",  min:0,  max:6.28,step:0.05,d:0.2},
-    {k:"persp",l:"遠近の強さ",   min:600,max:6000,step:100,d:1600},
-    {k:"rmin",l:"最小粒径",      min:0.2,max:3,   step:0.05,d:0.45},
-    {k:"rmax",l:"最大粒径",      min:1,  max:8,   step:0.1, d:3.45},
-    {k:"fpow",l:"潰れのカーブ",  min:0.3,max:2,   step:0.05,d:0.75}
+    {k:"Nu",  l:{ja:"軸方向の分割",en:"Axis divisions"},  min:60, max:600, step:10, d:300},
+    {k:"Nv",  l:{ja:"幅方向の分割",en:"Width divisions"},  min:6,  max:60,  step:1,  d:17},
+    {k:"HW",  l:{ja:"半幅",en:"Half width"},          min:40, max:400, step:5,  d:210},
+    {k:"len", l:{ja:"軸の長さ",en:"Axis length"},      min:600,max:2600,step:20, d:1760},
+    {k:"x0",  l:{ja:"始点 x",en:"Start x"},        min:-800,max:600,step:10, d:-260},
+    {k:"y0",  l:{ja:"始点 y",en:"Start y"},        min:-200,max:900, step:10, d:430},
+    {k:"drop",l:{ja:"軸の下り",en:"Axis drop"},      min:-600,max:600, step:10, d:250},
+    {k:"bend",l:{ja:"軸の反り",en:"Axis bend"},      min:0,  max:400, step:10, d:150},
+    {k:"bf",  l:{ja:"反りの周期",en:"Bend period"},    min:0.4,max:3,   step:0.1, d:1.1},
+    {k:"turn",l:{ja:"ねじれ回転数",en:"Twist turns"},  min:0.2,max:4,   step:0.1, d:2.2},
+    {k:"tau0",l:{ja:"ねじれ初期角",en:"Initial twist angle"},  min:0,  max:6.28,step:0.05,d:0.2},
+    {k:"persp",l:{ja:"遠近の強さ",en:"Perspective"},   min:600,max:6000,step:100,d:1600},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},      min:0.2,max:3,   step:0.05,d:0.45},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},      min:1,  max:8,   step:0.1, d:3.45},
+    {k:"fpow",l:{ja:"潰れのカーブ",en:"Foreshortening curve"},  min:0.3,max:2,   step:0.05,d:0.75}
   ],
   gen(p,W,H){
     const out=[];
@@ -308,26 +315,26 @@ S.ribbon = {
 
 /* ひらっとした布。射影の潰れ＋法線陰影 */
 S.cloth = {
-  label:"ひらっとした布（波打つ面＋法線陰影）",
-  note:"ねじり切らずに面を波打たせ、浅い俯角から正射影する。密度（潰れ）と陰影（法線と光の内積）の2つが揃うと「面」に見える。",
-  doc:"<b>布</b> — 高さ場 <code>h(u,v)</code> を持つ面を浅い俯角 <code>α</code> で正射影。<br>粒径はランバート陰影 <code>max(0, N·L)</code>。法線は数値微分で求める。<br>⚠ <b>幅の分割</b>は 20 前後まで落とすこと。64 では塗りに潰れて陰影が見えない。<br>⚠ 微分の探り点は定義域に収める（端で片側差分）。はみ出すと <code>Math.pow(負,小数)</code> が NaN になりパスごと壊れる。",
+  label:{ja:"ひらっとした布（波打つ面＋法線陰影）",en:"Draped cloth (wavy surface + normal shading)"},
+  note:{ja:"ねじり切らずに面を波打たせ、浅い俯角から正射影する。密度（潰れ）と陰影（法線と光の内積）の2つが揃うと「面」に見える。",en:"Rather than twisting all the way, the sheet ripples and is projected from a shallow tilt. Density (foreshortening) and shading (normal dot light) together are what make it read as a surface."},
+  doc:{ja:"<b>布</b> — 高さ場 <code>h(u,v)</code> を持つ面を浅い俯角 <code>α</code> で正射影。<br>粒径はランバート陰影 <code>max(0, N·L)</code>。法線は数値微分で求める。<br>⚠ <b>幅の分割</b>は 20 前後まで落とすこと。64 では塗りに潰れて陰影が見えない。<br>⚠ 微分の探り点は定義域に収める（端で片側差分）。はみ出すと <code>Math.pow(負,小数)</code> が NaN になりパスごと壊れる。",en:"<b>Cloth</b> — a surface carrying the height field <code>h(u,v)</code>, projected at a shallow tilt <code>α</code>.<br>Dot size is Lambert shading <code>max(0, N·L)</code>; normals come from numerical differentiation.<br>⚠ Keep <b>width divisions</b> down around 20. At 64 it collapses into a solid and the shading disappears.<br>⚠ Keep the derivative probes inside the domain (one-sided at the edges). Step outside and <code>Math.pow(negative, fractional)</code> returns NaN, which corrupts the whole path."},
   params:[
-    {k:"Nu",  l:"横の分割",      min:60, max:600, step:10, d:270},
-    {k:"Nv",  l:"奥行きの分割",  min:6,  max:60,  step:1,  d:22},
-    {k:"Lx",  l:"横の広がり",    min:600,max:2600,step:20, d:1620},
-    {k:"Lz",  l:"奥行きの広がり",min:300,max:2000,step:20, d:960},
-    {k:"alpha",l:"俯角",         min:0.05,max:1.2,step:0.02,d:0.24},
-    {k:"amp0",l:"振幅（基準）",  min:0,  max:300, step:5,  d:70},
-    {k:"amp1",l:"振幅（端で増）",min:0,  max:300, step:5,  d:95},
-    {k:"apow",l:"振幅のカーブ",  min:0.3,max:3,   step:0.1, d:1.6},
-    {k:"fu",  l:"横の波の数",    min:0.3,max:5,   step:0.05,d:1.65},
-    {k:"fv",  l:"奥行きの波の数",min:0,  max:5,   step:0.05,d:1.25},
-    {k:"tw",  l:"ねじり",        min:0,  max:1.6, step:0.05,d:0.55},
-    {k:"lx",  l:"光 x",          min:-1, max:1,   step:0.05,d:-0.30},
-    {k:"ly",  l:"光 y",          min:-1, max:1,   step:0.05,d:0.42},
-    {k:"rmin",l:"最小粒径",      min:0.2,max:3,   step:0.05,d:0.5},
-    {k:"rmax",l:"最大粒径",      min:1,  max:8,   step:0.1, d:3.4},
-    {k:"gamma",l:"陰影のカーブ", min:0.4,max:3,   step:0.05,d:1.6}
+    {k:"Nu",  l:{ja:"横の分割",en:"Divisions (u)"},      min:60, max:600, step:10, d:270},
+    {k:"Nv",  l:{ja:"奥行きの分割",en:"Depth divisions"},  min:6,  max:60,  step:1,  d:22},
+    {k:"Lx",  l:{ja:"横の広がり",en:"Width extent"},    min:600,max:2600,step:20, d:1620},
+    {k:"Lz",  l:{ja:"奥行きの広がり",en:"Depth extent"},min:300,max:2000,step:20, d:960},
+    {k:"alpha",l:{ja:"俯角",en:"Camera tilt"},         min:0.05,max:1.2,step:0.02,d:0.24},
+    {k:"amp0",l:{ja:"振幅（基準）",en:"Amplitude (base)"},  min:0,  max:300, step:5,  d:70},
+    {k:"amp1",l:{ja:"振幅（端で増）",en:"Amplitude (edge gain)"},min:0,  max:300, step:5,  d:95},
+    {k:"apow",l:{ja:"振幅のカーブ",en:"Amplitude curve"},  min:0.3,max:3,   step:0.1, d:1.6},
+    {k:"fu",  l:{ja:"横の波の数",en:"Wave count (u)"},    min:0.3,max:5,   step:0.05,d:1.65},
+    {k:"fv",  l:{ja:"奥行きの波の数",en:"Wave count (depth)"},min:0,  max:5,   step:0.05,d:1.25},
+    {k:"tw",  l:{ja:"ねじり",en:"Twist"},        min:0,  max:1.6, step:0.05,d:0.55},
+    {k:"lx",  l:{ja:"光 x",en:"Light x"},          min:-1, max:1,   step:0.05,d:-0.30},
+    {k:"ly",  l:{ja:"光 y",en:"Light y"},          min:-1, max:1,   step:0.05,d:0.42},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},      min:0.2,max:3,   step:0.05,d:0.5},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},      min:1,  max:8,   step:0.1, d:3.4},
+    {k:"gamma",l:{ja:"陰影のカーブ",en:"Shading curve"}, min:0.4,max:3,   step:0.05,d:1.6}
   ],
   gen(p,W,H){
     const h=(u,v)=>{
@@ -360,24 +367,24 @@ S.cloth = {
 
 /* 等角写像。角度を保つので歪んでも破綻しない */
 S.conformal = {
-  label:"等角写像（z² / z+1/z）",
-  note:"正方格子を複素解析関数で写す。等角なので歪んでも直交性が残る。特異点は必ず画面外に置くこと。",
-  doc:"<b>等角写像</b> — <code>w = z²</code> は直交格子を放物線の網に写す。<code>w = z + 1/z</code>（ジューコフスキー）は円のまわりの一様流を翼のまわりの流れに写す。<br>粒径は <code>|dw/dz|</code>（幾何）だけだと振幅が足りないので、位置ランプを混ぜる。<br>⚠ 原点・特異点が画面内に見えると即座に「物体」に見える。外へ出す。",
+  label:{ja:"等角写像（z² / z+1/z）",en:"Conformal map (z² / z+1/z)"},
+  note:{ja:"正方格子を複素解析関数で写す。等角なので歪んでも直交性が残る。特異点は必ず画面外に置くこと。",en:"A square lattice mapped by a complex analytic function. Being conformal, it stays orthogonal however much it distorts. Always keep the singularity off-canvas."},
+  doc:{ja:"<b>等角写像</b> — <code>w = z²</code> は直交格子を放物線の網に写す。<code>w = z + 1/z</code>（ジューコフスキー）は円のまわりの一様流を翼のまわりの流れに写す。<br>粒径は <code>|dw/dz|</code>（幾何）だけだと振幅が足りないので、位置ランプを混ぜる。<br>⚠ 原点・特異点が画面内に見えると即座に「物体」に見える。外へ出す。",en:"<b>Conformal map</b> — <code>w = z²</code> sends an orthogonal grid to a net of parabolas. <code>w = z + 1/z</code> (Joukowski) sends uniform flow around a circle to flow around an aerofoil.<br>Sizing by <code>|dw/dz|</code> alone lacks range, so a positional ramp is mixed in.<br>⚠ If the origin or singularity is visible on canvas, the image immediately reads as an object. Push it outside."},
   params:[
-    {k:"fn", l:"写像",       opts:[["z2","w = z²"],["jouk","w = z + 1/z"]], d:"z2"},
-    {k:"cx", l:"配置 x",     min:-1200,max:2600,step:10, d:1180},
-    {k:"cy", l:"配置 y",     min:-1200,max:2200,step:10, d:880},
-    {k:"sc", l:"スケール",   min:40,  max:800, step:10, d:226},
-    {k:"Na", l:"a の分割",   min:60,  max:900, step:20, d:460},
-    {k:"Nb", l:"b の分割",   min:12,  max:260, step:4,  d:96},
-    {k:"a0", l:"a 下限",     min:-4,  max:2,   step:0.05,d:-2.85},
-    {k:"a1", l:"a 上限",     min:-2,  max:4,   step:0.05,d:0.90},
-    {k:"b0", l:"b 下限",     min:0.02,max:3,   step:0.02,d:0.42},
-    {k:"b1", l:"b 上限",     min:0.2, max:5,   step:0.05,d:2.77},
-    {k:"mix",l:"幾何と位置の配合",min:0,max:1,step:0.05,d:0.45},
-    {k:"rmin",l:"最小粒径",  min:0.2, max:3,   step:0.05,d:0.30},
-    {k:"rmax",l:"最大粒径",  min:1,   max:8,   step:0.1, d:2.95},
-    {k:"pow", l:"階調カーブ",min:0.4, max:3,   step:0.05,d:2.0}
+    {k:"fn", l:{ja:"写像",en:"Mapping"},       opts:[["z2",{ja:"w = z²",en:"w = z²"}],["jouk",{ja:"w = z + 1/z",en:"w = z + 1/z"}]], d:"z2"},
+    {k:"cx", l:{ja:"配置 x",en:"Position x"},     min:-1200,max:2600,step:10, d:1180},
+    {k:"cy", l:{ja:"配置 y",en:"Position y"},     min:-1200,max:2200,step:10, d:880},
+    {k:"sc", l:{ja:"スケール",en:"Scale"},   min:40,  max:800, step:10, d:226},
+    {k:"Na", l:{ja:"a の分割",en:"a divisions"},   min:60,  max:900, step:20, d:460},
+    {k:"Nb", l:{ja:"b の分割",en:"b divisions"},   min:12,  max:260, step:4,  d:96},
+    {k:"a0", l:{ja:"a 下限",en:"a min"},     min:-4,  max:2,   step:0.05,d:-2.85},
+    {k:"a1", l:{ja:"a 上限",en:"a max"},     min:-2,  max:4,   step:0.05,d:0.90},
+    {k:"b0", l:{ja:"b 下限",en:"b min"},     min:0.02,max:3,   step:0.02,d:0.42},
+    {k:"b1", l:{ja:"b 上限",en:"b max"},     min:0.2, max:5,   step:0.05,d:2.77},
+    {k:"mix",l:{ja:"幾何と位置の配合",en:"Geometry / position mix"},min:0,max:1,step:0.05,d:0.45},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},  min:0.2, max:3,   step:0.05,d:0.30},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},  min:1,   max:8,   step:0.1, d:2.95},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"},min:0.4, max:3,   step:0.05,d:2.0}
   ],
   gen(p,W,H){
     const out=[];
@@ -409,27 +416,27 @@ S.conformal = {
 
 /* 歪ませた等高線（水面） */
 S.contour = {
-  label:"歪ませた等高線（水面）",
-  note:"低周波の波を数枚重ねて面をうねらせ、その上に等値線の帯を置く。断面を非対称にすると帯の中に方向のある階調が出る。",
-  doc:"<b>等高線</b> — <code>f</code> の小数部を帯の断面に通す。<code>Math.pow(ph, skew)</code> で立ち上がりを急に、抜けを緩くすると帯に方向が出る。<br><b>帯の細さ</b>が重さを決める。1.5 だとうねりは読めるが画面が埋まり、2.6 だと軽いがうねりが弱い。2.0 前後が中間。",
+  label:{ja:"歪ませた等高線（水面）",en:"Warped contours (water)"},
+  note:{ja:"低周波の波を数枚重ねて面をうねらせ、その上に等値線の帯を置く。断面を非対称にすると帯の中に方向のある階調が出る。",en:"A few low-frequency waves warp the field, then level-set bands are laid on top. An asymmetric band profile gives each band a directional gradient."},
+  doc:{ja:"<b>等高線</b> — <code>f</code> の小数部を帯の断面に通す。<code>Math.pow(ph, skew)</code> で立ち上がりを急に、抜けを緩くすると帯に方向が出る。<br><b>帯の細さ</b>が重さを決める。1.5 だとうねりは読めるが画面が埋まり、2.6 だと軽いがうねりが弱い。2.0 前後が中間。",en:"<b>Contours</b> — the fractional part of <code>f</code> is run through a band profile. <code>Math.pow(ph, skew)</code> makes the rise steep and the fall gentle, giving each band a direction.<br><b>Band thinness</b> decides the visual weight. At 1.5 the swell reads but the canvas fills up; at 2.6 it is light but the swell weakens. Around 2.0 is the middle ground."},
   params:[
-    {k:"step",l:"格子の間隔",   min:4,  max:20,  step:0.5, d:7.5},
-    {k:"a1", l:"波1 振幅",      min:0,  max:2,   step:0.05,d:1.00},
-    {k:"f1u",l:"波1 横周波数",  min:0,  max:8,   step:0.1, d:2.1},
-    {k:"f1v",l:"波1 縦周波数",  min:0,  max:8,   step:0.1, d:0.9},
-    {k:"a2", l:"波2 振幅",      min:0,  max:2,   step:0.05,d:0.62},
-    {k:"f2u",l:"波2 横周波数",  min:-8, max:8,   step:0.1, d:-1.6},
-    {k:"f2v",l:"波2 縦周波数",  min:0,  max:8,   step:0.1, d:3.4},
-    {k:"a3", l:"波3 振幅",      min:0,  max:2,   step:0.05,d:0.38},
-    {k:"f3u",l:"波3 横周波数",  min:0,  max:12,  step:0.1, d:5.3},
-    {k:"f3v",l:"波3 縦周波数",  min:0,  max:12,  step:0.1, d:3.1},
-    {k:"gain",l:"うねりの強さ", min:0.2,max:4,   step:0.05,d:1.55},
-    {k:"tx", l:"帯の傾き x",    min:0,  max:0.02,step:0.0002,d:0.0042},
-    {k:"ty", l:"帯の傾き y",    min:0,  max:0.02,step:0.0002,d:0.0026},
-    {k:"skew",l:"断面の非対称", min:0.2,max:2,   step:0.02,d:0.62},
-    {k:"width",l:"帯の細さ",    min:0.6,max:5,   step:0.1, d:2.0},
-    {k:"rmin",l:"最小粒径",     min:0.2,max:3,   step:0.05,d:0.28},
-    {k:"rmax",l:"最大粒径",     min:1,  max:8,   step:0.1, d:2.85}
+    {k:"step",l:{ja:"格子の間隔",en:"Sample spacing"},   min:4,  max:20,  step:0.5, d:7.5},
+    {k:"a1", l:{ja:"波1 振幅",en:"Wave 1 amplitude"},      min:0,  max:2,   step:0.05,d:1.00},
+    {k:"f1u",l:{ja:"波1 横周波数",en:"Wave 1 freq u"},  min:0,  max:8,   step:0.1, d:2.1},
+    {k:"f1v",l:{ja:"波1 縦周波数",en:"Wave 1 freq v"},  min:0,  max:8,   step:0.1, d:0.9},
+    {k:"a2", l:{ja:"波2 振幅",en:"Wave 2 amplitude"},      min:0,  max:2,   step:0.05,d:0.62},
+    {k:"f2u",l:{ja:"波2 横周波数",en:"Wave 2 freq u"},  min:-8, max:8,   step:0.1, d:-1.6},
+    {k:"f2v",l:{ja:"波2 縦周波数",en:"Wave 2 freq v"},  min:0,  max:8,   step:0.1, d:3.4},
+    {k:"a3", l:{ja:"波3 振幅",en:"Wave 3 amplitude"},      min:0,  max:2,   step:0.05,d:0.38},
+    {k:"f3u",l:{ja:"波3 横周波数",en:"Wave 3 freq u"},  min:0,  max:12,  step:0.1, d:5.3},
+    {k:"f3v",l:{ja:"波3 縦周波数",en:"Wave 3 freq v"},  min:0,  max:12,  step:0.1, d:3.1},
+    {k:"gain",l:{ja:"うねりの強さ",en:"Swell strength"}, min:0.2,max:4,   step:0.05,d:1.55},
+    {k:"tx", l:{ja:"帯の傾き x",en:"Band slope x"},    min:0,  max:0.02,step:0.0002,d:0.0042},
+    {k:"ty", l:{ja:"帯の傾き y",en:"Band slope y"},    min:0,  max:0.02,step:0.0002,d:0.0026},
+    {k:"skew",l:{ja:"断面の非対称",en:"Profile skew"}, min:0.2,max:2,   step:0.02,d:0.62},
+    {k:"width",l:{ja:"帯の細さ",en:"Band thinness"},    min:0.6,max:5,   step:0.1, d:2.0},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},     min:0.2,max:3,   step:0.05,d:0.28},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},     min:1,  max:8,   step:0.1, d:2.85}
   ],
   gen(p,W,H){
     const out=[];
@@ -450,16 +457,16 @@ S.contour = {
 
 /* モアレ */
 S.moire = {
-  label:"モアレ（二重格子）",
-  note:"ピッチの近い2枚の正方格子を微小角ずらして重ねる。小さな規則から大きな周期が立ち上がる。",
-  doc:"<b>モアレ</b> — 格子1の各点で、回転・拡大した格子2の最寄り格子点までの距離を粒径に使う。<code>p1</code> と <code>p2</code> の差、そして角度が干渉縞の周期を決める。差を小さくするほど縞が大きくなる。",
+  label:{ja:"モアレ（二重格子）",en:"Moiré (two lattices)"},
+  note:{ja:"ピッチの近い2枚の正方格子を微小角ずらして重ねる。小さな規則から大きな周期が立ち上がる。",en:"Two square lattices of near-equal pitch, overlaid at a small angle. A large-scale period emerges out of the small-scale regularity."},
+  doc:{ja:"<b>モアレ</b> — 格子1の各点で、回転・拡大した格子2の最寄り格子点までの距離を粒径に使う。<code>p1</code> と <code>p2</code> の差、そして角度が干渉縞の周期を決める。差を小さくするほど縞が大きくなる。",en:"<b>Moiré</b> — at each point of lattice 1, the distance to the nearest node of the rotated and rescaled lattice 2 sets the dot size. The gap between <code>p1</code> and <code>p2</code>, together with the angle, sets the fringe period. The smaller the gap, the larger the fringes."},
   params:[
-    {k:"p1",  l:"格子1 ピッチ", min:6,  max:40, step:0.5, d:15},
-    {k:"p2",  l:"格子2 ピッチ", min:6,  max:40, step:0.1, d:15.9},
-    {k:"ang", l:"角度（度）",   min:0,  max:30, step:0.1, d:7.5},
-    {k:"rmin",l:"最小粒径",     min:0.2,max:3,  step:0.05,d:0.5},
-    {k:"rmax",l:"最大粒径",     min:1,  max:9,  step:0.1, d:5.1},
-    {k:"pow", l:"階調カーブ",   min:0.4,max:3,  step:0.05,d:1.5}
+    {k:"p1",  l:{ja:"格子1 ピッチ",en:"Lattice 1 pitch"}, min:6,  max:40, step:0.5, d:15},
+    {k:"p2",  l:{ja:"格子2 ピッチ",en:"Lattice 2 pitch"}, min:6,  max:40, step:0.1, d:15.9},
+    {k:"ang", l:{ja:"角度（度）",en:"Angle (deg)"},   min:0,  max:30, step:0.1, d:7.5},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},     min:0.2,max:3,  step:0.05,d:0.5},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},     min:1,  max:9,  step:0.1, d:5.1},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"},   min:0.4,max:3,  step:0.05,d:1.5}
   ],
   gen(p,W,H){
     const out=[], a=p.ang*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a);
@@ -476,18 +483,18 @@ S.moire = {
 
 /* 準結晶 */
 S.quasi = {
-  label:"準結晶（N枚の平面波の和）",
-  note:"周期が無いのに完全に決定的。N=5 は5回対称で平面充填できない＝永遠に繰り返さない。",
-  doc:"<b>準結晶</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>、<code>θⱼ = 2πj/N</code>。<br>N=4 なら周期的、<b>N=5・7 は非周期</b>。k が構造の細かさを決める。",
+  label:{ja:"準結晶（N枚の平面波の和）",en:"Quasicrystal (sum of N plane waves)"},
+  note:{ja:"周期が無いのに完全に決定的。N=5 は5回対称で平面充填できない＝永遠に繰り返さない。",en:"No period, yet fully deterministic. N=5 has five-fold symmetry, which cannot tile the plane, so it never repeats."},
+  doc:{ja:"<b>準結晶</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>、<code>θⱼ = 2πj/N</code>。<br>N=4 なら周期的、<b>N=5・7 は非周期</b>。k が構造の細かさを決める。",en:"<b>Quasicrystal</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code> with <code>θⱼ = 2πj/N</code>.<br>N=4 is periodic; <b>N=5 and 7 are aperiodic</b>. k sets how fine the structure is."},
   params:[
-    {k:"N",   l:"波の枚数",   min:3,  max:9,   step:1,   d:5},
-    {k:"k",   l:"波数 k",     min:0.01,max:0.2,step:0.005,d:0.055},
-    {k:"step",l:"格子の間隔", min:4,  max:20,  step:0.5, d:9},
-    {k:"bias",l:"しきい値",   min:0,  max:1,   step:0.02,d:0.45},
-    {k:"span",l:"レンジ",     min:0.4,max:2.5, step:0.05,d:1.3},
-    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.4},
-    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:4.8},
-    {k:"pow", l:"階調カーブ", min:0.4,max:4,   step:0.05,d:2.2}
+    {k:"N",   l:{ja:"波の枚数",en:"Number of waves"},   min:3,  max:9,   step:1,   d:5},
+    {k:"k",   l:{ja:"波数 k",en:"Wave number k"},     min:0.01,max:0.2,step:0.005,d:0.055},
+    {k:"step",l:{ja:"格子の間隔",en:"Sample spacing"}, min:4,  max:20,  step:0.5, d:9},
+    {k:"bias",l:{ja:"しきい値",en:"Threshold"},   min:0,  max:1,   step:0.02,d:0.45},
+    {k:"span",l:{ja:"レンジ",en:"Range"},     min:0.4,max:2.5, step:0.05,d:1.3},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.4},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:4.8},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:4,   step:0.05,d:2.2}
   ],
   gen(p,W,H){
     const out=[], N=Math.round(p.N), ph=[];
@@ -506,19 +513,19 @@ S.quasi = {
 
 /* ギブス現象 */
 S.gibbs = {
-  label:"ギブス現象（フーリエ部分和）",
-  note:"矩形波を N 項で打ち切ると、不連続の近くに消えない振動が残る。行ごとに N を増やすと収束していく様子がそのまま絵になる。",
-  doc:"<b>ギブス現象</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>。<br>N を増やすと矩形に近づくが、<b>不連続の近くの行き過ぎ（約9%）は消えない</b>。それがリンギングとして残る。",
+  label:{ja:"ギブス現象（フーリエ部分和）",en:"Gibbs phenomenon (Fourier partial sum)"},
+  note:{ja:"矩形波を N 項で打ち切ると、不連続の近くに消えない振動が残る。行ごとに N を増やすと収束していく様子がそのまま絵になる。",en:"Truncate a square wave at N terms and a ringing near the discontinuity refuses to go away. Raising N row by row turns the convergence itself into the image."},
+  doc:{ja:"<b>ギブス現象</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>。<br>N を増やすと矩形に近づくが、<b>不連続の近くの行き過ぎ（約9%）は消えない</b>。それがリンギングとして残る。",en:"<b>Gibbs phenomenon</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>.<br>Raising N approaches the square wave, but <b>the overshoot near the discontinuity, about 9%, never goes away</b>. That is what remains as ringing."},
   params:[
-    {k:"rows",l:"行数",       min:12, max:140, step:2,  d:64},
-    {k:"cols",l:"横の分割",   min:60, max:600, step:10, d:300},
-    {k:"Nmax",l:"最大項数",   min:3,  max:80,  step:1,  d:41},
-    {k:"npow",l:"項数の増え方",min:0.4,max:4,  step:0.1, d:1.6},
-    {k:"kx",  l:"波数",       min:0.004,max:0.05,step:0.0005,d:0.0155},
-    {k:"amp", l:"振幅",       min:5,  max:150, step:1,  d:46},
-    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.5},
-    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.4},
-    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.3}
+    {k:"rows",l:{ja:"行数",en:"Rows"},       min:12, max:140, step:2,  d:64},
+    {k:"cols",l:{ja:"横の分割",en:"Divisions (u)"},   min:60, max:600, step:10, d:300},
+    {k:"Nmax",l:{ja:"最大項数",en:"Max terms"},   min:3,  max:80,  step:1,  d:41},
+    {k:"npow",l:{ja:"項数の増え方",en:"Term growth"},min:0.4,max:4,  step:0.1, d:1.6},
+    {k:"kx",  l:{ja:"波数",en:"Wave number"},       min:0.004,max:0.05,step:0.0005,d:0.0155},
+    {k:"amp", l:{ja:"振幅",en:"Amplitude"},       min:5,  max:150, step:1,  d:46},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.5},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.4},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.3}
   ],
   gen(p,W,H){
     const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
@@ -540,22 +547,22 @@ S.gibbs = {
 
 /* ねじれ格子 */
 S.twist = {
-  label:"ねじれ格子",
-  note:"行ごとに回転角と伸縮を進める。流線より静かで、布のたわみのようなテクスチャになる。",
-  doc:"<b>ねじれ格子</b> — 行が進むごとに回転 <code>ang(v)</code> と伸縮 <code>sc(v)</code> をかける。局所の詰まり具合を粒径に反映させて濃淡を出す。<br>濃淡のレンジが狭いと薄く見えるので <code>コントラスト</code> を上げる。",
+  label:{ja:"ねじれ格子",en:"Twisted grid"},
+  note:{ja:"行ごとに回転角と伸縮を進める。流線より静かで、布のたわみのようなテクスチャになる。",en:"Rotation and stretch advance row by row. Quieter than streamlines, reading like the sag of a fabric."},
+  doc:{ja:"<b>ねじれ格子</b> — 行が進むごとに回転 <code>ang(v)</code> と伸縮 <code>sc(v)</code> をかける。局所の詰まり具合を粒径に反映させて濃淡を出す。<br>濃淡のレンジが狭いと薄く見えるので <code>コントラスト</code> を上げる。",en:"<b>Twisted grid</b> — each successive row is rotated by <code>ang(v)</code> and stretched by <code>sc(v)</code>. Local crowding feeds back into dot size to produce the tone.<br>A narrow tonal range looks washed out, so raise <code>Contrast</code>."},
   params:[
-    {k:"rows",l:"行数",       min:10, max:160, step:2,  d:54},
-    {k:"cols",l:"列数",       min:20, max:300, step:5,  d:110},
-    {k:"a0",  l:"開始角",     min:-1.5,max:1.5,step:0.05,d:-0.55},
-    {k:"a1",  l:"終了角",     min:-1.5,max:1.5,step:0.05,d:0.95},
-    {k:"sc",  l:"伸縮",       min:0,  max:1,   step:0.02,d:0.42},
-    {k:"sf",  l:"伸縮の周期", min:0.3,max:3,   step:0.1, d:1.3},
-    {k:"spanx",l:"横の広がり",min:600,max:2600,step:20, d:1500},
-    {k:"spany",l:"縦の広がり",min:300,max:1600,step:20, d:760},
-    {k:"shear",l:"せん断",    min:0,  max:1,   step:0.02,d:0.42},
-    {k:"con", l:"コントラスト",min:0.2,max:2.5,step:0.05,d:1.4},
-    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.4},
-    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.6}
+    {k:"rows",l:{ja:"行数",en:"Rows"},       min:10, max:160, step:2,  d:54},
+    {k:"cols",l:{ja:"列数",en:"Columns"},       min:20, max:300, step:5,  d:110},
+    {k:"a0",  l:{ja:"開始角",en:"Start angle"},     min:-1.5,max:1.5,step:0.05,d:-0.55},
+    {k:"a1",  l:{ja:"終了角",en:"End angle"},     min:-1.5,max:1.5,step:0.05,d:0.95},
+    {k:"sc",  l:{ja:"伸縮",en:"Stretch"},       min:0,  max:1,   step:0.02,d:0.42},
+    {k:"sf",  l:{ja:"伸縮の周期",en:"Stretch period"}, min:0.3,max:3,   step:0.1, d:1.3},
+    {k:"spanx",l:{ja:"横の広がり",en:"Width extent"},min:600,max:2600,step:20, d:1500},
+    {k:"spany",l:{ja:"縦の広がり",en:"Height extent"},min:300,max:1600,step:20, d:760},
+    {k:"shear",l:{ja:"せん断",en:"Shear"},    min:0,  max:1,   step:0.02,d:0.42},
+    {k:"con", l:{ja:"コントラスト",en:"Contrast"},min:0.2,max:2.5,step:0.05,d:1.4},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.4},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.6}
   ],
   gen(p,W,H){
     const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
@@ -580,21 +587,21 @@ S.twist = {
 
 /* 焦線（コースティクス） */
 S.caustics = {
-  label:"焦線（コースティクス）",
-  note:"滑らかな写像の局所面積 |J| の逆数を濃度に使う。|J| がゼロを跨ぐと折り目が明るい筋として立つ。",
-  doc:"<b>焦線</b> — <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code> のヤコビアン <code>|J|</code>。<br>⚠ <b>振幅が小さいと <code>J</code> がゼロを跨がず、折り目が立たずただの霞になる。</b> A・B を大きく取ること。",
+  label:{ja:"焦線（コースティクス）",en:"Caustics"},
+  note:{ja:"滑らかな写像の局所面積 |J| の逆数を濃度に使う。|J| がゼロを跨ぐと折り目が明るい筋として立つ。",en:"The reciprocal of a smooth map's local area |J| drives the density. Where |J| crosses zero, the fold stands up as a bright ridge."},
+  doc:{ja:"<b>焦線</b> — <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code> のヤコビアン <code>|J|</code>。<br>⚠ <b>振幅が小さいと <code>J</code> がゼロを跨がず、折り目が立たずただの霞になる。</b> A・B を大きく取ること。",en:"<b>Caustics</b> — the Jacobian <code>|J|</code> of <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code>.<br>⚠ <b>With small amplitudes <code>J</code> never crosses zero, no fold forms, and you get nothing but haze.</b> Keep A and B large."},
   params:[
-    {k:"step",l:"格子の間隔", min:4,  max:20,  step:0.5, d:8.5},
-    {k:"A",   l:"振幅 A",     min:0,  max:400, step:5,  d:180},
-    {k:"B",   l:"振幅 B",     min:0,  max:400, step:5,  d:150},
-    {k:"k1",  l:"k₁",         min:0.001,max:0.03,step:0.0005,d:0.0068},
-    {k:"k2",  l:"k₂",         min:0.001,max:0.03,step:0.0005,d:0.0091},
-    {k:"k3",  l:"k₃",         min:0.001,max:0.03,step:0.0005,d:0.0055},
-    {k:"gain",l:"感度",       min:0.1,max:3,   step:0.05,d:0.62},
-    {k:"floor",l:"下駄",      min:0.01,max:1,  step:0.01,d:0.10},
-    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.35},
-    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.65},
-    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.5}
+    {k:"step",l:{ja:"格子の間隔",en:"Sample spacing"}, min:4,  max:20,  step:0.5, d:8.5},
+    {k:"A",   l:{ja:"振幅 A",en:"Amplitude A"},     min:0,  max:400, step:5,  d:180},
+    {k:"B",   l:{ja:"振幅 B",en:"Amplitude B"},     min:0,  max:400, step:5,  d:150},
+    {k:"k1",  l:{ja:"k₁",en:"k₁"},         min:0.001,max:0.03,step:0.0005,d:0.0068},
+    {k:"k2",  l:{ja:"k₂",en:"k₂"},         min:0.001,max:0.03,step:0.0005,d:0.0091},
+    {k:"k3",  l:{ja:"k₃",en:"k₃"},         min:0.001,max:0.03,step:0.0005,d:0.0055},
+    {k:"gain",l:{ja:"感度",en:"Sensitivity"},       min:0.1,max:3,   step:0.05,d:0.62},
+    {k:"floor",l:{ja:"下駄",en:"Floor"},      min:0.01,max:1,  step:0.01,d:0.10},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.35},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.65},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.5}
   ],
   gen(p,W,H){
     const out=[];
@@ -615,22 +622,22 @@ S.caustics = {
 
 /* 反応拡散（Gray-Scott） */
 S.turing = {
-  label:"反応拡散（Gray-Scott）",
-  note:"決定的な偏微分方程式なのに有機的な模様が出る。種と (F,K) を外すと反応が立ち上がらず真っ白になる。重いので少し待つ。",
-  doc:"<b>反応拡散</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code>／<code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>。<br>⚠ <b>種は塊で撒く。</b> 孤立した1セルは減衰して消える。<br>⚠ <code>(F,K)</code> が領域から外れると死ぬ。<b>迷路なら (0.030, 0.057)</b>、斑点なら (0.035, 0.062) あたり。<br>結果が空なら下の <code>v の最大値</code> を見る。ほぼ 0 なら死んでいる。",
+  label:{ja:"反応拡散（Gray-Scott）",en:"Reaction–diffusion (Gray-Scott)"},
+  note:{ja:"決定的な偏微分方程式なのに有機的な模様が出る。種と (F,K) を外すと反応が立ち上がらず真っ白になる。重いので少し待つ。",en:"A deterministic PDE that nonetheless yields organic patterns. Get the seeding or (F,K) wrong and the reaction never starts, leaving a blank canvas. It is heavy, so give it a moment."},
+  doc:{ja:"<b>反応拡散</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code>／<code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>。<br>⚠ <b>種は塊で撒く。</b> 孤立した1セルは減衰して消える。<br>⚠ <code>(F,K)</code> が領域から外れると死ぬ。<b>迷路なら (0.030, 0.057)</b>、斑点なら (0.035, 0.062) あたり。<br>結果が空なら下の <code>v の最大値</code> を見る。ほぼ 0 なら死んでいる。",en:"<b>Reaction–diffusion</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code> and <code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>.<br>⚠ <b>Seed in blocks.</b> An isolated single cell decays and vanishes.<br>⚠ Outside its region <code>(F,K)</code> simply dies. <b>Maze: (0.030, 0.057)</b>; spots: around (0.035, 0.062).<br>If the result comes out empty, check <code>max v</code> below. Near zero means the reaction died."},
   params:[
-    {k:"GW", l:"格子 幅",     min:60, max:260, step:10, d:160},
-    {k:"GH", l:"格子 高さ",   min:40, max:160, step:4,  d:84},
-    {k:"IT", l:"反復回数",    min:200,max:5000,step:100,d:3000},
-    {k:"F",  l:"供給 F",      min:0.010,max:0.070,step:0.001,d:0.030},
-    {k:"K",  l:"消失 K",      min:0.040,max:0.075,step:0.001,d:0.057},
-    {k:"Du", l:"拡散 Du",     min:0.05,max:0.24,step:0.01,d:0.16},
-    {k:"Dv", l:"拡散 Dv",     min:0.02,max:0.24,step:0.01,d:0.08},
-    {k:"seed",l:"種の間隔",   min:5,  max:30,  step:1,  d:11},
-    {k:"sdens",l:"種の密度",  min:0.1,max:1,   step:0.05,d:0.55},
-    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.35},
-    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.95},
-    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.1}
+    {k:"GW", l:{ja:"格子 幅",en:"Grid width"},     min:60, max:260, step:10, d:160},
+    {k:"GH", l:{ja:"格子 高さ",en:"Grid height"},   min:40, max:160, step:4,  d:84},
+    {k:"IT", l:{ja:"反復回数",en:"Iterations"},    min:200,max:5000,step:100,d:3000},
+    {k:"F",  l:{ja:"供給 F",en:"Feed F"},      min:0.010,max:0.070,step:0.001,d:0.030},
+    {k:"K",  l:{ja:"消失 K",en:"Kill K"},      min:0.040,max:0.075,step:0.001,d:0.057},
+    {k:"Du", l:{ja:"拡散 Du",en:"Diffusion Du"},     min:0.05,max:0.24,step:0.01,d:0.16},
+    {k:"Dv", l:{ja:"拡散 Dv",en:"Diffusion Dv"},     min:0.02,max:0.24,step:0.01,d:0.08},
+    {k:"seed",l:{ja:"種の間隔",en:"Seed spacing"},   min:5,  max:30,  step:1,  d:11},
+    {k:"sdens",l:{ja:"種の密度",en:"Seed density"},  min:0.1,max:1,   step:0.05,d:0.55},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.35},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.95},
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.1}
   ],
   gen(p,W,H){
     // 陽解法・4近傍ラプラシアン・dt=1 の安定条件は D < 0.25。
@@ -672,13 +679,97 @@ S.turing = {
 /* ── UI ─────────────────────────────────────────────────── */
 const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing"];
 const $ = id => document.getElementById(id);
+
+/* ── 言語 ──────────────────────────────────────────────
+   文言は {ja, en} の対で持ち、T() で今の言語を引く。
+   既定はブラウザの言語。選ぶと localStorage に残る。 */
+let LANG = (function(){
+  try{ const v=localStorage.getItem("patternlab.lang"); if(v==="ja"||v==="en") return v; }catch(e){}
+  return (navigator.language||"").toLowerCase().startsWith("ja") ? "ja" : "en";
+})();
+const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
+
+const UI = {
+  sub:{ja:"数学的な背景パターンの生成器 — 乱数を使わないので、同じパラメータからは常に同じ絵が出る",
+       en:"A generator for mathematical background patterns. No randomness, so the same parameters always give the same image."},
+  legStruct:{ja:"構造",en:"Structure"},
+  legParams:{ja:"パラメータ",en:"Parameters"},
+  legCanvas:{ja:"キャンバス",en:"Canvas"},
+  legColor:{ja:"色",en:"Color"},
+  legExport:{ja:"書き出し",en:"Export"},
+  legRecipe:{ja:"レシピ",en:"Recipe"},
+  shuffle:{ja:"振ってみる",en:"Shuffle"},
+  reset:{ja:"既定値に戻す",en:"Reset"},
+  save:{ja:"SVG を保存",en:"Save SVG"},
+  copy:{ja:"SVG をコピー",en:"Copy SVG"},
+  copied:{ja:"コピーした",en:"Copied"},
+  copyFail:{ja:"コピー失敗",en:"Copy failed"},
+  w:{ja:"幅",en:"Width"},
+  h:{ja:"高さ",en:"Height"},
+  fg:{ja:"ドット",en:"Dots"},
+  bg:{ja:"地",en:"Ground"},
+  transparent:{ja:"地を透明にする（他の絵に重ねるとき）",en:"Transparent ground (for layering)"},
+  op0:{ja:"小",en:"S"}, op1:{ja:"中",en:"M"}, op2:{ja:"大",en:"L"},
+  noteOp:{ja:"粒径で3段に分け、段ごとに不透明度を変えている。レンジを広げるほど濃淡が強い。",
+          en:"Dots are split into three tiers by size, each with its own opacity. A wider range means stronger tonal contrast."},
+  noteExport:{ja:"デザインツールへはファイルを読み込むか、コピーしてそのままペースト。ベクターなので拡大しても粗くならない。",
+              en:"Load the file into your design tool, or copy and paste it straight in. It is vector, so it stays sharp at any size."},
+  noteRecipe:{ja:"気に入った設定はこれごと控えておく。URL のハッシュにも同じ状態が入る。",
+              en:"Keep this text as a record of a setting you liked. The same state also lives in the URL hash."},
+  mCount:{ja:"ドット",en:"Dots"},
+  mSize:{ja:"サイズ",en:"Size"},
+  busy:{ja:"計算中…",en:"Computing…"},
+  genError:{ja:"生成エラー: ",en:"Generation error: "},
+  vmax:{ja:"v の最大値 ",en:"max v "},
+  dead:{ja:" — 反応が死んでいる。(F,K) と種を見直す",en:" — the reaction is dead. Revisit (F,K) and the seeding."},
+  noParams:{ja:"パラメータなし",en:"No parameters"},
+  principles:{ja:'設計原則 — <strong>粒立ちを残す</strong>（最大粒径 ≦ 格子間隔 × 0.55。潰れたら分割数を減らす）／<strong>四辺を貫いて画面全体を覆う</strong>／<strong>中心・特異点は画面の外に置く</strong>。中心が画面内に見えると「物体が置いてある」絵になる。',
+              en:'Design principles — <strong>keep the dots distinct</strong> (max dot size ≤ lattice spacing × 0.55; if it collapses, cut the divisions, not the size) / <strong>run through all four edges and cover the canvas</strong> / <strong>keep centers and singularities off-canvas</strong>. A visible center reads as an object sitting in the middle.'},
+  presets:{
+    "1200x630":{ja:"OGP・SNS 1200 × 630",en:"OGP / social 1200 × 630"},
+    "1280x670":{ja:"note 見出し 1280 × 670",en:"note header 1280 × 670"},
+    "1111x278":{ja:"帯バナー 1111 × 278",en:"Wide banner 1111 × 278"},
+    "1920x1080":{ja:"スライド 1920 × 1080",en:"Slide 1920 × 1080"},
+    "1080x1080":{ja:"正方形 1080 × 1080",en:"Square 1080 × 1080"},
+    "1080x1920":{ja:"縦 1080 × 1920",en:"Portrait 1080 × 1920"},
+    "custom":{ja:"カスタム",en:"Custom"}
+  }
+};
+
+function applyLang(){
+  document.documentElement.lang = LANG;
+  const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
+  set("uiSub","sub");
+  set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
+  set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
+  set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy");
+  set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
+  set("uiTransparent","transparent");
+  set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
+  set("uiNoteOp","noteOp"); set("uiNoteExport","noteExport"); set("uiNoteRecipe","noteRecipe");
+  set("uiMCount","mCount"); set("uiMSize","mSize");
+  $("uiPrinciples").innerHTML = T(UI.principles);
+  for(const o of $("preset").options) o.textContent = T(UI.presets[o.value]);
+  $("langJa").setAttribute("aria-pressed", LANG==="ja");
+  $("langEn").setAttribute("aria-pressed", LANG==="en");
+  const keep=$("struct").value;
+  buildStructSelect(); $("struct").value=keep;
+  buildParams();
+  render();
+}
+function setLang(v){
+  if(v===LANG) return;
+  LANG=v;
+  try{ localStorage.setItem("patternlab.lang", v); }catch(e){}
+  applyLang();
+}
 let cur="polar", P={};
 
 function defaults(key){
   const o={}; for(const s of S[key].params) o[s.k]=s.d; return o;
 }
 function buildStructSelect(){
-  $("struct").innerHTML = ORDER.map(k=>'<option value="'+k+'">'+S[k].label+'</option>').join("");
+  $("struct").innerHTML = ORDER.map(k=>'<option value="'+k+'">'+T(S[k].label)+'</option>').join("");
   $("struct").value=cur;
 }
 function buildParams(){
@@ -686,15 +777,15 @@ function buildParams(){
   for(const s of S[cur].params){
     const lab=document.createElement("label");
     if(s.opts){
-      lab.innerHTML='<div class="row"><span class="name">'+s.l+'</span></div>';
+      lab.innerHTML='<div class="row"><span class="name">'+T(s.l)+'</span></div>';
       const sel=document.createElement("select");
-      sel.innerHTML=s.opts.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join("");
+      sel.innerHTML=s.opts.map(o=>'<option value="'+o[0]+'">'+T(o[1])+'</option>').join("");
       sel.value=P[s.k];
       sel.addEventListener("change",()=>{ P[s.k]=sel.value; render(); });
       lab.appendChild(sel);
     }else{
       const dec = s.step<0.01 ? 4 : (s.step<1 ? (String(s.step).split(".")[1]||"").length : 0);
-      lab.innerHTML='<div class="row"><span class="name">'+s.l+'</span>'
+      lab.innerHTML='<div class="row"><span class="name">'+T(s.l)+'</span>'
         +'<span class="val" id="v_'+s.k+'">'+Number(P[s.k]).toFixed(dec)+'</span></div>';
       const inp=document.createElement("input");
       inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=P[s.k];
@@ -707,8 +798,9 @@ function buildParams(){
     }
     box.appendChild(lab);
   }
-  $("structNote").textContent=S[cur].note;
-  $("doc").innerHTML=S[cur].doc;
+  $("structNote").textContent=T(S[cur].note);
+  $("doc").innerHTML=T(S[cur].doc);
+  $("params").setAttribute("data-empty", T(UI.noParams));
 }
 
 let timer=null, lastSVG="";
@@ -730,7 +822,7 @@ function normDims(){
 
 function render(){
   if(timer) clearTimeout(timer);
-  $("mBusy").innerHTML='<span class="busy">計算中…</span>';
+  $("mBusy").innerHTML='<span class="busy">'+T(UI.busy)+'</span>';
   timer=setTimeout(doRender,60);
 }
 /* 保留中の描画を今すぐ流す。書き出し前に呼ぶ */
@@ -744,15 +836,15 @@ function doRender(){
     const op=[parseFloat($("op0").value),parseFloat($("op1").value),parseFloat($("op2").value)];
     const bg=$("transparent").checked ? null : $("bg").value;
     let dots=[];
-    try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent="生成エラー: "+e.message; return; }
+    try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
     lastSVG=svgFromDots(W,H,dots,$("fg").value,op,bg);
     $("preview").innerHTML=lastSVG;
     $("mCount").textContent=dots.length.toLocaleString();
     $("mSize").textContent=W+" × "+H;
     $("mBytes").textContent=(lastSVG.length/1024).toFixed(0)+" KB";
     $("mBusy").innerHTML = (cur==="turing" && S.turing.lastMax!==undefined)
-      ? ("v の最大値 "+S.turing.lastMax.toExponential(2)
-         + (S.turing.lastMax<0.01 ? " — 反応が死んでいる。(F,K) と種を見直す" : ""))
+      ? (T(UI.vmax)+S.turing.lastMax.toExponential(2)
+         + (S.turing.lastMax<0.01 ? T(UI.dead) : ""))
       : "";
     $("recipe").value = cur+" / "+W+"×"+H+"\n"
       + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
@@ -817,15 +909,18 @@ $("dlsvg").addEventListener("click",()=>{
 });
 $("copysvg").addEventListener("click",async()=>{
   flush();
-  try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent="コピーした"; }
-  catch(e){ $("copysvg").textContent="コピー失敗"; }
-  setTimeout(()=>{$("copysvg").textContent="SVG をコピー";},1400);
+  try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent=T(UI.copied); }
+  catch(e){ $("copysvg").textContent=T(UI.copyFail); }
+  setTimeout(()=>{$("copysvg").textContent=T(UI.copy);},1400);
 });
 
 $("logo").innerHTML=logoSVG("PATTERN LAB");
+$("langJa").addEventListener("click",()=>setLang("ja"));
+$("langEn").addEventListener("click",()=>setLang("en"));
 
 if(!readHash()) P=defaults(cur);
-buildStructSelect(); $("struct").value=cur; buildParams(); render();
+buildStructSelect(); $("struct").value=cur;
+applyLang();
 </script>
 </body>
 </html>
