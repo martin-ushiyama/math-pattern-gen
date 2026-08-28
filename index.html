@@ -901,6 +901,7 @@ function doRender(){
       ? (T(UI.vmax)+S.turing.lastMax.toExponential(2)
          + (S.turing.lastMax<0.01 ? T(UI.dead) : ""))
       : "";
+    updateScaleOptions(W,H);
     $("recipe").value = cur+" / "+W+"×"+H+"\n"
       + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
 }
@@ -962,13 +963,35 @@ $("dlsvg").addEventListener("click",()=>{
   a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
+/* canvas には実装ごとの上限がある。超えると例外ではなくタブごと落ちる
+   ことがあるので、押せる前に潰しておく。1辺 8192px、総ピクセル 4000万。
+   （1200×630 なら ×4 まで可、4000×4000 なら ×1 まで） */
+const PNG_MAX_SIDE=8192, PNG_MAX_PX=40e6;
+function pngFits(W,H,sc){
+  return W*sc<=PNG_MAX_SIDE && H*sc<=PNG_MAX_SIDE && W*sc*H*sc<=PNG_MAX_PX;
+}
+/* 倍率の選択肢に実寸を出し、収まらないものを無効にする */
+function updateScaleOptions(W,H){
+  const sel=$("pngScale");
+  let best=null;
+  for(const o of sel.options){
+    const sc=parseInt(o.value), ok=pngFits(W,H,sc);
+    o.disabled=!ok;
+    o.textContent = "× "+sc+(ok ? "  "+(W*sc)+"×"+(H*sc) : "");
+    if(ok) best=o.value;
+  }
+  if(sel.selectedOptions[0] && sel.selectedOptions[0].disabled && best!=null) sel.value=best;
+}
+
 /* SVG を canvas に描いて PNG にする。
    外部リソースを一切参照していないので canvas が汚染されず toBlob が通る。
    地を透明にしていれば PNG もアルファ付きで出る。 */
 function exportPNG(){
   flush();
-  const scale=parseInt($("pngScale").value)||2;
-  const W=Math.round(parseInt($("cw").value)*scale), H=Math.round(parseInt($("ch").value)*scale);
+  const cw=parseInt($("cw").value), ch=parseInt($("ch").value);
+  let scale=parseInt($("pngScale").value)||2;
+  while(scale>1 && !pngFits(cw,ch,scale)) scale--;      // 念のため
+  const W=Math.round(cw*scale), H=Math.round(ch*scale);
   const btn=$("dlpng"), label=T(UI.savePng);
   btn.disabled=true; btn.textContent=T(UI.pngBusy);
   const done=(msg)=>{ btn.disabled=false; btn.textContent=msg||label;
