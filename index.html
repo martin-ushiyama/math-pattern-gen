@@ -1245,7 +1245,7 @@ const DRAG={
 };
 
 let lastGenMs=0;                     // 直近の生成にかかった時間。重い構造を見分ける
-let drag=null;
+let drag=null, lastDragDraw=0;
 
 function paramSpec(key){ return S[cur].params.find(x=>x.k===key); }
 function setParam(key,val){
@@ -1262,7 +1262,11 @@ function setParam(key,val){
 
 function dragEnabled(){ return !!DRAG[cur]; }
 function updateDragCursor(){
-  $("preview").style.cursor = dragEnabled() ? "grab" : "";
+  const on=dragEnabled();
+  $("preview").style.cursor = on ? "grab" : "";
+  // preventDefault だけではポインタイベントのジェスチャ交渉から
+  // 確実には降りられない。touch-action で明示する
+  $("preview").style.touchAction = on ? "none" : "";
 }
 
 $("preview").addEventListener("pointerdown",(e)=>{
@@ -1287,7 +1291,15 @@ $("preview").addEventListener("pointermove",(e)=>{
   setParam(drag.keys[0], drag.px+dx);
   setParam(drag.keys[1], drag.py+dy);
   if(drag.light){
-    render();
+    // render() は 60ms 遅延するので、動かし続けると毎回タイマーが
+    // 積み直されて一向に描かれない。デバウンスを迂回して直接描く。
+    // requestAnimationFrame は非表示タブで止まるので使わない
+    const now=performance.now();
+    if(now-lastDragDraw>16){
+      lastDragDraw=now;
+      if(timer){ clearTimeout(timer); timer=null; }
+      doRender();
+    }
   }else{
     // 重い構造はドラッグ中だけ見た目をずらしておき、離したときに作り直す
     const svg=$("preview").querySelector("svg");
@@ -1297,12 +1309,11 @@ $("preview").addEventListener("pointermove",(e)=>{
 
 function endDrag(e){
   if(!drag) return;
-  const wasLight=drag.light;
-  drag=null;
+  drag=null; lastDragDraw=0;
   const svg=$("preview").querySelector("svg");
   if(svg) svg.style.transform="";
   $("preview").style.cursor=dragEnabled()?"grab":"";
-  if(!wasLight) render();
+  render();   // 最後の位置を必ず描き切る（軽い構造でも取りこぼさない）
 }
 $("preview").addEventListener("pointerup",endDrag);
 $("preview").addEventListener("pointercancel",endDrag);
