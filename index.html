@@ -29,8 +29,7 @@ header .gh:hover{background:var(--card)}
 header .gh .star{font-size:12px;line-height:1}
 header .by a:hover{border-bottom-color:var(--ink)}
 .wrap{display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
-.main{min-width:0}
-.docs{padding:0 24px 60px}
+.docs{margin-top:22px}
 .panel{border-right:1px solid var(--line);padding:16px 18px 40px;min-height:calc(100vh - 52px)}
 .stage{padding:20px 24px 60px;min-width:0}
 fieldset{border:0;padding:0;margin:0 0 20px}
@@ -73,10 +72,8 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 @media (max-width:900px){
   /* 狭い画面ではパターンを先に出す。操作パネルはその下 */
   .wrap{grid-template-columns:1fr}
-  .main{display:contents}
   .stage{order:-1;padding:14px 16px 4px}
   .panel{order:0;min-height:0;border-right:0;border-top:1px solid var(--line);padding:14px 16px 26px}
-  .docs{order:1;padding:0 16px 48px}
   header{padding:12px 16px}
 }
 @media (max-width:620px){
@@ -90,6 +87,12 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
   header .gh{padding:3px 6px;font-size:11px;gap:4px}
   header .by{font-size:11px}
   .lang button{padding:4px 6px;font-size:10px;letter-spacing:.04em}
+}
+/* ── PC ── スライダーを触っている間もパターンを見えたままにする ──
+   grid item の sticky はグリッドエリア内で動くので、align-self:start と
+   組み合わせると左カラムの高さいっぱいまで追従する */
+@media (min-width:901px){
+  .stage{position:sticky;top:0;align-self:start}
 }
 </style>
 </head>
@@ -189,9 +192,13 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     <p class="note" id="uiNoteRecipe"></p>
   </fieldset>
 
+  <div class="docs">
+    <div id="doc" class="hint" style="background:#fff"></div>
+    <div class="hint" id="uiPrinciples"></div>
+  </div>
+
 </div>
 
-<div class="main">
 <div class="stage">
   <div class="preview" id="preview"></div>
   <div class="meta">
@@ -200,12 +207,6 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     <span>SVG <b id="mBytes">–</b></span>
     <span id="mBusy"></span>
   </div>
-</div>
-
-<div class="docs">
-  <div id="doc" class="hint" style="background:#fff"></div>
-  <div class="hint" id="uiPrinciples"></div>
-</div>
 </div>
 </div>
 
