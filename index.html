@@ -965,7 +965,7 @@ function buildParams(){
   $("params").setAttribute("data-empty", T(UI.noParams));
 }
 
-let timer=null, lastSVG="";
+let timer=null, lastSVG="", hashPalette=null;
 
 /* 幅高さを宣言どおりの範囲に丸め、コントロールにも書き戻す。
    丸めないと、ハッシュやファイル名が実際の書き出しと食い違い、
@@ -997,7 +997,8 @@ function doRender(){
     writeHash();
     const op=[parseFloat($("op0").value),parseFloat($("op1").value),parseFloat($("op2").value)];
     const bg=$("transparent").checked ? null : currentPaint("bg");
-    const deg=parseInt($("angle").value)||90;
+    const a=parseInt($("angle").value);
+    const deg=isFinite(a)?a:90;   // 0度は有効な値なので || で潰さない
     let dots=[];
     try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
     lastSVG=svgFromDots(W,H,dots,currentPaint("fg"),op,bg,deg);
@@ -1039,7 +1040,8 @@ function readHash(){
     if(o.f2) $("fg2").value=o.f2;
     if(o.b2) $("bg2").value=o.b2;
     $("fgGrad").checked=!!o.fG; $("bgGrad").checked=!!o.bG;
-    if(o.ang){ $("angle").value=o.ang; $("v_angle").textContent=o.ang; }
+    if(o.ang!=null){ $("angle").value=o.ang; $("v_angle").textContent=o.ang; }
+    hashPalette = o.pal || null;
     $("transparent").checked=!!o.t;
     syncPaintUI();
     if(o.op){ $("op0").value=o.op[0]; $("op1").value=o.op[1]; $("op2").value=o.op[2]; }
@@ -1070,7 +1072,8 @@ $("palette").addEventListener("change",()=>{
 for(const id of ["fgGrad","bgGrad"]){
   $(id).addEventListener("change",()=>{ syncPaintUI(); $("palette").value="custom"; render(); });
 }
-$("angle").addEventListener("input",()=>{ $("v_angle").textContent=$("angle").value; render(); });
+$("angle").addEventListener("input",()=>{
+  $("v_angle").textContent=$("angle").value; $("palette").value="custom"; render(); });
 for(const id of ["fg","fg2","bg","bg2"]){
   $(id).addEventListener("input",()=>{ $("palette").value="custom"; render(); });
 }
@@ -1198,7 +1201,9 @@ $("langEn").addEventListener("click",()=>setLang("en"));
 
 buildPaletteSelect();
 if(readHash()){
-  if($("palette").value==="custom" || PALETTES.some(x=>x.id===$("palette").value)){}
+  // 色そのものはハッシュから戻っているので、名前だけ合わせる
+  const pal=hashPalette;
+  $("palette").value = (pal==="custom"||PALETTES.some(x=>x.id===pal)) ? pal : "custom";
 }else{
   P=defaults(cur);
   applyPalette("ink");
