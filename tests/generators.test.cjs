@@ -16,6 +16,10 @@ test('every structure has a concise generating rule',()=>{
   assert.equal(formulaFor('conformal',{fn:'jouk'}),'w = z + 1/z');
   assert.deepEqual(new Set([...Object.keys(FORMULAS),'conformal']),new Set(ORDER));
 });
+test('palette names do not retain the former Funho branding',()=>{
+  const pink=loadCore().PALETTES.find(p=>p.id==='pink');
+  assert.deepEqual(JSON.parse(JSON.stringify(pink.name)),{ja:'ピンク',en:'Pink'});
+});
 for(const id of ['truchet','voronoi']){
   test(id+': every parameter boundary and wide/tall canvases',()=>{
     for(const spec of S[id].params){for(const value of spec.opts?spec.opts.map(o=>o[0]):[spec.min,spec.max])valid(S[id].gen({...defaults(S,id),[spec.k]:value},480,320));}
