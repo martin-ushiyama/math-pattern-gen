@@ -1103,7 +1103,8 @@ $("reset").addEventListener("click",()=>{ P=defaults(cur); buildParams(); render
 $("shuffle").addEventListener("click",()=>{
   for(const s of S[cur].params){
     if(s.opts){ P[s.k]=s.opts[Math.floor(Math.random()*s.opts.length)][0]; continue; }
-    if(/^(GW|GH|IT|Nu|Nv|rows|cols|Na|Nb|step)$/.test(s.k)) continue;   // 重さに効くものは振らない
+    // 重さに効くもの・位置は振らない（位置を振ると有限な模様が画面外へ出て真っ白になる）
+    if(/^(GW|GH|IT|Nu|Nv|rows|cols|Na|Nb|step|ox|oy)$/.test(s.k)) continue;
     const v=s.min+Math.random()*(s.max-s.min);
     P[s.k]= s.step>=1 ? Math.round(v/s.step)*s.step : parseFloat(v.toFixed(4));
   }
@@ -1310,10 +1311,18 @@ $("preview").addEventListener("pointermove",(e)=>{
     }
   }else{
     // 重い構造はドラッグ中だけ見た目をずらしておき、離したときに作り直す。
-    // 動かすのはドットのパスだけ。SVG ごと動かすと地とグラデまで動いて、
-    // 端に市松が見え、離した瞬間に飛ぶ（確定後は模様しか動かないため）
-    const t="translate("+(dx/drag.scale)+"px,"+(dy/drag.scale)+"px)";
+    // 動かすのはドットのパスだけ。SVG ごと動かすと地とグラデまで動く。
+    // ずらす量はポインタの生の差分ではなく、実際に反映された値から出す。
+    // そうしないと端で頭打ちになったあとも動き続け、離した瞬間に戻る
+    const ax=(P[drag.keys[0]]-drag.px)/drag.scale;
+    const ay=(P[drag.keys[1]]-drag.py)/drag.scale;
+    const t="translate("+ax+"px,"+ay+"px)";
     for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform=t;
+    // パスを動かすと、その user space に乗っているグラデーションも一緒に動く。
+    // 逆向きの gradientTransform で画面座標に留める
+    const fg=$("preview").querySelector('linearGradient[id^="fg-"]');
+    if(fg) fg.setAttribute("gradientTransform",
+      "translate("+(-ax*drag.scale)+","+(-ay*drag.scale)+")");
   }
 });
 
@@ -1321,6 +1330,8 @@ function endDrag(e){
   if(!drag || (e && e.pointerId!==drag.id)) return;
   drag=null; lastDragDraw=0;
   for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform="";
+  const fgG=$("preview").querySelector('linearGradient[id^="fg-"]');
+  if(fgG) fgG.removeAttribute("gradientTransform");
   $("preview").style.cursor=dragEnabled()?"grab":"";
   render();   // 最後の位置を必ず描き切る（軽い構造でも取りこぼさない）
 }
