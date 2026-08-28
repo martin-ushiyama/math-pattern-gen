@@ -963,12 +963,49 @@ $("dlsvg").addEventListener("click",()=>{
   a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
-/* canvas には実装ごとの上限がある。超えると例外ではなくタブごと落ちる
-   ことがあるので、押せる前に潰しておく。1辺 8192px、総ピクセル 4000万。
-   （1200×630 なら ×4 まで可、4000×4000 なら ×1 まで） */
-const PNG_MAX_SIDE=8192, PNG_MAX_PX=40e6;
+/* canvas の上限は実装ごとに違う。iOS Safari は面積 16,777,216px で
+   頭打ちだが、デスクトップの Chrome はその十数倍まで通る。固定値を
+   書くとどちらかで外れるので、実際に確保できるかを測る。
+
+   絶対に試さない上限だけ決めておき（暴走した確保を防ぐ）、その中では
+   実測に任せる。 */
+const PNG_HARD_SIDE=16384, PNG_HARD_PX=2.7e8;
+let PNG_MAX_PX_MEASURED=null;
+
+/* 確保して隅に印を書き、読み戻せるかで判定する。
+   上限を超えた canvas は例外を投げるか、描いても中身が入らない。 */
+function canvasWorks(W,H){
+  if(W>PNG_HARD_SIDE||H>PNG_HARD_SIDE||W*H>PNG_HARD_PX) return false;
+  let c=null;
+  try{
+    c=document.createElement("canvas"); c.width=W; c.height=H;
+    if(c.width!==W||c.height!==H) return false;
+    const x=c.getContext("2d"); if(!x) return false;
+    x.fillStyle="#010203"; x.fillRect(W-1,H-1,1,1);
+    const d=x.getImageData(W-1,H-1,1,1).data;
+    return d[0]===1&&d[1]===2&&d[2]===3;
+  }catch(e){ return false; }
+  finally{ if(c){ c.width=0; c.height=0; } }   // すぐ解放する
+}
+
+/* 実際に通る面積を一度だけ測って覚える。小さい方から試すので、
+   測定そのものが重い確保にならない。 */
+function pngCapacity(){
+  if(PNG_MAX_PX_MEASURED!=null) return PNG_MAX_PX_MEASURED;
+  const steps=[4e6, 16.7e6, 40e6, 8e7, 1.4e8, 2.7e8];
+  let ok=4e6;
+  for(const px of steps){
+    const side=Math.floor(Math.sqrt(px));
+    if(!canvasWorks(side,side)) break;
+    ok=px;
+  }
+  PNG_MAX_PX_MEASURED=ok;
+  return ok;
+}
+
 function pngFits(W,H,sc){
-  return W*sc<=PNG_MAX_SIDE && H*sc<=PNG_MAX_SIDE && W*sc*H*sc<=PNG_MAX_PX;
+  const w=W*sc, h=H*sc;
+  return w<=PNG_HARD_SIDE && h<=PNG_HARD_SIDE && w*h<=pngCapacity();
 }
 /* 倍率の選択肢に実寸を出し、収まらないものを無効にする */
 function updateScaleOptions(W,H){
@@ -990,7 +1027,8 @@ function exportPNG(){
   flush();
   const cw=parseInt($("cw").value), ch=parseInt($("ch").value);
   let scale=parseInt($("pngScale").value)||2;
-  while(scale>1 && !pngFits(cw,ch,scale)) scale--;      // 念のため
+  // 測定は目安なので、実際に使うサイズでも確保できるか確かめて落とす
+  while(scale>1 && !(pngFits(cw,ch,scale) && canvasWorks(cw*scale,ch*scale))) scale--;
   const W=Math.round(cw*scale), H=Math.round(ch*scale);
   const btn=$("dlpng"), label=T(UI.savePng);
   btn.disabled=true; btn.textContent=T(UI.pngBusy);
