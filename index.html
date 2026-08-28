@@ -1309,17 +1309,18 @@ $("preview").addEventListener("pointermove",(e)=>{
       doRender();
     }
   }else{
-    // 重い構造はドラッグ中だけ見た目をずらしておき、離したときに作り直す
-    const svg=$("preview").querySelector("svg");
-    if(svg) svg.style.transform="translate("+(dx/drag.scale)+"px,"+(dy/drag.scale)+"px)";
+    // 重い構造はドラッグ中だけ見た目をずらしておき、離したときに作り直す。
+    // 動かすのはドットのパスだけ。SVG ごと動かすと地とグラデまで動いて、
+    // 端に市松が見え、離した瞬間に飛ぶ（確定後は模様しか動かないため）
+    const t="translate("+(dx/drag.scale)+"px,"+(dy/drag.scale)+"px)";
+    for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform=t;
   }
 });
 
 function endDrag(e){
   if(!drag || (e && e.pointerId!==drag.id)) return;
   drag=null; lastDragDraw=0;
-  const svg=$("preview").querySelector("svg");
-  if(svg) svg.style.transform="";
+  for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform="";
   $("preview").style.cursor=dragEnabled()?"grab":"";
   render();   // 最後の位置を必ず描き切る（軽い構造でも取りこぼさない）
 }
