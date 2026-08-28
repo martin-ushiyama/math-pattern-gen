@@ -1283,15 +1283,15 @@ $("preview").addEventListener("pointerdown",(e)=>{
   const keys=DRAG[cur];
   const sx=paramSpec(keys[0]), sy=paramSpec(keys[1]);
   if(!sx||!sy) return;
+  // 保留中の描画があると、P は新しい値なのに表示は古い絵のままになる。
+  // 捨てると基準がずれるので、先に流し切ってから掴む
+  flush();
   const rect=$("preview").getBoundingClientRect();
   const W=parseInt($("cw").value)||1200;
   drag={ id:e.pointerId, keys, x0:e.clientX, y0:e.clientY,
          px:P[keys[0]], py:P[keys[1]],
          scale: W/Math.max(1,rect.width),   // 表示は縮んでいるのでキャンバス座標へ直す
          light: lastDrawMs<40 };            // 軽い構造は即時、重い構造は離してから
-  // 直前の操作で仕込まれた描画が残っていると、ドラッグ開始後に
-  // 更新済みの値で描き直され、そこへさらに平行移動が乗って二重にずれる
-  if(timer){ clearTimeout(timer); timer=null; }
   $("preview").setPointerCapture(e.pointerId);
   $("preview").style.cursor="grabbing";
   e.preventDefault();
@@ -1332,11 +1332,14 @@ $("preview").addEventListener("pointermove",(e)=>{
 function endDrag(e){
   if(!drag || (e && e.pointerId!==drag.id)) return;
   drag=null; lastDragDraw=0;
+  $("preview").style.cursor=dragEnabled()?"grab":"";
+  // 平行移動を先に外すと、描き直すまでの間だけ元の位置が見えて瞬く。
+  // 先に描き直し、そのあとで（新しい SVG に対して）transform を消す
+  if(timer){ clearTimeout(timer); timer=null; }
+  doRender();
   for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform="";
   const fgG=$("preview").querySelector('linearGradient[id^="fg-"]');
   if(fgG) fgG.removeAttribute("gradientTransform");
-  $("preview").style.cursor=dragEnabled()?"grab":"";
-  render();   // 最後の位置を必ず描き切る（軽い構造でも取りこぼさない）
 }
 $("preview").addEventListener("pointerup",endDrag);
 $("preview").addEventListener("pointercancel",endDrag);
