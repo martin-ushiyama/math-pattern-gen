@@ -160,9 +160,9 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     </label>
     <div class="grid2">
       <label><span class="name" id="uiFg"></span>
-        <span class="pair"><input type="color" id="fg" value="#1b1b26"><input type="color" id="fg2" value="#1b1b26"></span></label>
+        <span class="pair"><input type="color" id="fg" value="#1644dd"><input type="color" id="fg2" value="#1644dd"></span></label>
       <label><span class="name" id="uiBg"></span>
-        <span class="pair"><input type="color" id="bg" value="#f4f4f5"><input type="color" id="bg2" value="#f4f4f5"></span></label>
+        <span class="pair"><input type="color" id="bg" value="#f3eedf"><input type="color" id="bg2" value="#f3eedf"></span></label>
     </div>
     <div class="grid2">
       <label class="row"><input type="checkbox" id="fgGrad" style="width:auto;accent-color:var(--accent)"><span class="name" id="uiFgGrad"></span></label>
@@ -792,7 +792,10 @@ S.turing = {
 /* 配色プリセット。単色は文字列、グラデーションは [開始, 終了]。
    地のグラデーションは「ごく近い2色」に寄せてある。模様が主役なので、
    地が主張すると喧嘩する。ドット側は移動が見えるので少し振ってよい。 */
+const DEFAULT_PALETTE="cobalt-cream";
 const PALETTES=[
+ {id:"cobalt-cream", name:{ja:"コバルト＆クリーム", en:"Cobalt & cream"},
+  fg:"#1644DD", bg:"#F3EEDF", deg:90},
  {id:"ink",     name:{ja:"墨",              en:"Ink"},
   fg:"#1B1B26", bg:"#F4F4F5", deg:90},
  {id:"paper",   name:{ja:"インク＆ペーパー", en:"Ink & paper"},
@@ -1362,7 +1365,8 @@ if(readHash()){
   $("palette").value = (pal==="custom"||PALETTES.some(x=>x.id===pal)) ? pal : "custom";
 }else{
   P=defaults(cur);
-  applyPalette("ink");
+  $("palette").value=DEFAULT_PALETTE;
+  applyPalette(DEFAULT_PALETTE);
 }
 syncPaintUI();
 buildStructSelect(); $("struct").value=cur;
