@@ -430,7 +430,9 @@ S.cloth = {
     {k:"ly",  l:{ja:"光 y",en:"Light y"},          min:-1, max:1,   step:0.05,d:0.42},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},      min:0.2,max:3,   step:0.05,d:0.5},
     {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},      min:1,  max:8,   step:0.1, d:3.4},
-    {k:"gamma",l:{ja:"陰影のカーブ",en:"Shading curve"}, min:0.4,max:3,   step:0.05,d:1.6}
+    {k:"gamma",l:{ja:"陰影のカーブ",en:"Shading curve"}, min:0.4,max:3,   step:0.05,d:1.6},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const h=(u,v)=>{
@@ -453,7 +455,7 @@ S.cloth = {
         const hu=(h(u1,v)-h(u0,v))/((u1-u0)*p.Lx), hv=(h(u,v1)-h(u,v0))/((v1-v0)*p.Lz);
         let nx=-hu, ny=-hv, nz=1; const nl=Math.hypot(nx,ny,nz)||1; nx/=nl; ny/=nl; nz/=nl;
         const lam=Math.max(0, nx*Lx_+ny*Ly_+nz*Lz_);
-        const sx=W/2+X, sy=H/2+(Y*sa-Z*ca);
+        const sx=W/2+p.ox+X, sy=H/2+p.oy+(Y*sa-Z*ca);
         if(sx<-25||sx>W+25||sy<-25||sy>H+25) continue;
         out.push({x:sx, y:sy, r:p.rmin+(p.rmax-p.rmin)*Math.pow(0.18+0.82*lam, p.gamma)});
       }}
@@ -532,7 +534,9 @@ S.contour = {
     {k:"skew",l:{ja:"断面の非対称",en:"Profile skew"}, min:0.2,max:2,   step:0.02,d:0.62},
     {k:"width",l:{ja:"帯の細さ",en:"Band thinness"},    min:0.6,max:5,   step:0.1, d:2.0},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},     min:0.2,max:3,   step:0.05,d:0.28},
-    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},     min:1,  max:8,   step:0.1, d:2.85}
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},     min:1,  max:8,   step:0.1, d:2.85},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[];
@@ -541,7 +545,8 @@ S.contour = {
            + p.a2*Math.sin(p.f2v*v+p.f2u*u+2.1)
            + p.a3*Math.sin(p.f3u*u+p.f3v*v-1.2); };
     for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
-      const f=surf(x,y)*p.gain + (p.tx*x + p.ty*y);
+      const xs=x-p.ox, ys=y-p.oy;                 // 場だけずらす
+      const f=surf(xs,ys)*p.gain + (p.tx*xs + p.ty*ys);
       const ph=f-Math.floor(f);
       const prof=Math.pow(Math.sin(Math.PI*Math.pow(ph, p.skew)), p.width);
       const r=p.rmin+(p.rmax-p.rmin)*prof;
@@ -562,12 +567,15 @@ S.moire = {
     {k:"ang", l:{ja:"角度（度）",en:"Angle (deg)"},   min:0,  max:30, step:0.1, d:7.5},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},     min:0.2,max:3,  step:0.05,d:0.5},
     {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},     min:1,  max:9,  step:0.1, d:5.1},
-    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"},   min:0.4,max:3,  step:0.05,d:1.5}
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"},   min:0.4,max:3,  step:0.05,d:1.5},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[], a=p.ang*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a);
     for(let y=-20; y<H+20; y+=p.p1){ for(let x=-20; x<W+20; x+=p.p1){
-      const rx=(x-W/2)*ca+(y-H/2)*sa, ry=-(x-W/2)*sa+(y-H/2)*ca;
+      const dx=x-W/2-p.ox, dy=y-H/2-p.oy;
+      const rx=dx*ca+dy*sa, ry=-dx*sa+dy*ca;
       const fx=rx/p.p2-Math.round(rx/p.p2), fy=ry/p.p2-Math.round(ry/p.p2);
       const d=Math.hypot(fx,fy)/0.7071;
       const m=Math.max(0,1-d);
@@ -590,7 +598,9 @@ S.quasi = {
     {k:"span",l:{ja:"レンジ",en:"Range"},     min:0.4,max:2.5, step:0.05,d:1.3},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.4},
     {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:4.8},
-    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:4,   step:0.05,d:2.2}
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:4,   step:0.05,d:2.2},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[], N=Math.round(p.N), ph=[];
@@ -598,7 +608,7 @@ S.quasi = {
     for(let y=0; y<H; y+=p.step){ for(let x=0; x<W; x+=p.step){
       let s=0;
       for(let j=0;j<N;j++){ const a=Math.PI*2*j/N;
-        s+=Math.cos(p.k*((x-W*0.47)*Math.cos(a)+(y-H*0.48)*Math.sin(a))+ph[j]); }
+        s+=Math.cos(p.k*((x-W*0.47-p.ox)*Math.cos(a)+(y-H*0.48-p.oy)*Math.sin(a))+ph[j]); }
       const m=clamp01((s+N*p.bias)/(N*p.span));
       const r=p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow);
       if(r>0.55) out.push({x,y,r});
@@ -621,15 +631,17 @@ S.gibbs = {
     {k:"amp", l:{ja:"振幅",en:"Amplitude"},       min:5,  max:150, step:1,  d:46},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.5},
     {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.4},
-    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.3}
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.3},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
     for(let j=0;j<=rows;j++){
-      const v=j/rows, N=1+Math.round(Math.pow(v,p.npow)*p.Nmax), y0=-H*0.06+v*H*1.13;
+      const v=j/rows, N=1+Math.round(Math.pow(v,p.npow)*p.Nmax), y0=-H*0.06+v*H*1.13+p.oy;
       for(let i=0;i<=cols;i++){
         const x=-W*0.03+i/cols*W*1.06;
-        let s=0; for(let n=1;n<=N;n+=2) s+=Math.sin(n*(x*p.kx))/n;
+        let s=0; for(let n=1;n<=N;n+=2) s+=Math.sin(n*((x-p.ox)*p.kx))/n;
         s*=4/Math.PI;
         const y=y0+s*p.amp;
         if(x<-25||x>W+25||y<-25||y>H+25) continue;
@@ -658,7 +670,9 @@ S.twist = {
     {k:"shear",l:{ja:"せん断",en:"Shear"},    min:0,  max:1,   step:0.02,d:0.42},
     {k:"con", l:{ja:"コントラスト",en:"Contrast"},min:0.2,max:2.5,step:0.05,d:1.4},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.4},
-    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.6}
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.6},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
@@ -670,7 +684,7 @@ S.twist = {
       for(let i=0;i<=cols;i++){
         const u=i/cols;
         const lx=(u-0.5)*p.spanx*s, ly=(v-0.5)*p.spany;
-        const x=W/2+lx*ca-ly*sa*0.28, y=H/2+lx*sa*p.shear+ly;
+        const x=W/2+p.ox+lx*ca-ly*sa*0.28, y=H/2+p.oy+lx*sa*p.shear+ly;
         if(x<-20||x>W+20||y<-20||y>H+20) continue;
         const dens=Math.abs(ca)*s;
         const m=clamp01((1.15-dens*0.62)*p.con);
@@ -697,7 +711,9 @@ S.caustics = {
     {k:"floor",l:{ja:"下駄",en:"Floor"},      min:0.01,max:1,  step:0.01,d:0.10},
     {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},   min:0.2,max:3,   step:0.05,d:0.35},
     {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},   min:1,  max:8,   step:0.1, d:3.65},
-    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.5}
+    {k:"pow", l:{ja:"階調カーブ",en:"Tone curve"}, min:0.4,max:3,   step:0.05,d:1.5},
+    {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
+    {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
   gen(p,W,H){
     const out=[];
@@ -708,7 +724,7 @@ S.caustics = {
       return Math.abs(fxx*fyy-fxy*fyx);
     };
     for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
-      const m=clamp01(p.gain/(J(x,y)+p.floor));
+      const m=clamp01(p.gain/(J(x-p.ox,y-p.oy)+p.floor));
       const r=p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow);
       if(r>0.5) out.push({x,y,r});
     }}
@@ -971,7 +987,8 @@ function buildParams(){
       lab.innerHTML='<div class="row"><span class="name">'+T(s.l)+'</span>'
         +'<span class="val" id="v_'+s.k+'">'+Number(P[s.k]).toFixed(dec)+'</span></div>';
       const inp=document.createElement("input");
-      inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=P[s.k];
+      inp.type="range"; inp.id="p_"+s.k;
+      inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=P[s.k];
       inp.addEventListener("input",()=>{
         P[s.k]=parseFloat(inp.value);
         $("v_"+s.k).textContent=Number(P[s.k]).toFixed(dec);
@@ -984,6 +1001,7 @@ function buildParams(){
   $("structNote").textContent=T(S[cur].note);
   $("doc").innerHTML=T(S[cur].doc);
   $("params").setAttribute("data-empty", T(UI.noParams));
+  updateDragCursor();
 }
 
 let timer=null, lastSVG="", hashPalette=null;
@@ -1021,9 +1039,13 @@ function doRender(){
     const a=parseInt($("angle").value);
     const deg=isFinite(a)?a:90;   // 0度は有効な値なので || で潰さない
     let dots=[];
+    const t0=performance.now();
     try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
     lastSVG=svgFromDots(W,H,dots,currentPaint("fg"),op,bg,deg);
     $("preview").innerHTML=lastSVG;
+    // 生成だけでなく、文字列の組み立てと DOM への反映まで含めて測る。
+    // 密なパターンはここが支配的で、生成だけ見ると「軽い」と誤判定する
+    lastDrawMs=performance.now()-t0;
     $("mCount").textContent=dots.length.toLocaleString();
     $("mSize").textContent=W+" × "+H;
     $("mBytes").textContent=(lastSVG.length/1024).toFixed(0)+" KB";
@@ -1045,6 +1067,10 @@ function syncPreset(){
 
 /* URL ハッシュに状態を持つ */
 function writeHash(){
+  // ドラッグ中は書かない。Safari は replaceState の呼び出し頻度に制限があり、
+  // 毎フレーム呼ぶと数秒で SecurityError を投げて描画ごと止まる。
+  // 離したときに endDrag から render() が走るので、そこで書かれる
+  if(drag) return;
   const o={s:cur,w:$("cw").value,h:$("ch").value,fg:$("fg").value,bg:$("bg").value,
     f2:$("fg2").value,b2:$("bg2").value,fG:$("fgGrad").checked?1:0,bG:$("bgGrad").checked?1:0,
     ang:$("angle").value,pal:$("palette").value,
@@ -1077,7 +1103,8 @@ $("reset").addEventListener("click",()=>{ P=defaults(cur); buildParams(); render
 $("shuffle").addEventListener("click",()=>{
   for(const s of S[cur].params){
     if(s.opts){ P[s.k]=s.opts[Math.floor(Math.random()*s.opts.length)][0]; continue; }
-    if(/^(GW|GH|IT|Nu|Nv|rows|cols|Na|Nb|step)$/.test(s.k)) continue;   // 重さに効くものは振らない
+    // 重さに効くもの・位置は振らない（位置を振ると有限な模様が画面外へ出て真っ白になる）
+    if(/^(GW|GH|IT|Nu|Nv|rows|cols|Na|Nb|step|ox|oy)$/.test(s.k)) continue;
     const v=s.min+Math.random()*(s.max-s.min);
     P[s.k]= s.step>=1 ? Math.round(v/s.step)*s.step : parseFloat(v.toFixed(4));
   }
@@ -1210,6 +1237,112 @@ function exportPNG(){
   img.src=url;
 }
 $("dlpng").addEventListener("click",exportPNG);
+
+/* ── 図をドラッグして動かす ────────────────────────────
+   構造ごとに「位置」を持つパラメータが違うので対応表を持つ。
+   反応拡散だけは格子上で反復するため、ずらすには配列を回すことに
+   なって重い。ここは対象外にする。
+
+   グラデーションは userSpaceOnUse で画面座標に固定してあるので、
+   模様だけ動いてグラデは止まったままになる。 */
+const DRAG={
+  polar:["cx","cy"], conformal:["cx","cy"], ribbon:["x0","y0"],
+  cloth:["ox","oy"], twist:["ox","oy"], quasi:["ox","oy"],
+  contour:["ox","oy"], moire:["ox","oy"], gibbs:["ox","oy"], caustics:["ox","oy"]
+};
+
+let lastDrawMs=0;                    // 直近の描画にかかった時間。重い構造を見分ける
+let drag=null, lastDragDraw=0;
+
+function paramSpec(key){ return S[cur].params.find(x=>x.k===key); }
+function setParam(key,val){
+  const sp=paramSpec(key); if(!sp) return;
+  const v=Math.max(sp.min, Math.min(sp.max, Math.round(val/sp.step)*sp.step));
+  P[key]=v;
+  const inp=$("p_"+key), lab=$("v_"+key);
+  if(inp) inp.value=v;
+  if(lab){
+    const dec = sp.step<0.01 ? 4 : (sp.step<1 ? (String(sp.step).split(".")[1]||"").length : 0);
+    lab.textContent=Number(v).toFixed(dec);
+  }
+}
+
+function dragEnabled(){ return !!DRAG[cur]; }
+function updateDragCursor(){
+  const on=dragEnabled();
+  $("preview").style.cursor = on ? "grab" : "";
+  // preventDefault だけではポインタイベントのジェスチャ交渉から
+  // 確実には降りられない。touch-action で明示する
+  $("preview").style.touchAction = on ? "none" : "";
+}
+
+$("preview").addEventListener("pointerdown",(e)=>{
+  if(!dragEnabled()) return;
+  if(drag) return;                       // 既に掴んでいるなら2本目は無視
+  if(e.pointerType==="mouse" && e.button!==0) return;   // 左ボタン以外は拾わない
+  const keys=DRAG[cur];
+  const sx=paramSpec(keys[0]), sy=paramSpec(keys[1]);
+  if(!sx||!sy) return;
+  // 保留中の描画があると、P は新しい値なのに表示は古い絵のままになる。
+  // 捨てると基準がずれるので、先に流し切ってから掴む
+  flush();
+  const rect=$("preview").getBoundingClientRect();
+  const W=parseInt($("cw").value)||1200;
+  drag={ id:e.pointerId, keys, x0:e.clientX, y0:e.clientY,
+         px:P[keys[0]], py:P[keys[1]],
+         scale: W/Math.max(1,rect.width),   // 表示は縮んでいるのでキャンバス座標へ直す
+         light: lastDrawMs<40 };            // 軽い構造は即時、重い構造は離してから
+  $("preview").setPointerCapture(e.pointerId);
+  $("preview").style.cursor="grabbing";
+  e.preventDefault();
+});
+
+$("preview").addEventListener("pointermove",(e)=>{
+  if(!drag || e.pointerId!==drag.id) return;
+  const dx=(e.clientX-drag.x0)*drag.scale, dy=(e.clientY-drag.y0)*drag.scale;
+  setParam(drag.keys[0], drag.px+dx);
+  setParam(drag.keys[1], drag.py+dy);
+  if(drag.light){
+    // render() は 60ms 遅延するので、動かし続けると毎回タイマーが
+    // 積み直されて一向に描かれない。デバウンスを迂回して直接描く。
+    // requestAnimationFrame は非表示タブで止まるので使わない
+    const now=performance.now();
+    if(now-lastDragDraw>16){
+      lastDragDraw=now;
+      if(timer){ clearTimeout(timer); timer=null; }
+      doRender();
+    }
+  }else{
+    // 重い構造はドラッグ中だけ見た目をずらしておき、離したときに作り直す。
+    // 動かすのはドットのパスだけ。SVG ごと動かすと地とグラデまで動く。
+    // ずらす量はポインタの生の差分ではなく、実際に反映された値から出す。
+    // そうしないと端で頭打ちになったあとも動き続け、離した瞬間に戻る
+    // SVG の中の要素に当てる CSS transform は user unit（viewBox 座標）で
+    // 解釈される。表示が縮んでいても割ってはいけない
+    const ax=P[drag.keys[0]]-drag.px, ay=P[drag.keys[1]]-drag.py;
+    const t="translate("+ax+"px,"+ay+"px)";
+    for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform=t;
+    // パスを動かすと、その user space に乗っているグラデーションも一緒に動く。
+    // 同じ座標系なので、そのまま逆向きに戻す
+    const fg=$("preview").querySelector('linearGradient[id^="fg-"]');
+    if(fg) fg.setAttribute("gradientTransform","translate("+(-ax)+","+(-ay)+")");
+  }
+});
+
+function endDrag(e){
+  if(!drag || (e && e.pointerId!==drag.id)) return;
+  drag=null; lastDragDraw=0;
+  $("preview").style.cursor=dragEnabled()?"grab":"";
+  // 平行移動を先に外すと、描き直すまでの間だけ元の位置が見えて瞬く。
+  // 先に描き直し、そのあとで（新しい SVG に対して）transform を消す
+  if(timer){ clearTimeout(timer); timer=null; }
+  doRender();
+  for(const path of $("preview").querySelectorAll("svg > path")) path.style.transform="";
+  const fgG=$("preview").querySelector('linearGradient[id^="fg-"]');
+  if(fgG) fgG.removeAttribute("gradientTransform");
+}
+$("preview").addEventListener("pointerup",endDrag);
+$("preview").addEventListener("pointercancel",endDrag);
 
 $("copysvg").addEventListener("click",async()=>{
   flush();
