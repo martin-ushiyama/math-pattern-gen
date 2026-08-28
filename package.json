@@ -1,0 +1,11 @@
+{
+  "name": "math-pattern-gen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build-time tools only; the app runs as standalone HTML.",
+  "scripts": {
+    "build:gallery": "node scripts/build-gallery.cjs",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": { "sharp": "0.35.4" }
+}

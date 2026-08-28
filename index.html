@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Math Pattern Gen — 数学から、模様が生まれる。</title>
-<meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
+<meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。13種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
 <link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Math Pattern Gen">
 <meta property="og:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
-<meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
+<meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。13種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
 <meta property="og:url" content="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@mrtn">
 <meta name="twitter:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
-<meta name="twitter:description" content="11種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
+<meta name="twitter:description" content="13種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
 <meta name="twitter:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
 <meta name="twitter:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
 <link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
@@ -153,6 +153,9 @@ legend{border:0;font-size:11px;font-weight:600;letter-spacing:.06em;padding:0;ma
 .control-tabs button[aria-selected="true"]::after{content:"";height:2px;background:var(--ink);position:absolute;bottom:-1px;left:16px;right:16px}
 .control-pane{overflow:auto;min-height:0;padding:24px 4px 28px 0;scrollbar-width:thin;scrollbar-color:#d4d7cd transparent}
 .control-pane[hidden]{display:none}
+.structure-legend{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.browse-structures{font-size:11px;font-weight:400;letter-spacing:0;color:var(--ink);text-decoration:none;border-bottom:1px solid #c7cbc0;padding-bottom:2px;white-space:nowrap}
+.browse-structures:hover{color:#1644dd;border-color:#1644dd}
 #pane-shape > fieldset > legend,#pane-color > fieldset > legend{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
 label{margin-bottom:15px}
 .row .name{font-size:11px;letter-spacing:.02em}
@@ -209,9 +212,9 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
 </header>
 
 <div class="wrap">
-<div class="panel">  <fieldset>
-    <legend id="uiLegStruct"></legend>
-    <select id="struct"></select>
+<div class="panel">  <fieldset aria-labelledby="uiLegStruct">
+    <legend class="structure-legend"><span id="uiLegStruct"></span><a class="browse-structures" id="browseStructures" href="structures.html"></a></legend>
+    <select id="struct" aria-labelledby="uiLegStruct"></select>
     <p class="note" id="structNote"></p>
   </fieldset><div class="control-tabs" role="tablist" aria-label="Controls"><button type="button" role="tab" id="tab-shape" aria-controls="pane-shape" aria-selected="true" tabindex="0"></button><button type="button" role="tab" id="tab-color" aria-controls="pane-color" aria-selected="false" tabindex="-1"></button><button type="button" role="tab" id="tab-export" aria-controls="pane-export" aria-selected="false" tabindex="-1"></button></div><div id="pane-shape" class="control-pane" role="tabpanel" aria-labelledby="tab-shape" tabindex="0" >  <fieldset>
     <legend id="uiLegParams"></legend>
@@ -887,6 +890,90 @@ S.turing = {
    地のグラデーションは「ごく近い2色」に寄せてある。模様が主役なので、
    地が主張すると喧嘩する。ドット側は移動が見えるので少し振ってよい。 */
 const DEFAULT_PALETTE="cobalt-cream";
+/* 座標とseedだけから決まる乱数。パンやサイズ変更でも同じ場を保つ。 */
+function cellRandom(x,y,seed,salt=0){
+  let h=Math.imul(x|0,374761393)^Math.imul(y|0,668265263)^Math.imul(seed|0,1442695041)^salt;
+  h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function fieldSampling(p,W,H){
+  // 最大サイズでも描画点を約9万に抑える。粒径も同率で補正する。
+  const step=Math.max(p.step,Math.sqrt(W*H/90000));
+  return {step,scale:step/p.step};
+}
+S.truchet={
+  label:{ja:"トルーシェ（つながる円弧）",en:"Truchet (connected arcs)"},
+  note:{ja:"向きを変えた円弧がつながり、輪や迷路が現れる。小さなタイルから、大きな流れをつくります。",en:"Quarter-circle tiles join into loops and meanders. Small changes in orientation create a larger flow."},
+  doc:{ja:"<b>トルーシェのしくみ</b><br>正方形の対角に、半径がタイル幅の半分の円弧を置きます。向きは座標とseedで決め、円弧からの距離を点の大きさに変えています。<br><b>表情を変える</b> — タイルを大きくするとゆったりした曲線に。「向きの偏り」を変えると、ランダムな迷路から整った輪へ近づきます。<br>大きなキャンバスでは約9万点を上限に、点の間隔と粒径を調整します。",en:"<b>How Truchet works</b><br>Each square contains arcs with a radius of half its width. Tile coordinates and a seed choose their orientation; distance to the arcs controls dot size.<br><b>Change the rhythm</b> — Larger tiles make broader curves. Orientation bias moves between meanders and ordered loops.<br>Large canvases adapt dot spacing and size to a budget of about 90,000 dots."},
+  params:[
+    {k:"cell",l:{ja:"タイルの大きさ",en:"Tile size"},min:60,max:360,step:10,d:180},
+    {k:"width",l:{ja:"帯の幅",en:"Band width"},min:0.04,max:0.4,step:0.01,d:0.15},
+    {k:"bias",l:{ja:"向きの偏り",en:"Orientation bias"},min:0,max:1,step:0.05,d:0.5},
+    {k:"seed",l:{ja:"配置の種",en:"Arrangement seed"},min:1,max:9999,step:1,d:31},
+    {k:"step",l:{ja:"点の間隔",en:"Dot spacing"},min:5,max:20,step:0.5,d:8},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},min:0.1,max:2,step:0.1,d:0.3},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},min:1,max:6,step:0.1,d:3.5},
+    {k:"pow",l:{ja:"階調カーブ",en:"Tone curve"},min:0.4,max:3,step:0.1,d:0.8},
+    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:40},
+    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:30}
+  ],
+  gen(p,W,H){
+    const out=[],{step,scale}=fieldSampling(p,W,H),L=p.cell;
+    for(let y=step/2;y<H;y+=step)for(let x=step/2;x<W;x+=step){
+      const gx=Math.floor((x-p.ox)/L),gy=Math.floor((y-p.oy)/L);
+      const u=x-p.ox-gx*L,v=y-p.oy-gy*L;
+      const flip=cellRandom(gx,gy,p.seed)<p.bias;
+      const d1=Math.abs(Math.hypot(flip?u-L:u,v)-L/2);
+      const d2=Math.abs(Math.hypot(flip?u:u-L,v-L)-L/2);
+      const m=Math.pow(clamp01(1-Math.min(d1,d2)/(L*p.width)),p.pow);
+      const r=(p.rmin+(p.rmax-p.rmin)*m)*scale;
+      out.push({x,y,r});
+    }
+    return out;
+  }
+};
+S.voronoi={
+  label:{ja:"ボロノイ（セル模様）",en:"Voronoi (cellular field)"},
+  note:{ja:"点と点のあいだに、細胞や石組みのような境界が生まれる。領域の大きさとゆらぎで、整った網目から有機的な模様へ。",en:"Scattered points divide the plane into cells. Adjust their spacing and irregularity to move from an ordered mesh to an organic texture."},
+  doc:{ja:"<b>ボロノイのしくみ</b><br>各格子に1つずつ母点を置き、seedで位置をずらします。最も近い2点までの距離を <code>F₁, F₂</code> とすると、<code>F₂−F₁=0</code> が領域の境界です。この差から粒径を決めます。差は辺までの厳密な距離ではありません。<br><b>内と外を切り替える</b> — 「描く場所」で境界と内側を選べます。ゆらぎを下げると幾何的に、上げると自然な石組みのように。<br>大きなキャンバスでは約9万点を上限に、点の間隔と粒径を調整します。",en:"<b>How Voronoi works</b><br>One seeded point is placed in each grid cell. For the two nearest distances, <code>F₁</code> and <code>F₂</code>, cell boundaries lie where <code>F₂−F₁=0</code>. This difference controls dot size; it is not the exact distance to an edge.<br><b>Inside or outside</b> — Switch between borders and interiors. Less irregularity gives a geometric grid; more creates an organic mesh.<br>Large canvases adapt dot spacing and size to about 90,000 dots."},
+  params:[
+    {k:"cell",l:{ja:"領域の大きさ",en:"Cell size"},min:60,max:360,step:10,d:180},
+    {k:"jitter",l:{ja:"母点のゆらぎ",en:"Point irregularity"},min:0,max:1,step:0.05,d:0.9},
+    {k:"width",l:{ja:"境界の幅",en:"Border width"},min:0.03,max:0.5,step:0.01,d:0.22},
+    {k:"mode",l:{ja:"描く場所",en:"Draw"},opts:[["edges",{ja:"境界",en:"Borders"}],["cells",{ja:"内側",en:"Interiors"}]],d:"edges"},
+    {k:"seed",l:{ja:"配置の種",en:"Arrangement seed"},min:1,max:9999,step:1,d:73},
+    {k:"step",l:{ja:"点の間隔",en:"Dot spacing"},min:5,max:20,step:0.5,d:8},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},min:0.1,max:2,step:0.05,d:0.25},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},min:1,max:6,step:0.1,d:3.5},
+    {k:"pow",l:{ja:"階調カーブ",en:"Tone curve"},min:0.4,max:3,step:0.1,d:0.9},
+    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:30},
+    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:20}
+  ],
+  gen(p,W,H){
+    const out=[],{step,scale}=fieldSampling(p,W,H),L=p.cell;
+    const x0=Math.floor(-p.ox/L)-2,y0=Math.floor(-p.oy/L)-2;
+    const x1=Math.floor((W-p.ox)/L)+2,y1=Math.floor((H-p.oy)/L)+2,sites=[];
+    for(let gy=y0;gy<=y1;gy++){
+      const row=[];
+      for(let gx=x0;gx<=x1;gx++)row.push({x:(gx+0.5+(cellRandom(gx,gy,p.seed)-0.5)*p.jitter)*L+p.ox,y:(gy+0.5+(cellRandom(gx,gy,p.seed,0x5bd1e995)-0.5)*p.jitter)*L+p.oy});
+      sites.push(row);
+    }
+    for(let y=step/2;y<H;y+=step)for(let x=step/2;x<W;x+=step){
+      const gx=Math.floor((x-p.ox)/L)-x0,gy=Math.floor((y-p.oy)/L)-y0;
+      let first=Infinity,second=Infinity;
+      // 母点が元のセル内にあるので、5×5近傍で最近傍2点を捕捉する。
+      for(let j=gy-2;j<=gy+2;j++)for(let i=gx-2;i<=gx+2;i++){
+        const q=sites[j][i],d=(x-q.x)**2+(y-q.y)**2;
+        if(d<first){second=first;first=d;}else if(d<second)second=d;
+      }
+      let m=clamp01(1-(Math.sqrt(second)-Math.sqrt(first))/(L*p.width));
+      if(p.mode==="cells")m=1-m;
+      const r=(p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow))*scale;
+      out.push({x,y,r});
+    }
+    return out;
+  }
+};
 const PALETTES=[
  {id:"cobalt-cream", name:{ja:"コバルト＆クリーム", en:"Cobalt & cream"},
   fg:"#1644DD", bg:"#F3EEDF", deg:90},
@@ -916,7 +1003,15 @@ const PALETTES=[
   fg:"#F4F4F5", bg:["#1B1B26","#2E2E3D"], deg:110}
 ];
 
-const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing"];
+function normalizeParams(key,input){
+  const values=input&&typeof input==="object"?input:{};
+  return Object.fromEntries(S[key].params.map(spec=>{
+    const v=values[spec.k];
+    if(spec.opts)return [spec.k,spec.opts.some(o=>o[0]===v)?v:spec.d];
+    return [spec.k,typeof v==="number"&&Number.isFinite(v)?Math.min(spec.max,Math.max(spec.min,v)):spec.d];
+  }));
+}
+const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi"];
 const $ = id => document.getElementById(id);
 
 /* ── 言語 ──────────────────────────────────────────────
@@ -929,6 +1024,7 @@ let LANG = (function(){
 const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
 
 const UI = {
+  browseStructures:{ja:"一覧から選ぶ ↗",en:"Browse all ↗"},
   tabShape:{ja:"かたち",en:"Shape"},tabColor:{ja:"配色",en:"Color"},tabExport:{ja:"書き出し",en:"Export"},
   preview:{ja:"プレビュー",en:"Preview"},quickExport:{ja:"書き出す ↗",en:"Export ↗"},
   mathDetails:{ja:"この模様のしくみ",en:"Behind the pattern"},
@@ -1030,6 +1126,7 @@ function applyLang(){
   document.title = T(UI.title);
   const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
   set("uiSub","sub");
+  set("browseStructures","browseStructures");
   set("tab-shape","tabShape"); set("tab-color","tabColor"); set("tab-export","tabExport");
   set("uiPreview","preview"); set("quickExport","quickExport"); set("uiMathDetails","mathDetails"); set("uiCanvasTip","canvasTip");
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
@@ -1128,6 +1225,7 @@ function normDims(){
 }
 
 function render(){
+  syncPaletteSwatches();
   if(timer) clearTimeout(timer);
   $("mBusy").innerHTML='<span class="busy">'+T(UI.busy)+'</span>';
   timer=setTimeout(doRender,60);
@@ -1187,8 +1285,8 @@ function readHash(){
   if(!location.hash || location.hash.length<3) return false;
   try{
     const o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    if(!S[o.s]) return false;
-    cur=o.s; P=Object.assign(defaults(cur), o.p||{});
+    if(!o||typeof o.s!=="string"||!Object.hasOwn(S,o.s)) return false;
+    cur=o.s; P=normalizeParams(cur,o.p);
     $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
     if(o.f2) $("fg2").value=o.f2;
     if(o.b2) $("bg2").value=o.b2;
@@ -1226,7 +1324,7 @@ $("palette").addEventListener("change",()=>{
   render();
 });
 for(const id of ["fgGrad","bgGrad"]){
-  $(id).addEventListener("change",()=>{ syncPaintUI(); $("palette").value="custom"; render(); });
+  $(id).addEventListener("change",()=>{ $("palette").value="custom"; syncPaintUI(); render(); });
 }
 $("angle").addEventListener("input",()=>{
   $("v_angle").textContent=$("angle").value; $("palette").value="custom"; render(); });
@@ -1354,7 +1452,8 @@ $("dlpng").addEventListener("click",exportPNG);
 const DRAG={
   polar:["cx","cy"], conformal:["cx","cy"], ribbon:["x0","y0"],
   cloth:["ox","oy"], twist:["ox","oy"], quasi:["ox","oy"],
-  contour:["ox","oy"], moire:["ox","oy"], gibbs:["ox","oy"], caustics:["ox","oy"]
+  contour:["ox","oy"], moire:["ox","oy"], gibbs:["ox","oy"], caustics:["ox","oy"],
+  truchet:["ox","oy"], voronoi:["ox","oy"]
 };
 
 let lastDrawMs=0;                    // 直近の描画にかかった時間。重い構造を見分ける
@@ -1494,6 +1593,13 @@ controlKeys.forEach((key,index)=>{
   });
 });
 $("quickExport").addEventListener("click",()=>{showControlPane("export");$("tab-export").focus();});
+$("browseStructures").addEventListener("click",()=>{
+  flush();
+  try{
+    sessionStorage.setItem("mpg.editorHash",location.hash);
+    sessionStorage.setItem("mpg.galleryReturn","1");
+  }catch(e){}
+});
 
 $("logo").innerHTML=brandLogoSVG();
 $("langJa").addEventListener("click",()=>setLang("ja"));
