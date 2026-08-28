@@ -1,9 +1,33 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pattern Lab</title>
+<title>Pattern Lab — 数学から、模様が生まれる。</title>
+<meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
+<link rel="canonical" href="https://martin-ushiyama.github.io/pattern-lab/">
+<meta name="theme-color" content="#f3eedf">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pattern Lab">
+<meta property="og:title" content="Pattern Lab — 数学から、模様が生まれる。">
+<meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
+<meta property="og:url" content="https://martin-ushiyama.github.io/pattern-lab/">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://martin-ushiyama.github.io/pattern-lab/assets/brand/ogp.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@mrtn">
+<meta name="twitter:title" content="Pattern Lab — 数学から、模様が生まれる。">
+<meta name="twitter:description" content="11種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
+<meta name="twitter:image" content="https://martin-ushiyama.github.io/pattern-lab/assets/brand/ogp.png">
+<meta name="twitter:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
+<link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+<link rel="icon" type="image/svg+xml" sizes="any" href="assets/brand/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/brand/apple-touch-icon.png">
 <style>
 :root{
   --ink:#1B1B26; --gray:#6E6E78; --line:#DCDCE3; --card:#ECECF1;
@@ -326,8 +350,8 @@ const S = {};
 /* 極格子（ギヨシェ）。半径も角度も一定ピッチ、濃淡は解析関数だけ */
 S.polar = {
   label:{ja:"極格子（ギヨシェ）",en:"Polar lattice (guilloché)"},
-  note:{ja:"同心円を一定ピッチで並べ、cos(kθ + ar) で濃淡をかける。平坦部を作ると帯が塗りに変わり、縁は同じ式から連続的にハーフトーンになる。",en:"Concentric rings at a constant pitch, shaded by cos(kθ + ar). Add a plateau and the band turns solid, while its edge falls off into halftone from the very same expression."},
-  doc:{ja:"<b>極格子</b> — <code>r = r₀ + i·dr</code>／<code>dθ = ds/r</code>（等弧長。点の間隔が全域で一定でスポークが出ない）または <code>dθ</code> 一定（等角。放射状のスジが立つ）。濃淡は <code>0.5 + 0.5·cos(k·θ + a·r)</code>。<br><b>平坦部</b> <code>hi</code> を 1 未満にするとそこから上は粒径が最大に張り付いて<b>塗り</b>になる。0.58 で画面のおよそ半分、0.26 で大半。塗りにするには <code>rmax</code> を 8 前後まで上げる。<br><b>被覆</b> <code>r0</code> ≦ 中心に最も近い画面内の点までの距離、<code>r1</code> ≧ 四隅までの最大距離。満たさないと画面のどこかに届かない。",en:"<b>Polar lattice</b> — <code>r = r₀ + i·dr</code> with <code>dθ = ds/r</code> (equal arc length: spacing is uniform everywhere and no spokes appear) or constant <code>dθ</code> (equal angle: radial streaks stand up). Tone is <code>0.5 + 0.5·cos(k·θ + a·r)</code>.<br><b>Plateau</b> — set <code>hi</code> below 1 and everything above it pins to the maximum dot size, becoming a <b>solid</b>. 0.58 fills roughly half the canvas, 0.26 most of it. Raise <code>rmax</code> to around 8 so the dots actually touch.<br><b>Coverage</b> — <code>r0</code> ≤ the distance to the nearest on-canvas point, <code>r1</code> ≥ the distance to the farthest corner. Miss either and part of the canvas stays empty."},
+  note:{"ja":"同心円に点を並べると、大きな波が見えてくる。間隔とねじれを変えて、静かなうねりから細かな織り目まで。","en":"Dots on concentric circles become sweeping waves. Change the spacing and twist to move from gentle swells to a fine weave."},
+  doc:{"ja":"<b>極格子のしくみ</b><br>半径は <code>r = r₀ + i·dr</code>、濃淡は <code>0.5 + 0.5·cos(kθ + ar)</code>。<br><b>点の並べ方</b> — 等弧長 <code>dθ = ds/r</code> なら間隔が揃い、等角なら放射状の筋が現れます。<br><b>帯を太くする</b> — <code>hi</code> を下げると、大きなドットの領域が広がります。粒径も上げると、点がつながって面になります。<br><b>四隅まで広げる</b> — 内半径は画面までの最短距離より小さく、外半径は最も遠い角まで届くように。中心を画面外へ置くと、流れが引き立ちます。","en":"<b>How the polar lattice works</b><br>Radii follow <code>r = r₀ + i·dr</code>; tone follows <code>0.5 + 0.5·cos(kθ + ar)</code>.<br><b>Dot spacing</b> — Equal arc length, <code>dθ = ds/r</code>, keeps spacing uniform. Equal angles reveal radial lines.<br><b>Broader bands</b> — Lower <code>hi</code> to expand the largest dots. Increase their size to merge them into solid areas.<br><b>Reach the corners</b> — Keep the inner radius below the nearest point of the canvas and the outer radius beyond its farthest corner. An off-canvas center brings out the flow."},
   params:[
     {k:"cx",  l:{ja:"中心 x",en:"Center x"},        min:-1200,max:2600,step:10, d:1300},
     {k:"cy",  l:{ja:"中心 y",en:"Center y"},        min:-1200,max:2200,step:10, d:760},
@@ -369,8 +393,8 @@ S.polar = {
 /* ねじれたリボン。射影の潰れがそのまま濃淡になる */
 S.ribbon = {
   label:{ja:"ねじれたリボン（線織面の正射影）",en:"Twisted ribbon (ruled surface, orthographic)"},
-  note:{ja:"3次元のリボンを正射影する。edge-on になった瞬間に幅方向の格子が軸へ潰れ、そこが自動的に濃くなる。濃淡を塗っているのではない。",en:"A 3D ribbon under orthographic projection. The instant it turns edge-on, the width-wise lattice collapses onto the axis and that band darkens by itself. The tone is not painted in."},
-  doc:{ja:"<b>ねじれたリボン</b> — 軸 <code>P(u)</code> に沿って幅方向 <code>v</code> を伸ばし、その方向を軸まわりに <code>τ(u)</code> だけ回す。正射影すると <code>cos τ → 0</code> で格子が潰れて濃くなる。<br>粒径は <b>射影の潰れ</b> <code>|cos τ|</code> と <b>奥行き</b> の2要素。<br>⚠ <b>幅の分割</b>を増やすと行間より粒が大きくなり塗りに潰れる。17〜22 が適正。",en:"<b>Twisted ribbon</b> — the width direction <code>v</code> extends along the axis <code>P(u)</code>, rotated about that axis by <code>τ(u)</code>. Under orthographic projection the lattice collapses and darkens as <code>cos τ → 0</code>.<br>Dot size comes from two factors: <b>foreshortening</b> <code>|cos τ|</code> and <b>depth</b>.<br>⚠ Raise the <b>width divisions</b> and the dots grow larger than the row spacing, collapsing into a solid. 17 to 22 is the usable range."},
+  note:{"ja":"点でできたリボンを、ゆっくりねじる。折り重なるところが濃くなり、平面の上に奥行きが生まれます。","en":"Twist a ribbon made of dots. Where the rows overlap, they grow darker and give the flat image a sense of depth."},
+  doc:{"ja":"<b>リボンのしくみ</b><br>軸 <code>P(u)</code> に沿って幅を広げ、<code>τ(u)</code> で回転させた面を投影します。<code>cos τ → 0</code> で幅方向の点列が重なり、濃い帯になります。<br>粒径には、面の向きと奥行きも反映しています。<br><b>点を残すコツ</b> — 幅方向の分割は17〜22あたりから。点がつながりすぎるときは、分割数を減らして隙間を作ってみてください。","en":"<b>How the ribbon works</b><br>A surface extends across the axis <code>P(u)</code>, turns by <code>τ(u)</code>, then projects onto the canvas. As <code>cos τ → 0</code>, its rows overlap into a darker band.<br>Dot size also responds to orientation and depth.<br><b>Keep the dots visible</b> — Start with 17–22 width divisions. If too many dots merge, reduce the divisions to open up the spacing."},
   params:[
     {k:"Nu",  l:{ja:"軸方向の分割",en:"Axis divisions"},  min:60, max:600, step:10, d:300},
     {k:"Nv",  l:{ja:"幅方向の分割",en:"Width divisions"},  min:6,  max:60,  step:1,  d:17},
@@ -412,8 +436,8 @@ S.ribbon = {
 /* ひらっとした布。射影の潰れ＋法線陰影 */
 S.cloth = {
   label:{ja:"ひらっとした布（波打つ面＋法線陰影）",en:"Draped cloth (wavy surface + normal shading)"},
-  note:{ja:"ねじり切らずに面を波打たせ、浅い俯角から正射影する。密度（潰れ）と陰影（法線と光の内積）の2つが揃うと「面」に見える。",en:"Rather than twisting all the way, the sheet ripples and is projected from a shallow tilt. Density (foreshortening) and shading (normal dot light) together are what make it read as a surface."},
-  doc:{ja:"<b>布</b> — 高さ場 <code>h(u,v)</code> を持つ面を浅い俯角 <code>α</code> で正射影。<br>粒径はランバート陰影 <code>max(0, N·L)</code>。法線は数値微分で求める。<br>⚠ <b>幅の分割</b>は 20 前後まで落とすこと。64 では塗りに潰れて陰影が見えない。<br>⚠ 微分の探り点は定義域に収める（端で片側差分）。はみ出すと <code>Math.pow(負,小数)</code> が NaN になりパスごと壊れる。",en:"<b>Cloth</b> — a surface carrying the height field <code>h(u,v)</code>, projected at a shallow tilt <code>α</code>.<br>Dot size is Lambert shading <code>max(0, N·L)</code>; normals come from numerical differentiation.<br>⚠ Keep <b>width divisions</b> down around 20. At 64 it collapses into a solid and the shading disappears.<br>⚠ Keep the derivative probes inside the domain (one-sided at the edges). Step outside and <code>Math.pow(negative, fractional)</code> returns NaN, which corrupts the whole path."},
+  note:{"ja":"布がふわりと波打つように、点の列がたわむ。光の向きと面の傾きで、やわらかな陰影をつくります。","en":"Rows of dots bend like a rippling sheet of cloth. Light and surface tilt give the pattern its soft shading."},
+  doc:{"ja":"<b>布のしくみ</b><br>高さ <code>h(u,v)</code> を持つ面を、俯角 <code>α</code> から投影します。点列の詰まり方と、法線と光の内積 <code>max(0, N·L)</code> による粒径が、面の表情を作ります。<br><b>まずは少ない分割で</b> — 奥行きの分割は20前後から。広がりや俯角に合わせて増やし、点が面に潰れる手前を探してみてください。<br><b>陰影を変える</b> — 光の向きと陰影のカーブで、折れ目の見え方を調整できます。","en":"<b>How the cloth works</b><br>A surface with height <code>h(u,v)</code> is projected from tilt <code>α</code>. Row spacing and dot size from <code>max(0, N·L)</code>, the surface normal dotted with the light direction, make it read as a sheet.<br><b>Start with fewer divisions</b> — Try about 20 depth divisions, then add more to suit the extent and tilt. Stop before the dots merge into a solid fill.<br><b>Shape the shading</b> — Adjust the light direction and shading curve to bring out the folds."},
   params:[
     {k:"Nu",  l:{ja:"横の分割",en:"Divisions (u)"},      min:60, max:600, step:10, d:270},
     {k:"Nv",  l:{ja:"奥行きの分割",en:"Depth divisions"},  min:6,  max:60,  step:1,  d:22},
@@ -466,8 +490,8 @@ S.cloth = {
 /* 等角写像。角度を保つので歪んでも破綻しない */
 S.conformal = {
   label:{ja:"等角写像（z² / z+1/z）",en:"Conformal map (z² / z+1/z)"},
-  note:{ja:"正方格子を複素解析関数で写す。等角なので歪んでも直交性が残る。特異点は必ず画面外に置くこと。",en:"A square lattice mapped by a complex analytic function. Being conformal, it stays orthogonal however much it distorts. Always keep the singularity off-canvas."},
-  doc:{ja:"<b>等角写像</b> — <code>w = z²</code> は直交格子を放物線の網に写す。<code>w = z + 1/z</code>（ジューコフスキー）は円のまわりの一様流を翼のまわりの流れに写す。<br>粒径は <code>|dw/dz|</code>（幾何）だけだと振幅が足りないので、位置ランプを混ぜる。<br>⚠ 原点・特異点が画面内に見えると即座に「物体」に見える。外へ出す。",en:"<b>Conformal map</b> — <code>w = z²</code> sends an orthogonal grid to a net of parabolas. <code>w = z + 1/z</code> (Joukowski) sends uniform flow around a circle to flow around an aerofoil.<br>Sizing by <code>|dw/dz|</code> alone lacks range, so a positional ramp is mixed in.<br>⚠ If the origin or singularity is visible on canvas, the image immediately reads as an object. Push it outside."},
+  note:{"ja":"整った格子を、曲線の網へ。交わる角度を保ちながら、点の流れを大きく曲げていきます。","en":"Turn a regular grid into a net of curves. The lines bend while keeping their crossing angles."},
+  doc:{"ja":"<b>等角写像のしくみ</b><br><code>w = z²</code> は格子を放物線の網へ、<code>w = z + 1/z</code> は円の周りの流れを翼の周りのような流れへ写します。<br>粒径は <code>|dw/dz|</code> と位置による濃淡を組み合わせています。<br><b>流れを見せるコツ</b> — 原点や特異点を画面外へ移すと、中心の形ではなく曲線の広がりが主役になります。","en":"<b>How the conformal map works</b><br><code>w = z²</code> turns a grid into a net of parabolas. <code>w = z + 1/z</code> maps flow around a circle to flow around an aerofoil.<br>Dot sizes combine <code>|dw/dz|</code> with a positional tone ramp.<br><b>Bring out the flow</b> — Move the origin or singularity outside the canvas so the curves, rather than the center, lead the composition."},
   params:[
     {k:"fn", l:{ja:"写像",en:"Mapping"},       opts:[["z2",{ja:"w = z²",en:"w = z²"}],["jouk",{ja:"w = z + 1/z",en:"w = z + 1/z"}]], d:"z2"},
     {k:"cx", l:{ja:"配置 x",en:"Position x"},     min:-1200,max:2600,step:10, d:1180},
@@ -515,8 +539,8 @@ S.conformal = {
 /* 歪ませた等高線（水面） */
 S.contour = {
   label:{ja:"歪ませた等高線（水面）",en:"Warped contours (water)"},
-  note:{ja:"低周波の波を数枚重ねて面をうねらせ、その上に等値線の帯を置く。断面を非対称にすると帯の中に方向のある階調が出る。",en:"A few low-frequency waves warp the field, then level-set bands are laid on top. An asymmetric band profile gives each band a directional gradient."},
-  doc:{ja:"<b>等高線</b> — <code>f</code> の小数部を帯の断面に通す。<code>Math.pow(ph, skew)</code> で立ち上がりを急に、抜けを緩くすると帯に方向が出る。<br><b>帯の細さ</b>が重さを決める。1.5 だとうねりは読めるが画面が埋まり、2.6 だと軽いがうねりが弱い。2.0 前後が中間。",en:"<b>Contours</b> — the fractional part of <code>f</code> is run through a band profile. <code>Math.pow(ph, skew)</code> makes the rise steep and the fall gentle, giving each band a direction.<br><b>Band thinness</b> decides the visual weight. At 1.5 the swell reads but the canvas fills up; at 2.6 it is light but the swell weakens. Around 2.0 is the middle ground."},
+  note:{"ja":"水面にも、地形にも見える、なだらかな帯。波を重ねて、等高線のような濃淡を描きます。","en":"Soft bands that suggest water or terrain. Layer a few waves to draw tones like contour lines."},
+  doc:{"ja":"<b>等高線のしくみ</b><br>複数の波を足した場 <code>f</code> の小数部を、帯の断面へ変換します。<code>Math.pow(ph, skew)</code> で断面を非対称にすると、帯に流れる向きが生まれます。<br><b>軽さを調整する</b> — 「帯の細さ」は2前後から。小さくすると太く重厚に、大きくすると細く軽やかになります。","en":"<b>How the contours work</b><br>The fractional part of a wave field <code>f</code> becomes a band profile. <code>Math.pow(ph, skew)</code> makes the profile asymmetric and gives the bands a direction.<br><b>Adjust the visual weight</b> — Start with band thinness near 2. Lower values make broader, heavier bands; higher values make finer, lighter ones."},
   params:[
     {k:"step",l:{ja:"格子の間隔",en:"Sample spacing"},   min:4,  max:20,  step:0.5, d:7.5},
     {k:"a1", l:{ja:"波1 振幅",en:"Wave 1 amplitude"},      min:0,  max:2,   step:0.05,d:1.00},
@@ -559,8 +583,8 @@ S.contour = {
 /* モアレ */
 S.moire = {
   label:{ja:"モアレ（二重格子）",en:"Moiré (two lattices)"},
-  note:{ja:"ピッチの近い2枚の正方格子を微小角ずらして重ねる。小さな規則から大きな周期が立ち上がる。",en:"Two square lattices of near-equal pitch, overlaid at a small angle. A large-scale period emerges out of the small-scale regularity."},
-  doc:{ja:"<b>モアレ</b> — 格子1の各点で、回転・拡大した格子2の最寄り格子点までの距離を粒径に使う。<code>p1</code> と <code>p2</code> の差、そして角度が干渉縞の周期を決める。差を小さくするほど縞が大きくなる。",en:"<b>Moiré</b> — at each point of lattice 1, the distance to the nearest node of the rotated and rescaled lattice 2 sets the dot size. The gap between <code>p1</code> and <code>p2</code>, together with the angle, sets the fringe period. The smaller the gap, the larger the fringes."},
+  note:{"ja":"わずかなずれから、大きなリズムが生まれる。2枚の格子の間隔と角度を変えて、干渉模様を探ります。","en":"A tiny offset becomes a large rhythm. Adjust the spacing and angle of two grids to explore their interference."},
+  doc:{"ja":"<b>モアレのしくみ</b><br>格子1の各点から、回転・拡大した格子2の最寄りの点までの距離を粒径にしています。<br><b>大きな模様にする</b> — <code>p1</code> と <code>p2</code> の差や角度差を小さくすると、干渉縞の周期が大きくなります。少しずつ動かすと、変化がよく見えます。","en":"<b>How moiré works</b><br>At each point in grid 1, dot size follows the distance to the nearest point in a rotated and scaled grid 2.<br><b>Make the pattern broader</b> — Smaller pitch and angle differences create larger interference periods. Move the controls in small steps to see the change."},
   params:[
     {k:"p1",  l:{ja:"格子1 ピッチ",en:"Lattice 1 pitch"}, min:6,  max:40, step:0.5, d:15},
     {k:"p2",  l:{ja:"格子2 ピッチ",en:"Lattice 2 pitch"}, min:6,  max:40, step:0.1, d:15.9},
@@ -588,8 +612,8 @@ S.moire = {
 /* 準結晶 */
 S.quasi = {
   label:{ja:"準結晶（N枚の平面波の和）",en:"Quasicrystal (sum of N plane waves)"},
-  note:{ja:"周期が無いのに完全に決定的。N=5 は5回対称で平面充填できない＝永遠に繰り返さない。",en:"No period, yet fully deterministic. N=5 has five-fold symmetry, which cannot tile the plane, so it never repeats."},
-  doc:{ja:"<b>準結晶</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>、<code>θⱼ = 2πj/N</code>。<br>N=4 なら周期的、<b>N=5・7 は非周期</b>。k が構造の細かさを決める。",en:"<b>Quasicrystal</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code> with <code>θⱼ = 2πj/N</code>.<br>N=4 is periodic; <b>N=5 and 7 are aperiodic</b>. k sets how fine the structure is."},
+  note:{"ja":"規則はあるのに、同じ並びを繰り返さない。5方向や7方向の波が重なって、結晶のような模様が現れます。","en":"Ordered, but never quite repeating. Waves from five or seven directions meet in a pattern that resembles a crystal."},
+  doc:{"ja":"<b>準結晶のしくみ</b><br><code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>、<code>θⱼ = 2πj/N</code>。複数方向の平面波を足し合わせます。<br><code>N=4</code> なら周期的、<code>N=5・7</code> なら非周期の模様になります。<br><b>細かさを変える</b> — 波数 <code>k</code> を上げると細かく、下げると大きな形になります。","en":"<b>How the quasicrystal works</b><br><code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>, with <code>θⱼ = 2πj/N</code>, adds plane waves from several directions.<br><code>N=4</code> is periodic; <code>N=5 or 7</code> gives an aperiodic pattern.<br><b>Change the scale</b> — Raise wave number <code>k</code> for finer detail, or lower it for broader forms."},
   params:[
     {k:"N",   l:{ja:"波の枚数",en:"Number of waves"},   min:3,  max:9,   step:1,   d:5},
     {k:"k",   l:{ja:"波数 k",en:"Wave number k"},     min:0.01,max:0.2,step:0.005,d:0.055},
@@ -620,8 +644,8 @@ S.quasi = {
 /* ギブス現象 */
 S.gibbs = {
   label:{ja:"ギブス現象（フーリエ部分和）",en:"Gibbs phenomenon (Fourier partial sum)"},
-  note:{ja:"矩形波を N 項で打ち切ると、不連続の近くに消えない振動が残る。行ごとに N を増やすと収束していく様子がそのまま絵になる。",en:"Truncate a square wave at N terms and a ringing near the discontinuity refuses to go away. Raising N row by row turns the convergence itself into the image."},
-  doc:{ja:"<b>ギブス現象</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>。<br>N を増やすと矩形に近づくが、<b>不連続の近くの行き過ぎ（約9%）は消えない</b>。それがリンギングとして残る。",en:"<b>Gibbs phenomenon</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>.<br>Raising N approaches the square wave, but <b>the overshoot near the discontinuity, about 9%, never goes away</b>. That is what remains as ringing."},
+  note:{"ja":"なめらかな波を重ねると、角の近くに小さな揺れが残る。その消えない揺れを、点の列で描きます。","en":"Add smooth waves together and a small ripple remains near each sharp edge. Rows of dots make that persistent ringing visible."},
+  doc:{"ja":"<b>ギブス現象のしくみ</b><br>矩形波を <code>(4/π)·Σ sin(nkx)/n</code>（奇数 <code>n ≤ N</code>）で近似します。<br>項数を増やすと矩形に近づきますが、不連続の近くには段差の約9%の行き過ぎが残ります。<br><b>変化を読む</b> — 行が進むにつれて項数が増えます。「最大項数」と「項数の増え方」で、波から角へ移る様子を調整できます。","en":"<b>How the Gibbs phenomenon works</b><br>A square wave is approximated by <code>(4/π)·Σ sin(nkx)/n</code> for odd <code>n ≤ N</code>.<br>More terms sharpen the edges, but an overshoot of about 9% of the jump remains near each discontinuity.<br><b>Read the transition</b> — The term count grows row by row. Max terms and term growth control the transition from waves to corners."},
   params:[
     {k:"rows",l:{ja:"行数",en:"Rows"},       min:12, max:140, step:2,  d:64},
     {k:"cols",l:{ja:"横の分割",en:"Divisions (u)"},   min:60, max:600, step:10, d:300},
@@ -656,8 +680,8 @@ S.gibbs = {
 /* ねじれ格子 */
 S.twist = {
   label:{ja:"ねじれ格子",en:"Twisted grid"},
-  note:{ja:"行ごとに回転角と伸縮を進める。流線より静かで、布のたわみのようなテクスチャになる。",en:"Rotation and stretch advance row by row. Quieter than streamlines, reading like the sag of a fabric."},
-  doc:{ja:"<b>ねじれ格子</b> — 行が進むごとに回転 <code>ang(v)</code> と伸縮 <code>sc(v)</code> をかける。局所の詰まり具合を粒径に反映させて濃淡を出す。<br>濃淡のレンジが狭いと薄く見えるので <code>コントラスト</code> を上げる。",en:"<b>Twisted grid</b> — each successive row is rotated by <code>ang(v)</code> and stretched by <code>sc(v)</code>. Local crowding feeds back into dot size to produce the tone.<br>A narrow tonal range looks washed out, so raise <code>Contrast</code>."},
+  note:{"ja":"整列した点を、少しずつ回して伸ばす。規則正しい格子に、布のたわみのような動きが生まれます。","en":"Rotate and stretch rows of orderly dots. A regular grid begins to move like the sag of a fabric."},
+  doc:{"ja":"<b>ねじれ格子のしくみ</b><br>行ごとに回転 <code>ang(v)</code> と伸縮 <code>sc(v)</code> をかけ、局所的な詰まり方を粒径へ反映しています。<br><b>静かに動かす</b> — 開始角と終了角の差を小さくすると、ゆるやかな流れになります。模様が薄く見えるときは「コントラスト」を上げてみてください。","en":"<b>How the twisted grid works</b><br>Each row rotates by <code>ang(v)</code> and stretches by <code>sc(v)</code>. Local crowding feeds into dot size.<br><b>Keep the movement gentle</b> — A small difference between start and end angles gives a quiet flow. Raise contrast if the pattern looks too faint."},
   params:[
     {k:"rows",l:{ja:"行数",en:"Rows"},       min:10, max:160, step:2,  d:54},
     {k:"cols",l:{ja:"列数",en:"Columns"},       min:20, max:300, step:5,  d:110},
@@ -698,8 +722,8 @@ S.twist = {
 /* 焦線（コースティクス） */
 S.caustics = {
   label:{ja:"焦線（コースティクス）",en:"Caustics"},
-  note:{ja:"滑らかな写像の局所面積 |J| の逆数を濃度に使う。|J| がゼロを跨ぐと折り目が明るい筋として立つ。",en:"The reciprocal of a smooth map's local area |J| drives the density. Where |J| crosses zero, the fold stands up as a bright ridge."},
-  doc:{ja:"<b>焦線</b> — <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code> のヤコビアン <code>|J|</code>。<br>⚠ <b>振幅が小さいと <code>J</code> がゼロを跨がず、折り目が立たずただの霞になる。</b> A・B を大きく取ること。",en:"<b>Caustics</b> — the Jacobian <code>|J|</code> of <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code>.<br>⚠ <b>With small amplitudes <code>J</code> never crosses zero, no fold forms, and you get nothing but haze.</b> Keep A and B large."},
+  note:{"ja":"水底に差す光のように、濃淡が弧を描く。面のひずみから、光が集まる場所を思わせる筋をつくります。","en":"Arcs of tone suggest light on the bottom of a pool. A distorted field forms bands that resemble gathered light."},
+  doc:{"ja":"<b>焦線のしくみ</b><br><code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code> のヤコビアンの絶対値 <code>|J|</code> を使います。局所面積が小さくなる場所ほど、ドットを大きくします。<br><b>筋を出す</b> — 模様がぼんやりしているときは、振幅A・Bを上げてみてください。ヤコビアンがゼロをまたぐと、強い帯が現れます。","en":"<b>How caustics work</b><br>The field uses the absolute Jacobian <code>|J|</code> of <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code>. Smaller local areas produce larger dots.<br><b>Bring out the bands</b> — If the pattern is faint, increase amplitudes A and B. Strong bands appear where the Jacobian crosses zero."},
   params:[
     {k:"step",l:{ja:"格子の間隔",en:"Sample spacing"}, min:4,  max:20,  step:0.5, d:8.5},
     {k:"A",   l:{ja:"振幅 A",en:"Amplitude A"},     min:0,  max:400, step:5,  d:180},
@@ -735,8 +759,8 @@ S.caustics = {
 /* 反応拡散（Gray-Scott） */
 S.turing = {
   label:{ja:"反応拡散（Gray-Scott）",en:"Reaction–diffusion (Gray-Scott)"},
-  note:{ja:"決定的な偏微分方程式なのに有機的な模様が出る。種と (F,K) を外すと反応が立ち上がらず真っ白になる。重いので少し待つ。",en:"A deterministic PDE that nonetheless yields organic patterns. Get the seeding or (F,K) wrong and the reaction never starts, leaving a blank canvas. It is heavy, so give it a moment."},
-  doc:{ja:"<b>反応拡散</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code>／<code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>。<br>⚠ <b>種は塊で撒く。</b> 孤立した1セルは減衰して消える。<br>⚠ <code>(F,K)</code> が領域から外れると死ぬ。<b>迷路なら (0.030, 0.057)</b>、斑点なら (0.035, 0.062) あたり。<br>結果が空なら下の <code>v の最大値</code> を見る。ほぼ 0 なら死んでいる。",en:"<b>Reaction–diffusion</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code> and <code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>.<br>⚠ <b>Seed in blocks.</b> An isolated single cell decays and vanishes.<br>⚠ Outside its region <code>(F,K)</code> simply dies. <b>Maze: (0.030, 0.057)</b>; spots: around (0.035, 0.062).<br>If the result comes out empty, check <code>max v</code> below. Near zero means the reaction died."},
+  note:{"ja":"点が育ち、つながり、迷路になる。2つの成分の反応と拡散から、有機的な模様をつくります。計算には少し時間がかかります。","en":"Spots grow, connect and become a maze. Two reacting and diffusing components create organic patterns. This one takes a little longer to compute."},
+  doc:{"ja":"<b>反応拡散のしくみ</b><br><code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code><br><code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code><br>Gray-Scottモデルを、同じ初期条件から計算します。<br><b>最初の手がかり</b> — 迷路状なら <code>(F,K) = (0.030, 0.057)</code>、斑点状なら <code>(0.035, 0.062)</code> あたりから。<br><b>模様が出ないとき</b> — 「vの最大値」がほぼ0なら、反応が弱まっています。供給F・消失Kと、種の間隔・密度を調整してください。","en":"<b>How reaction–diffusion works</b><br><code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code><br><code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code><br>The Gray-Scott model runs from repeatable initial conditions.<br><b>A starting point</b> — Try <code>(F,K) = (0.030, 0.057)</code> for a maze or <code>(0.035, 0.062)</code> for spots.<br><b>If the canvas stays empty</b> — A max v near zero means little reaction remains. Adjust feed F, kill K and the seed spacing or density."},
   params:[
     {k:"GW", l:{ja:"格子 幅",en:"Grid width"},     min:60, max:260, step:10, d:160},
     {k:"GH", l:{ja:"格子 高さ",en:"Grid height"},   min:40, max:160, step:4,  d:84},
@@ -835,56 +859,56 @@ let LANG = (function(){
 const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
 
 const UI = {
-  sub:{ja:"数学的な背景パターンの生成器 — 乱数を使わないので、同じパラメータからは常に同じ絵が出る",
-       en:"A generator for mathematical background patterns. No randomness, so the same parameters always give the same image."},
+  title:{ja:"Pattern Lab — 数学から、模様が生まれる。",en:"Pattern Lab — Patterns, born from math."},
+  sub:{ja:"数学から、模様が生まれる。",en:"Patterns, born from math."},
   legStruct:{ja:"構造",en:"Structure"},
-  legParams:{ja:"パラメータ",en:"Parameters"},
-  legCanvas:{ja:"キャンバス",en:"Canvas"},
-  legColor:{ja:"色",en:"Color"},
+  legParams:{ja:"かたち",en:"Shape"},
+  legCanvas:{ja:"サイズ",en:"Size"},
+  legColor:{ja:"配色",en:"Color"},
   legExport:{ja:"書き出し",en:"Export"},
   legRecipe:{ja:"レシピ",en:"Recipe"},
-  shuffle:{ja:"振ってみる",en:"Shuffle"},
-  reset:{ja:"既定値に戻す",en:"Reset"},
+  shuffle:{ja:"別のかたちを試す",en:"Try another shape"},
+  reset:{ja:"かたちを戻す",en:"Reset shape"},
   save:{ja:"SVG を保存",en:"Save SVG"},
   copy:{ja:"SVG をコピー",en:"Copy SVG"},
   savePng:{ja:"PNG を保存",en:"Save PNG"},
-  starTitle:{ja:"GitHub でスターを付ける",en:"Star this project on GitHub"},
+  starTitle:{ja:"ソースを見る・GitHubで応援する",en:"View the source and star on GitHub"},
   pngBusy:{ja:"書き出し中…",en:"Rendering…"},
-  pngFail:{ja:"PNG の書き出しに失敗",en:"PNG export failed"},
-  pngTooBig:{ja:"この端末には大きすぎる",en:"Too large for this device"},
-  pngReduced:{ja:"× {n} で書き出した（端末の上限）",en:"Exported at × {n} (device limit)"},
-  notePng:{ja:"PNG は倍率をかけた実寸で書き出す。印刷や、SVG を読めない場所に貼るとき用。",
-           en:"PNG is written out at the canvas size times the scale. For print, or anywhere SVG will not go."},
-  copied:{ja:"コピーした",en:"Copied"},
-  copyFail:{ja:"コピー失敗",en:"Copy failed"},
+  pngFail:{ja:"PNGを保存できませんでした。倍率を下げてお試しください。",en:"Could not save PNG. Try a smaller scale."},
+  pngTooBig:{ja:"このサイズは端末の上限を超えています",en:"This size exceeds your device limit"},
+  pngReduced:{ja:"端末に合わせて × {n} で保存しました",en:"Saved at × {n} to fit your device"},
+  notePng:{ja:"SNSやスライドにはPNGを。倍率を選ぶと、キャンバスのサイズをそのまま拡大して保存できます。",
+           en:"Use PNG for posts and slides. Choose a scale to export a larger image at the same proportions."},
+  copied:{ja:"コピーしました",en:"Copied"},
+  copyFail:{ja:"コピーできませんでした。SVG保存をお試しください。",en:"Could not copy. Try Save SVG."},
   w:{ja:"幅",en:"Width"},
   h:{ja:"高さ",en:"Height"},
   fg:{ja:"ドット",en:"Dots"},
   paletteLabel:{ja:"配色",en:"Palette"},
   custom:{ja:"カスタム",en:"Custom"},
-  fgGrad:{ja:"ドットをグラデに",en:"Gradient dots"},
-  bgGrad:{ja:"地をグラデに",en:"Gradient ground"},
-  angle:{ja:"グラデの角度",en:"Gradient angle"},
+  fgGrad:{ja:"ドットをグラデーションに",en:"Use a gradient for dots"},
+  bgGrad:{ja:"背景をグラデーションに",en:"Use a gradient for the background"},
+  angle:{ja:"グラデーションの向き",en:"Gradient direction"},
   gradStart:{ja:"開始色",en:"start color"},
   gradEnd:{ja:"終了色",en:"end color"},
-  bg:{ja:"地",en:"Ground"},
-  transparent:{ja:"地を透明にする（他の絵に重ねるとき）",en:"Transparent ground (for layering)"},
+  bg:{ja:"背景",en:"Background"},
+  transparent:{ja:"背景を透明にする",en:"Transparent background"},
   op0:{ja:"小",en:"S"}, op1:{ja:"中",en:"M"}, op2:{ja:"大",en:"L"},
-  noteOp:{ja:"粒径で3段に分け、段ごとに不透明度を変えている。レンジを広げるほど濃淡が強い。",
-          en:"Dots are split into three tiers by size, each with its own opacity. A wider range means stronger tonal contrast."},
-  noteExport:{ja:"デザインツールへはファイルを読み込むか、コピーしてそのままペースト。ベクターなので拡大しても粗くならない。",
-              en:"Load the file into your design tool, or copy and paste it straight in. It is vector, so it stays sharp at any size."},
-  noteRecipe:{ja:"気に入った設定はこれごと控えておく。URL のハッシュにも同じ状態が入る。",
-              en:"Keep this text as a record of a setting you liked. The same state also lives in the URL hash."},
+  noteOp:{ja:"小・中・大のドットごとに、不透明度を調整できます。値は0で透明、1で不透明。差をつけると、模様の濃淡が際立ちます。",
+          en:"Set opacity for small, medium and large dots: 0 is transparent, 1 is opaque. A wider difference brings out the pattern's tones."},
+  noteExport:{ja:"大きく使うならSVGを。拡大しても点の輪郭が保たれます。背景を透明にすれば、写真や他のデザインにも重ねられます。",
+              en:"Use SVG when you need to scale up without losing sharpness. A transparent background lets you layer the pattern over photos or other designs."},
+  noteRecipe:{ja:"気に入った模様は、URLごと残しておこう。かたちも色も、同じ設定で開き直せます。下の数値は、かたちのレシピです。",
+              en:"Keep the URL when you find a pattern you like. It brings back both shape and color. The values here record the shape."},
   mCount:{ja:"ドット",en:"Dots"},
   mSize:{ja:"サイズ",en:"Size"},
   busy:{ja:"計算中…",en:"Computing…"},
-  genError:{ja:"生成エラー: ",en:"Generation error: "},
+  genError:{ja:"模様を生成できませんでした: ",en:"Could not generate the pattern: "},
   vmax:{ja:"v の最大値 ",en:"max v "},
-  dead:{ja:" — 反応が死んでいる。(F,K) と種を見直す",en:" — the reaction is dead. Revisit (F,K) and the seeding."},
+  dead:{ja:" — 反応が弱いようです。供給F・消失K・種の設定を調整してください。",en:" — little reaction remains. Adjust feed F, kill K and the seed settings."},
   noParams:{ja:"パラメータなし",en:"No parameters"},
-  principles:{ja:'設計原則 — <strong>粒立ちを残す</strong>（最大粒径 ≦ 格子間隔 × 0.55。潰れたら分割数を減らす）／<strong>四辺を貫いて画面全体を覆う</strong>／<strong>中心・特異点は画面の外に置く</strong>。中心が画面内に見えると「物体が置いてある」絵になる。',
-              en:'Design principles — <strong>keep the dots distinct</strong> (max dot size ≤ lattice spacing × 0.55; if it collapses, cut the divisions, not the size) / <strong>run through all four edges and cover the canvas</strong> / <strong>keep centers and singularities off-canvas</strong>. A visible center reads as an object sitting in the middle.'},
+  principles:{ja:'背景づくりのヒント<br><strong>点の隙間を残す。</strong> 詰まりすぎたら、粒径や分割数を少し下げてみる。<br><strong>画面の外へ続ける。</strong> 模様が四辺を越えると、広がりが生まれる。<br><strong>中心をずらす。</strong> 渦の芯や特異点を画面外へ出すと、流れを主役にできる。',
+              en:'Tips for a background<br><strong>Leave space between dots.</strong> If they merge, try smaller dots or fewer divisions.<br><strong>Let the pattern continue.</strong> Extend it past the edges for a sense of space.<br><strong>Move the center.</strong> Keeping a vortex or singularity outside the frame lets the movement take the lead.'},
   presets:{
     "1200x630":{ja:"OGP・SNS 1200 × 630",en:"OGP / social 1200 × 630"},
     "1280x670":{ja:"note 見出し 1280 × 670",en:"note header 1280 × 670"},
@@ -928,6 +952,7 @@ function currentPaint(which){
 
 function applyLang(){
   document.documentElement.lang = LANG;
+  document.title = T(UI.title);
   const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
   set("uiSub","sub");
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
