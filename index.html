@@ -285,6 +285,16 @@ function paintDef(id,paint,W,H,deg){
       +'</linearGradient>'};
 }
 
+/* 生成した SVG を同じ文書に複数貼ると url(#fgG) が最初の1枚を指してしまう。
+   内容から決めた接尾辞を付けて衝突を避ける。乱数は使わない（同じ入力からは
+   同じ SVG が出る、という性質を壊さないため）。 */
+function paintKey(W,H,color,bg,deg){
+  const src=JSON.stringify([W,H,color,bg,deg]);
+  let h=2166136261;
+  for(let i=0;i<src.length;i++){ h^=src.charCodeAt(i); h=Math.imul(h,16777619); }
+  return (h>>>0).toString(36);
+}
+
 function svgFromDots(W,H,dots,color,op,bg,deg){
   const tiers=[[],[],[]];
   for(const d of dots){
@@ -296,7 +306,8 @@ function svgFromDots(W,H,dots,color,op,bg,deg){
       +'a'+r.toFixed(2)+' '+r.toFixed(2)+' 0 1 0 '+(-2*r).toFixed(2)+' 0');
   }
   deg = (deg==null) ? 90 : deg;
-  const fp=paintDef("fgG",color,W,H,deg), bp=paintDef("bgG",bg,W,H,deg);
+  const k=paintKey(W,H,color,bg,deg);
+  const fp=paintDef("fg-"+k,color,W,H,deg), bp=paintDef("bg-"+k,bg,W,H,deg);
   const defs=(fp.def||bp.def) ? "<defs>"+bp.def+fp.def+"</defs>" : "";
   const rect = bg ? '<rect width="'+W+'" height="'+H+'" fill="'+bp.ref+'"/>' : '';
   const paths = tiers.map((t,i)=> t.length
@@ -835,6 +846,8 @@ const UI = {
   fgGrad:{ja:"ドットをグラデに",en:"Gradient dots"},
   bgGrad:{ja:"地をグラデに",en:"Gradient ground"},
   angle:{ja:"グラデの角度",en:"Gradient angle"},
+  gradStart:{ja:"開始色",en:"start color"},
+  gradEnd:{ja:"終了色",en:"end color"},
   bg:{ja:"地",en:"Ground"},
   transparent:{ja:"地を透明にする（他の絵に重ねるとき）",en:"Transparent ground (for layering)"},
   op0:{ja:"小",en:"S"}, op1:{ja:"中",en:"M"}, op2:{ja:"大",en:"L"},
@@ -907,6 +920,11 @@ function applyLang(){
   set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
   set("uiFgGrad","fgGrad"); set("uiBgGrad","bgGrad"); set("uiAngle","angle");
   set("uiPalette","paletteLabel");
+  // 1つの label に色入力が2つ並ぶので、暗黙の関連付けでは2つ目に名前が付かない
+  $("fg").setAttribute("aria-label", T(UI.fg)+" — "+T(UI.gradStart));
+  $("fg2").setAttribute("aria-label", T(UI.fg)+" — "+T(UI.gradEnd));
+  $("bg").setAttribute("aria-label", T(UI.bg)+" — "+T(UI.gradStart));
+  $("bg2").setAttribute("aria-label", T(UI.bg)+" — "+T(UI.gradEnd));
   $("palette").setAttribute("aria-label", T(UI.paletteLabel));
   const keepPal=$("palette").value; buildPaletteSelect(); $("palette").value=keepPal;
   set("uiTransparent","transparent");
