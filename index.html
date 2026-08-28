@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Math Pattern Gen — 数学から、模様が生まれる。</title>
-<meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
+<meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。13種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
 <link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Math Pattern Gen">
 <meta property="og:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
-<meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。11種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
+<meta property="og:description" content="点の間隔を変える。波を重ねる。色を選ぶ。13種類の数学的な構造から、背景パターンをつくる小さな実験室。SVG・PNGで持ち出せます。">
 <meta property="og:url" content="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@mrtn">
 <meta name="twitter:title" content="Math Pattern Gen — 数学から、模様が生まれる。">
-<meta name="twitter:description" content="11種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
+<meta name="twitter:description" content="13種類の数学的な構造を、触って、変えて、背景に。ブラウザでつくって、SVG・PNGで持ち出せます。">
 <meta name="twitter:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp.png">
 <meta name="twitter:image:alt" content="クリーム色の地に青いドットロゴと、大きく波打つ極格子の模様。数学から、模様が生まれる。">
 <link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
@@ -130,6 +130,69 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 @media (min-width:901px){
   .stage{position:sticky;top:0;align-self:start}
 }
+
+/* ── UI study: quiet controls, a generous canvas ── */
+:root{--ink:#20211f;--gray:#6b6e68;--line:#e4e5df;--card:#f0f1ed;--accent:#252823;--bg:#f5f5f1;--panel:#fafaf8}
+body{font-size:13px;letter-spacing:.01em}
+header{min-height:76px;padding:20px 28px;background:#fff;gap:20px}
+header .sub{font-size:11px;letter-spacing:.045em}
+header .right{gap:16px}
+header .gh{border-color:transparent;background:#f5f5f2;border-radius:5px}
+.lang{border-color:#e6e7e1;border-radius:5px}
+.lang button{font-weight:600;padding:5px 8px}
+.wrap{grid-template-columns:344px minmax(0,1fr)}
+.panel{padding:24px 22px 0;background:#fff;min-height:0;display:flex;flex-direction:column;height:calc(100dvh - 76px);overflow:hidden}
+.panel > fieldset{flex:none;margin:0 0 20px}
+fieldset{margin:0 0 26px;min-width:0}
+legend{border:0;font-size:11px;font-weight:600;letter-spacing:.06em;padding:0;margin-bottom:12px;color:#6b6e68}
+#struct{font-weight:600;font-size:12px;padding:11px 12px;background:#f7f8f4;border-color:#eceee6}
+#structNote{font-size:11px;line-height:1.85;margin:10px 2px 0}
+.control-tabs{display:flex;border-bottom:1px solid var(--line);gap:0;flex:none}
+.control-tabs button{flex:1;border:0;border-radius:0;background:transparent;color:var(--gray);font-weight:500;font-size:12px;padding:12px 0;position:relative}
+.control-tabs button[aria-selected="true"]{color:var(--ink);font-weight:700}
+.control-tabs button[aria-selected="true"]::after{content:"";height:2px;background:var(--ink);position:absolute;bottom:-1px;left:16px;right:16px}
+.control-pane{overflow:auto;min-height:0;padding:24px 4px 28px 0;scrollbar-width:thin;scrollbar-color:#d4d7cd transparent}
+.control-pane[hidden]{display:none}
+.structure-legend{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.browse-structures{font-size:11px;font-weight:400;letter-spacing:0;color:var(--ink);text-decoration:none;border-bottom:1px solid #c7cbc0;padding-bottom:2px;white-space:nowrap}
+.browse-structures:hover{color:#1644dd;border-color:#1644dd}
+#pane-shape > fieldset > legend,#pane-color > fieldset > legend{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+label{margin-bottom:15px}
+.row .name{font-size:11px;letter-spacing:.02em}
+.row .val{font-family:ui-monospace,monospace;font-size:10px;background:#f4f5f0;border-radius:3px;padding:2px 5px;width:auto;min-width:46px;color:#53584d}
+input[type=range]{appearance:none;-webkit-appearance:none;height:18px;background:transparent;margin:3px 0 0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:#d8dbd1;border-radius:1px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:#33382e;margin-top:-4.5px;box-shadow:0 0 0 3px #fff}
+input[type=range]::-moz-range-track{height:2px;background:#d8dbd1}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:#33382e}
+select,input[type=number],input[type=text]{border-color:#e3e5dc;border-radius:5px;background:#fafbf7;padding:9px 10px}
+button{border-color:#dedfd8;border-radius:5px;font-size:11px;font-weight:600;padding:10px 9px;transition:background .15s,color .15s}
+button:hover{background:#f0f2ea}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,[role=tabpanel]:focus-visible{outline:2px solid #1644dd;outline-offset:3px}
+#shuffle{background:#f0f2eb;border-color:#e8eadf}#reset{color:#6b6e68;border-color:transparent}
+.math-notes{border-top:1px solid var(--line);padding:18px 0;font-size:11px;color:var(--gray)}
+.math-notes summary{cursor:pointer;color:#454a40}.docs{margin-top:16px}.hint{border:0;border-radius:4px;padding:12px;line-height:1.9}
+.stage{padding:26px 36px 36px;top:0;min-height:calc(100dvh - 76px)}
+.canvas-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.canvas-label{font-size:11px;color:#6b6e68;letter-spacing:.08em}
+.canvas-export{background:var(--ink);color:#fff;border-color:var(--ink);padding:10px 17px}.canvas-export:hover{background:#454b3e}
+.preview{border:0;border-radius:3px;box-shadow:0 2px 5px #1d25140a,0 18px 50px #1d251410;outline:1px solid #1d25140a}
+.meta{font-size:10px;margin:18px 0 0;gap:20px;color:#818579}.meta b{font-weight:500;color:#505649}
+.canvas-tip{font-size:10px;color:#7d8174;line-height:1.8;border-top:1px solid #e3e5dc;padding-top:20px;margin:32px 0 0}
+.palette-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 1px 22px}
+.palette-swatches button{padding:0;display:flex;height:37px;overflow:hidden;border:0;border-radius:4px;outline:1px solid #00000012;outline-offset:0}
+.palette-swatches button span{width:50%;height:100%;pointer-events:none}
+.palette-swatches button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:3px}
+.palette-swatches button:focus-visible{outline:2px solid #1644dd;outline-offset:3px}
+input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding:4px;background:#fff;cursor:pointer}
+.hex-value{display:block;font:10px ui-monospace,monospace;color:#73796b;margin-top:6px;letter-spacing:.04em}
+.grid2{gap:10px}.grid3{gap:8px}.note{line-height:1.85;font-size:11px}
+@media(max-width:1050px){header .sub{display:none}.stage{padding:24px}.wrap{grid-template-columns:320px minmax(0,1fr)}}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{height:auto;overflow:visible;padding:22px;display:block}.control-pane{max-height:none;overflow:visible}.stage{min-height:0;position:static;padding:22px 22px 26px}.canvas-head{margin-bottom:18px}.canvas-tip{margin-top:20px;padding-top:15px}.control-tabs{position:sticky;top:0;background:#fff;z-index:2}.control-pane[hidden]{display:none}}
+@media(max-width:620px){header{padding:14px 18px;gap:10px;min-height:0}header .right{gap:6px}header .lang button{padding:4px 6px}.stage{padding:18px 18px 22px}.panel{padding:20px 18px 0}.meta{gap:12px;font-size:9px}.canvas-tip{font-size:10px}.canvas-export{padding:9px 13px}}
+@media(max-width:420px){header{display:grid;gap:8px 10px}header h1{max-width:283.5px}header .right{display:contents}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -149,53 +212,31 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 </header>
 
 <div class="wrap">
-<div class="panel">
-
-  <fieldset>
-    <legend id="uiLegStruct"></legend>
-    <select id="struct"></select>
+<div class="panel">  <fieldset aria-labelledby="uiLegStruct">
+    <legend class="structure-legend"><span id="uiLegStruct"></span><a class="browse-structures" id="browseStructures" href="structures.html"></a></legend>
+    <select id="struct" aria-labelledby="uiLegStruct"></select>
     <p class="note" id="structNote"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset><div class="control-tabs" role="tablist" aria-label="Controls"><button type="button" role="tab" id="tab-shape" aria-controls="pane-shape" aria-selected="true" tabindex="0"></button><button type="button" role="tab" id="tab-color" aria-controls="pane-color" aria-selected="false" tabindex="-1"></button><button type="button" role="tab" id="tab-export" aria-controls="pane-export" aria-selected="false" tabindex="-1"></button></div><div id="pane-shape" class="control-pane" role="tabpanel" aria-labelledby="tab-shape" tabindex="0" >  <fieldset>
     <legend id="uiLegParams"></legend>
     <div id="params"></div>
     <div class="grid2" style="margin-top:12px">
       <button id="shuffle"></button>
       <button id="reset"></button>
     </div>
-  </fieldset>
-
-  <fieldset>
-    <legend id="uiLegCanvas"></legend>
-    <label>
-      <select id="preset">
-        <option value="1200x630"></option>
-        <option value="1280x670"></option>
-        <option value="1111x278"></option>
-        <option value="1920x1080"></option>
-        <option value="1080x1080"></option>
-        <option value="1080x1920"></option>
-        <option value="custom"></option>
-      </select>
-    </label>
-    <div class="grid2">
-      <label><span class="name" id="uiW"></span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
-      <label><span class="name" id="uiH"></span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
-    </div>
-  </fieldset>
-
-  <fieldset>
+  </fieldset><details class="math-notes"><summary id="uiMathDetails"></summary>  <div class="docs">
+    <div id="doc" class="hint" style="background:#fff"></div>
+    <div class="hint" id="uiPrinciples"></div></div></details></div><div id="pane-color" class="control-pane" role="tabpanel" aria-labelledby="tab-color" tabindex="0" hidden>  <fieldset>
     <legend id="uiLegColor"></legend>
+    <div id="paletteSwatches" class="palette-swatches"></div>
     <label>
       <span class="name" id="uiPalette"></span>
       <select id="palette"></select>
     </label>
     <div class="grid2">
       <label><span class="name" id="uiFg"></span>
-        <span class="pair"><input type="color" id="fg" value="#1644dd"><input type="color" id="fg2" value="#1644dd"></span></label>
+        <span class="pair"><input type="color" id="fg" value="#1644dd"><input type="color" id="fg2" value="#1644dd"></span><output id="fgHex" class="hex-value"></output></label>
       <label><span class="name" id="uiBg"></span>
-        <span class="pair"><input type="color" id="bg" value="#f3eedf"><input type="color" id="bg2" value="#f3eedf"></span></label>
+        <span class="pair"><input type="color" id="bg" value="#f3eedf"><input type="color" id="bg2" value="#f3eedf"></span><output id="bgHex" class="hex-value"></output></label>
     </div>
     <div class="grid2">
       <label class="row"><input type="checkbox" id="fgGrad" style="width:auto;accent-color:var(--accent)"><span class="name" id="uiFgGrad"></span></label>
@@ -215,9 +256,24 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
       <label><span class="name" style="font-size:11px" id="uiOp2"></span><input type="number" id="op2" value="1.00" min="0" max="1" step="0.02"></label>
     </div>
     <p class="note" id="uiNoteOp"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset></div><div id="pane-export" class="control-pane" role="tabpanel" aria-labelledby="tab-export" tabindex="0" hidden>  <fieldset>
+    <legend id="uiLegCanvas"></legend>
+    <label>
+      <select id="preset">
+        <option value="1200x630"></option>
+        <option value="1280x670"></option>
+        <option value="1111x278"></option>
+        <option value="1920x1080"></option>
+        <option value="1080x1080"></option>
+        <option value="1080x1920"></option>
+        <option value="custom"></option>
+      </select>
+    </label>
+    <div class="grid2">
+      <label><span class="name" id="uiW"></span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
+      <label><span class="name" id="uiH"></span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
+    </div>
+  </fieldset>  <fieldset>
     <legend id="uiLegExport"></legend>
     <div class="grid2">
       <button class="primary" id="dlsvg"></button>
@@ -234,22 +290,14 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     </div>
     <p class="note" id="uiNotePng"></p>
     <p class="note" id="uiNoteExport"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset>  <fieldset>
     <legend id="uiLegRecipe"></legend>
     <textarea id="recipe" readonly spellcheck="false"></textarea>
     <p class="note" id="uiNoteRecipe"></p>
-  </fieldset>
-
-  <div class="docs">
-    <div id="doc" class="hint" style="background:#fff"></div>
-    <div class="hint" id="uiPrinciples"></div>
-  </div>
-
-</div>
+  </fieldset></div></div>
 
 <div class="stage">
+  <div class="canvas-head"><span class="canvas-label" id="uiPreview"></span><button type="button" class="canvas-export" id="quickExport"></button></div>
   <div class="preview" id="preview"></div>
   <div class="meta">
     <span><span id="uiMCount"></span> <b id="mCount">–</b></span>
@@ -257,6 +305,7 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     <span>SVG <b id="mBytes">–</b></span>
     <span id="mBusy"></span>
   </div>
+  <p class="canvas-tip" id="uiCanvasTip"></p>
 </div>
 </div>
 
@@ -841,6 +890,90 @@ S.turing = {
    地のグラデーションは「ごく近い2色」に寄せてある。模様が主役なので、
    地が主張すると喧嘩する。ドット側は移動が見えるので少し振ってよい。 */
 const DEFAULT_PALETTE="cobalt-cream";
+/* 座標とseedだけから決まる乱数。パンやサイズ変更でも同じ場を保つ。 */
+function cellRandom(x,y,seed,salt=0){
+  let h=Math.imul(x|0,374761393)^Math.imul(y|0,668265263)^Math.imul(seed|0,1442695041)^salt;
+  h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function fieldSampling(p,W,H){
+  // 最大サイズでも描画点を約9万に抑える。粒径も同率で補正する。
+  const step=Math.max(p.step,Math.sqrt(W*H/90000));
+  return {step,scale:step/p.step};
+}
+S.truchet={
+  label:{ja:"トルーシェ（つながる円弧）",en:"Truchet (connected arcs)"},
+  note:{ja:"向きを変えた円弧がつながり、輪や迷路が現れる。小さなタイルから、大きな流れをつくります。",en:"Quarter-circle tiles join into loops and meanders. Small changes in orientation create a larger flow."},
+  doc:{ja:"<b>トルーシェのしくみ</b><br>正方形の対角に、半径がタイル幅の半分の円弧を置きます。向きは座標とseedで決め、円弧からの距離を点の大きさに変えています。<br><b>表情を変える</b> — タイルを大きくするとゆったりした曲線に。「向きの偏り」を変えると、ランダムな迷路から整った輪へ近づきます。<br>大きなキャンバスでは約9万点を上限に、点の間隔と粒径を調整します。",en:"<b>How Truchet works</b><br>Each square contains arcs with a radius of half its width. Tile coordinates and a seed choose their orientation; distance to the arcs controls dot size.<br><b>Change the rhythm</b> — Larger tiles make broader curves. Orientation bias moves between meanders and ordered loops.<br>Large canvases adapt dot spacing and size to a budget of about 90,000 dots."},
+  params:[
+    {k:"cell",l:{ja:"タイルの大きさ",en:"Tile size"},min:60,max:360,step:10,d:180},
+    {k:"width",l:{ja:"帯の幅",en:"Band width"},min:0.04,max:0.4,step:0.01,d:0.15},
+    {k:"bias",l:{ja:"向きの偏り",en:"Orientation bias"},min:0,max:1,step:0.05,d:0.5},
+    {k:"seed",l:{ja:"配置の種",en:"Arrangement seed"},min:1,max:9999,step:1,d:31},
+    {k:"step",l:{ja:"点の間隔",en:"Dot spacing"},min:5,max:20,step:0.5,d:8},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},min:0.1,max:2,step:0.1,d:0.3},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},min:1,max:6,step:0.1,d:3.5},
+    {k:"pow",l:{ja:"階調カーブ",en:"Tone curve"},min:0.4,max:3,step:0.1,d:0.8},
+    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:40},
+    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:30}
+  ],
+  gen(p,W,H){
+    const out=[],{step,scale}=fieldSampling(p,W,H),L=p.cell;
+    for(let y=step/2;y<H;y+=step)for(let x=step/2;x<W;x+=step){
+      const gx=Math.floor((x-p.ox)/L),gy=Math.floor((y-p.oy)/L);
+      const u=x-p.ox-gx*L,v=y-p.oy-gy*L;
+      const flip=cellRandom(gx,gy,p.seed)<p.bias;
+      const d1=Math.abs(Math.hypot(flip?u-L:u,v)-L/2);
+      const d2=Math.abs(Math.hypot(flip?u:u-L,v-L)-L/2);
+      const m=Math.pow(clamp01(1-Math.min(d1,d2)/(L*p.width)),p.pow);
+      const r=(p.rmin+(p.rmax-p.rmin)*m)*scale;
+      out.push({x,y,r});
+    }
+    return out;
+  }
+};
+S.voronoi={
+  label:{ja:"ボロノイ（セル模様）",en:"Voronoi (cellular field)"},
+  note:{ja:"点と点のあいだに、細胞や石組みのような境界が生まれる。領域の大きさとゆらぎで、整った網目から有機的な模様へ。",en:"Scattered points divide the plane into cells. Adjust their spacing and irregularity to move from an ordered mesh to an organic texture."},
+  doc:{ja:"<b>ボロノイのしくみ</b><br>各格子に1つずつ母点を置き、seedで位置をずらします。最も近い2点までの距離を <code>F₁, F₂</code> とすると、<code>F₂−F₁=0</code> が領域の境界です。この差から粒径を決めます。差は辺までの厳密な距離ではありません。<br><b>内と外を切り替える</b> — 「描く場所」で境界と内側を選べます。ゆらぎを下げると幾何的に、上げると自然な石組みのように。<br>大きなキャンバスでは約9万点を上限に、点の間隔と粒径を調整します。",en:"<b>How Voronoi works</b><br>One seeded point is placed in each grid cell. For the two nearest distances, <code>F₁</code> and <code>F₂</code>, cell boundaries lie where <code>F₂−F₁=0</code>. This difference controls dot size; it is not the exact distance to an edge.<br><b>Inside or outside</b> — Switch between borders and interiors. Less irregularity gives a geometric grid; more creates an organic mesh.<br>Large canvases adapt dot spacing and size to about 90,000 dots."},
+  params:[
+    {k:"cell",l:{ja:"領域の大きさ",en:"Cell size"},min:60,max:360,step:10,d:180},
+    {k:"jitter",l:{ja:"母点のゆらぎ",en:"Point irregularity"},min:0,max:1,step:0.05,d:0.9},
+    {k:"width",l:{ja:"境界の幅",en:"Border width"},min:0.03,max:0.5,step:0.01,d:0.22},
+    {k:"mode",l:{ja:"描く場所",en:"Draw"},opts:[["edges",{ja:"境界",en:"Borders"}],["cells",{ja:"内側",en:"Interiors"}]],d:"edges"},
+    {k:"seed",l:{ja:"配置の種",en:"Arrangement seed"},min:1,max:9999,step:1,d:73},
+    {k:"step",l:{ja:"点の間隔",en:"Dot spacing"},min:5,max:20,step:0.5,d:8},
+    {k:"rmin",l:{ja:"最小粒径",en:"Min dot size"},min:0.1,max:2,step:0.05,d:0.25},
+    {k:"rmax",l:{ja:"最大粒径",en:"Max dot size"},min:1,max:6,step:0.1,d:3.5},
+    {k:"pow",l:{ja:"階調カーブ",en:"Tone curve"},min:0.4,max:3,step:0.1,d:0.9},
+    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:30},
+    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:20}
+  ],
+  gen(p,W,H){
+    const out=[],{step,scale}=fieldSampling(p,W,H),L=p.cell;
+    const x0=Math.floor(-p.ox/L)-2,y0=Math.floor(-p.oy/L)-2;
+    const x1=Math.floor((W-p.ox)/L)+2,y1=Math.floor((H-p.oy)/L)+2,sites=[];
+    for(let gy=y0;gy<=y1;gy++){
+      const row=[];
+      for(let gx=x0;gx<=x1;gx++)row.push({x:(gx+0.5+(cellRandom(gx,gy,p.seed)-0.5)*p.jitter)*L+p.ox,y:(gy+0.5+(cellRandom(gx,gy,p.seed,0x5bd1e995)-0.5)*p.jitter)*L+p.oy});
+      sites.push(row);
+    }
+    for(let y=step/2;y<H;y+=step)for(let x=step/2;x<W;x+=step){
+      const gx=Math.floor((x-p.ox)/L)-x0,gy=Math.floor((y-p.oy)/L)-y0;
+      let first=Infinity,second=Infinity;
+      // 母点が元のセル内にあるので、5×5近傍で最近傍2点を捕捉する。
+      for(let j=gy-2;j<=gy+2;j++)for(let i=gx-2;i<=gx+2;i++){
+        const q=sites[j][i],d=(x-q.x)**2+(y-q.y)**2;
+        if(d<first){second=first;first=d;}else if(d<second)second=d;
+      }
+      let m=clamp01(1-(Math.sqrt(second)-Math.sqrt(first))/(L*p.width));
+      if(p.mode==="cells")m=1-m;
+      const r=(p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow))*scale;
+      out.push({x,y,r});
+    }
+    return out;
+  }
+};
 const PALETTES=[
  {id:"cobalt-cream", name:{ja:"コバルト＆クリーム", en:"Cobalt & cream"},
   fg:"#1644DD", bg:"#F3EEDF", deg:90},
@@ -870,7 +1003,15 @@ const PALETTES=[
   fg:"#F4F4F5", bg:["#1B1B26","#2E2E3D"], deg:110}
 ];
 
-const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing"];
+function normalizeParams(key,input){
+  const values=input&&typeof input==="object"?input:{};
+  return Object.fromEntries(S[key].params.map(spec=>{
+    const v=values[spec.k];
+    if(spec.opts)return [spec.k,spec.opts.some(o=>o[0]===v)?v:spec.d];
+    return [spec.k,typeof v==="number"&&Number.isFinite(v)?Math.min(spec.max,Math.max(spec.min,v)):spec.d];
+  }));
+}
+const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi"];
 const $ = id => document.getElementById(id);
 
 /* ── 言語 ──────────────────────────────────────────────
@@ -883,6 +1024,11 @@ let LANG = (function(){
 const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
 
 const UI = {
+  browseStructures:{ja:"一覧から選ぶ ↗",en:"Browse all ↗"},
+  tabShape:{ja:"かたち",en:"Shape"},tabColor:{ja:"配色",en:"Color"},tabExport:{ja:"書き出し",en:"Export"},
+  preview:{ja:"プレビュー",en:"Preview"},quickExport:{ja:"書き出す ↗",en:"Export ↗"},
+  mathDetails:{ja:"この模様のしくみ",en:"Behind the pattern"},
+  canvasTip:{ja:"気に入ったら、このURLをブックマーク。かたちと配色を残せます。",en:"Bookmark this URL to keep the shape and colors."},
   title:{ja:"Math Pattern Gen — 数学から、模様が生まれる。",en:"Math Pattern Gen — Patterns, born from math."},
   sub:{ja:"数学から、模様が生まれる。",en:"Patterns, born from math."},
   legStruct:{ja:"構造",en:"Structure"},
@@ -969,6 +1115,7 @@ function syncPaintUI(){
   $("fg").parentElement.classList.toggle("solid",!fg);
   $("bg").parentElement.classList.toggle("solid",!bg);
   $("angleWrap").style.display=(fg||bg)?"":"none";
+  syncPaletteSwatches();
 }
 function currentPaint(which){
   return $(which+"Grad").checked ? [$(which).value,$(which+"2").value] : $(which).value;
@@ -979,6 +1126,9 @@ function applyLang(){
   document.title = T(UI.title);
   const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
   set("uiSub","sub");
+  set("browseStructures","browseStructures");
+  set("tab-shape","tabShape"); set("tab-color","tabColor"); set("tab-export","tabExport");
+  set("uiPreview","preview"); set("quickExport","quickExport"); set("uiMathDetails","mathDetails"); set("uiCanvasTip","canvasTip");
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
   set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
   set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy");
@@ -995,6 +1145,7 @@ function applyLang(){
   $("bg2").setAttribute("aria-label", T(UI.bg)+" — "+T(UI.gradEnd));
   $("palette").setAttribute("aria-label", T(UI.paletteLabel));
   const keepPal=$("palette").value; buildPaletteSelect(); $("palette").value=keepPal;
+  buildPaletteSwatches();
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
   set("uiNoteOp","noteOp"); set("uiNoteExport","noteExport"); set("uiNoteRecipe","noteRecipe");
@@ -1074,6 +1225,7 @@ function normDims(){
 }
 
 function render(){
+  syncPaletteSwatches();
   if(timer) clearTimeout(timer);
   $("mBusy").innerHTML='<span class="busy">'+T(UI.busy)+'</span>';
   timer=setTimeout(doRender,60);
@@ -1133,8 +1285,8 @@ function readHash(){
   if(!location.hash || location.hash.length<3) return false;
   try{
     const o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
-    if(!S[o.s]) return false;
-    cur=o.s; P=Object.assign(defaults(cur), o.p||{});
+    if(!o||typeof o.s!=="string"||!Object.hasOwn(S,o.s)) return false;
+    cur=o.s; P=normalizeParams(cur,o.p);
     $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
     if(o.f2) $("fg2").value=o.f2;
     if(o.b2) $("bg2").value=o.b2;
@@ -1172,7 +1324,7 @@ $("palette").addEventListener("change",()=>{
   render();
 });
 for(const id of ["fgGrad","bgGrad"]){
-  $(id).addEventListener("change",()=>{ syncPaintUI(); $("palette").value="custom"; render(); });
+  $(id).addEventListener("change",()=>{ $("palette").value="custom"; syncPaintUI(); render(); });
 }
 $("angle").addEventListener("input",()=>{
   $("v_angle").textContent=$("angle").value; $("palette").value="custom"; render(); });
@@ -1300,7 +1452,8 @@ $("dlpng").addEventListener("click",exportPNG);
 const DRAG={
   polar:["cx","cy"], conformal:["cx","cy"], ribbon:["x0","y0"],
   cloth:["ox","oy"], twist:["ox","oy"], quasi:["ox","oy"],
-  contour:["ox","oy"], moire:["ox","oy"], gibbs:["ox","oy"], caustics:["ox","oy"]
+  contour:["ox","oy"], moire:["ox","oy"], gibbs:["ox","oy"], caustics:["ox","oy"],
+  truchet:["ox","oy"], voronoi:["ox","oy"]
 };
 
 let lastDrawMs=0;                    // 直近の描画にかかった時間。重い構造を見分ける
@@ -1401,6 +1554,51 @@ $("copysvg").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent=T(UI.copied); }
   catch(e){ $("copysvg").textContent=T(UI.copyFail); }
   setTimeout(()=>{$("copysvg").textContent=T(UI.copy);},1400);
+});
+
+
+/* ── 操作パネル: 設定値は保持したまま、作業ごとに切り替える ── */
+function showControlPane(key){
+  for(const id of ["shape","color","export"]){
+    const active=id===key;
+    $("tab-"+id).setAttribute("aria-selected",active);
+    $("tab-"+id).tabIndex=active?0:-1;
+    $("pane-"+id).hidden=!active;
+  }
+}
+function syncPaletteSwatches(){
+  if(!$("paletteSwatches")) return;
+  for(const button of $("paletteSwatches").querySelectorAll("button"))button.setAttribute("aria-pressed",button.dataset.palette===$("palette").value);
+  $("fgHex").textContent=$("fg").value.toUpperCase();
+  $("bgHex").textContent=$("bg").value.toUpperCase();
+}
+function buildPaletteSwatches(){
+  $("paletteSwatches").replaceChildren();
+  const paint=v=>Array.isArray(v)?"linear-gradient(135deg,"+v.join(",")+")":v;
+  for(const p of PALETTES){
+    const button=document.createElement("button");button.type="button";button.dataset.palette=p.id;
+    button.setAttribute("aria-label",T(p.name));button.title=T(p.name);
+    for(const v of [p.bg,p.fg]){const chip=document.createElement("span");chip.style.background=paint(v);button.appendChild(chip);}
+    button.addEventListener("click",()=>{$("palette").value=p.id;$("palette").dispatchEvent(new Event("change"));});
+    $("paletteSwatches").appendChild(button);
+  }
+  syncPaletteSwatches();
+}
+const controlKeys=["shape","color","export"];
+controlKeys.forEach((key,index)=>{
+  $("tab-"+key).addEventListener("click",()=>showControlPane(key));
+  $("tab-"+key).addEventListener("keydown",event=>{
+    const next=event.key==="ArrowRight"?(index+1)%3:event.key==="ArrowLeft"?(index+2)%3:event.key==="Home"?0:event.key==="End"?2:null;
+    if(next===null)return;event.preventDefault();showControlPane(controlKeys[next]);$("tab-"+controlKeys[next]).focus();
+  });
+});
+$("quickExport").addEventListener("click",()=>{showControlPane("export");$("tab-export").focus();});
+$("browseStructures").addEventListener("click",()=>{
+  flush();
+  try{
+    sessionStorage.setItem("mpg.editorHash",location.hash);
+    sessionStorage.setItem("mpg.galleryReturn","1");
+  }catch(e){}
 });
 
 $("logo").innerHTML=brandLogoSVG();
