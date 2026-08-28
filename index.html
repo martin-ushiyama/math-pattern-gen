@@ -752,6 +752,8 @@ const UI = {
   starTitle:{ja:"GitHub でスターを付ける",en:"Star this project on GitHub"},
   pngBusy:{ja:"書き出し中…",en:"Rendering…"},
   pngFail:{ja:"PNG の書き出しに失敗",en:"PNG export failed"},
+  pngTooBig:{ja:"この端末には大きすぎる",en:"Too large for this device"},
+  pngReduced:{ja:"× {n} で書き出した（端末の上限）",en:"Exported at × {n} (device limit)"},
   notePng:{ja:"PNG は倍率をかけた実寸で書き出す。印刷や、SVG を読めない場所に貼るとき用。",
            en:"PNG is written out at the canvas size times the scale. For print, or anywhere SVG will not go."},
   copied:{ja:"コピーした",en:"Copied"},
@@ -964,50 +966,43 @@ $("dlsvg").addEventListener("click",()=>{
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 });
 /* canvas の上限は実装ごとに違う。iOS Safari は面積 16,777,216px で
-   頭打ちだが、デスクトップの Chrome はその十数倍まで通る。固定値を
-   書くとどちらかで外れるので、実際に確保できるかを測る。
+   頭打ちだが、デスクトップの Chrome はその十数倍まで通る。
 
-   絶対に試さない上限だけ決めておき（暴走した確保を防ぐ）、その中では
-   実測に任せる。 */
-const PNG_HARD_SIDE=16384, PNG_HARD_PX=2.7e8;
-let PNG_MAX_PX_MEASURED=null;
+   端末の容量を先に測る実装にすると、PNG を書き出さない人にも大きな
+   確保を強いることになる（それこそ避けたかった事故）。だから測らない。
+   選択肢の絞り込みは机上の上限だけで行い、実際に使う canvas を作った
+   ときに確かめる。確保はどのみち1回必要なので、余分な確保は起きない。 */
+// ブラウザの上限ではなく、道具としての上限。8192px / 6700万px（約268MB）。
+// 16000×16000 は Chrome なら通るが、1GiB 確保して数百MB の PNG が出るだけで
+// 使い道がない。ここを超える組み合わせは最初から出さない。
+const PNG_HARD_SIDE=8192, PNG_HARD_PX=6.7e7;
+function pngFits(W,H,sc){
+  const w=W*sc, h=H*sc;
+  return w<=PNG_HARD_SIDE && h<=PNG_HARD_SIDE && w*h<=PNG_HARD_PX;
+}
 
 /* 確保して隅に印を書き、読み戻せるかで判定する。
-   上限を超えた canvas は例外を投げるか、描いても中身が入らない。 */
-function canvasWorks(W,H){
-  if(W>PNG_HARD_SIDE||H>PNG_HARD_SIDE||W*H>PNG_HARD_PX) return false;
+   上限を超えた canvas は例外を投げるか、描いても中身が入らない。
+   使える場合はその canvas をそのまま返す（作り直さない）。 */
+function makeCanvas(W,H){
+  if(!pngFits(W,H,1)) return null;
   let c=null;
   try{
     c=document.createElement("canvas"); c.width=W; c.height=H;
-    if(c.width!==W||c.height!==H) return false;
-    const x=c.getContext("2d"); if(!x) return false;
+    if(c.width!==W||c.height!==H) throw 0;
+    const x=c.getContext("2d"); if(!x) throw 0;
     x.fillStyle="#010203"; x.fillRect(W-1,H-1,1,1);
     const d=x.getImageData(W-1,H-1,1,1).data;
-    return d[0]===1&&d[1]===2&&d[2]===3;
-  }catch(e){ return false; }
-  finally{ if(c){ c.width=0; c.height=0; } }   // すぐ解放する
-}
-
-/* 実際に通る面積を一度だけ測って覚える。小さい方から試すので、
-   測定そのものが重い確保にならない。 */
-function pngCapacity(){
-  if(PNG_MAX_PX_MEASURED!=null) return PNG_MAX_PX_MEASURED;
-  const steps=[4e6, 16.7e6, 40e6, 8e7, 1.4e8, 2.7e8];
-  let ok=4e6;
-  for(const px of steps){
-    const side=Math.floor(Math.sqrt(px));
-    if(!canvasWorks(side,side)) break;
-    ok=px;
+    if(!(d[0]===1&&d[1]===2&&d[2]===3)) throw 0;
+    x.clearRect(W-1,H-1,1,1);
+    return c;
+  }catch(e){
+    if(c){ c.width=0; c.height=0; }
+    return null;
   }
-  PNG_MAX_PX_MEASURED=ok;
-  return ok;
 }
 
-function pngFits(W,H,sc){
-  const w=W*sc, h=H*sc;
-  return w<=PNG_HARD_SIDE && h<=PNG_HARD_SIDE && w*h<=pngCapacity();
-}
-/* 倍率の選択肢に実寸を出し、収まらないものを無効にする */
+/* 倍率の選択肢に実寸を出し、机上の上限を超えるものを無効にする */
 function updateScaleOptions(W,H){
   const sel=$("pngScale");
   let best=null;
@@ -1026,35 +1021,43 @@ function updateScaleOptions(W,H){
 function exportPNG(){
   flush();
   const cw=parseInt($("cw").value), ch=parseInt($("ch").value);
-  let scale=parseInt($("pngScale").value)||2;
-  // 測定は目安なので、実際に使うサイズでも確保できるか確かめて落とす
-  while(scale>1 && !(pngFits(cw,ch,scale) && canvasWorks(cw*scale,ch*scale))) scale--;
-  const W=Math.round(cw*scale), H=Math.round(ch*scale);
+  const want=parseInt($("pngScale").value)||2;
   const btn=$("dlpng"), label=T(UI.savePng);
   btn.disabled=true; btn.textContent=T(UI.pngBusy);
   const done=(msg)=>{ btn.disabled=false; btn.textContent=msg||label;
-    if(msg) setTimeout(()=>{btn.textContent=label;},1600); };
+    if(msg) setTimeout(()=>{btn.textContent=label;},2000); };
+
+  // 実際に使う canvas を、大きい方から順に確保できるまで試す。
+  // ×1 でも確保できない端末なら、そこで諦めて知らせる。
+  let c=null, scale=want;
+  for(; scale>=1; scale--){
+    c=makeCanvas(Math.round(cw*scale), Math.round(ch*scale));
+    if(c) break;
+  }
+  if(!c){ done(T(UI.pngTooBig)); return; }
+
+  const W=c.width, H=c.height;
   const url=URL.createObjectURL(new Blob([lastSVG],{type:"image/svg+xml;charset=utf-8"}));
   const img=new Image();
+  const cleanup=()=>{ URL.revokeObjectURL(url); c.width=0; c.height=0; };
   img.onload=()=>{
     try{
-      const c=document.createElement("canvas"); c.width=W; c.height=H;
       const ctx=c.getContext("2d");
       ctx.imageSmoothingEnabled=true;
       ctx.drawImage(img,0,0,W,H);
       c.toBlob(bl=>{
-        URL.revokeObjectURL(url);
-        if(!bl){ done(T(UI.pngFail)); return; }
+        if(!bl){ cleanup(); done(T(UI.pngFail)); return; }
         const a=document.createElement("a");
         a.href=URL.createObjectURL(bl);
         a.download="pattern-"+cur+"-"+W+"x"+H+".png";
         a.click();
         setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-        done();
+        cleanup();
+        done(scale<want ? T(UI.pngReduced).replace("{n}",scale) : null);
       },"image/png");
-    }catch(e){ URL.revokeObjectURL(url); done(T(UI.pngFail)); }
+    }catch(e){ cleanup(); done(T(UI.pngFail)); }
   };
-  img.onerror=()=>{ URL.revokeObjectURL(url); done(T(UI.pngFail)); };
+  img.onerror=()=>{ cleanup(); done(T(UI.pngFail)); };
   img.src=url;
 }
 $("dlpng").addEventListener("click",exportPNG);
