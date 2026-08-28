@@ -176,7 +176,16 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,su
 .canvas-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .canvas-label{font-size:11px;color:#6b6e68;letter-spacing:.08em}
 .canvas-export{background:var(--ink);color:#fff;border-color:var(--ink);padding:10px 17px}.canvas-export:hover{background:#454b3e}
-.preview{border:0;border-radius:3px;box-shadow:0 2px 5px #1d25140a,0 18px 50px #1d251410;outline:1px solid #1d25140a}
+.preview{border:0;border-radius:3px;box-shadow:0 2px 5px #1d25140a,0 18px 50px #1d251410;outline:1px solid #1d25140a;position:relative;isolation:isolate}
+.preview.formula-transition>svg{animation:pattern-form 820ms cubic-bezier(.2,.72,.25,1) both}
+.formula-intro{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.preview.formula-transition>.formula-intro{animation:formula-away 820ms cubic-bezier(.2,.72,.25,1) both}
+.formula-intro-inner{text-align:center;max-width:min(82%,720px);transform:translateY(-2%)}
+.formula-kicker{font:9px/1.2 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;letter-spacing:.18em;opacity:.62;margin-bottom:12px}
+.formula-equation{font:500 clamp(17px,2.35vw,34px)/1.5 ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;letter-spacing:-.035em;white-space:pre-line;text-wrap:balance}
+.formula-name{font-size:10px;letter-spacing:.08em;margin-top:12px;opacity:.68}
+@keyframes pattern-form{0%,18%{clip-path:circle(0 at 50% 50%);opacity:.08}100%{clip-path:circle(145% at 50% 50%);opacity:1}}
+@keyframes formula-away{0%,26%{opacity:1}70%{opacity:.22}100%{opacity:0}}
 .meta{font-size:10px;margin:18px 0 0;gap:20px;color:#818579}.meta b{font-weight:500;color:#505649}
 .canvas-tip{font-size:10px;color:#7d8174;line-height:1.8;border-top:1px solid #e3e5dc;padding-top:20px;margin:32px 0 0}
 .palette-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 1px 22px}
@@ -191,7 +200,7 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
 @media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{height:auto;overflow:visible;padding:22px;display:block}.control-pane{max-height:none;overflow:visible}.stage{min-height:0;position:static;padding:22px 22px 26px}.canvas-head{margin-bottom:18px}.canvas-tip{margin-top:20px;padding-top:15px}.control-tabs{position:sticky;top:0;background:#fff;z-index:2}.control-pane[hidden]{display:none}}
 @media(max-width:620px){header{padding:14px 18px;gap:10px;min-height:0}header .right{gap:6px}header .lang button{padding:4px 6px}.stage{padding:18px 18px 22px}.panel{padding:20px 18px 0}.meta{gap:12px;font-size:9px}.canvas-tip{font-size:10px}.canvas-export{padding:9px 13px}}
 @media(max-width:420px){header{display:grid;gap:8px 10px}header h1{max-width:283.5px}header .right{display:contents}}
-@media(prefers-reduced-motion:reduce){button{transition:none}}
+@media(prefers-reduced-motion:reduce){button{transition:none}.preview.formula-transition>svg,.formula-intro{animation:none}}
 
 </style>
 </head>
@@ -1011,6 +1020,25 @@ function normalizeParams(key,input){
     return [spec.k,typeof v==="number"&&Number.isFinite(v)?Math.min(spec.max,Math.max(spec.min,v)):spec.d];
   }));
 }
+/* 構造を一目で伝える短い生成規則。詳しい式は各構造の解説に残す。 */
+const FORMULAS={
+  polar:"rᵢ = r₀ + i·Δr   |   m = cos(kθ + arᵢ + φ)",
+  ribbon:"X(u,v) = P(u) + v·R(τ(u))N(u)",
+  cloth:"h(u,v) = A(u)·sin(fᵤu + fᵥv + τu)",
+  contour:"m(x,y) = frac(Σ aᵢ·sin(kᵢ·x + φᵢ))",
+  twist:"x′ = R(α(v)) · S(v)x",
+  moire:"d(x, Λ₂) = min ‖x − Rφ(p₂n)‖",
+  quasi:"Σⱼ cos(k·(x cos θⱼ + y sin θⱼ) + ψⱼ)",
+  gibbs:"f(x) = (4/π) Σₙ odd sin(nkx)/n",
+  caustics:"tone(x,y) ∝ 1 / (|det DF(x,y)| + ε)",
+  turing:"∂u/∂t = Dᵤ∇²u − uv² + F(1−u)\n∂v/∂t = Dᵥ∇²v + uv² − (F+K)v",
+  truchet:"m(x) = 1 − d(x, arc)/(L·w)",
+  voronoi:"m(x) = 1 − (F₂(x) − F₁(x))/w"
+};
+function formulaFor(key,p){
+  if(key==="conformal")return p&&p.fn==="jouk" ? "w = z + 1/z" : "w = z²";
+  return FORMULAS[key]||"";
+}
 const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi"];
 const $ = id => document.getElementById(id);
 
@@ -1207,7 +1235,7 @@ function buildParams(){
   updateDragCursor();
 }
 
-let timer=null, lastSVG="", hashPalette=null;
+let timer=null, lastSVG="", hashPalette=null, pendingFormula=null, formulaTimer=null;
 
 /* 幅高さを宣言どおりの範囲に丸め、コントロールにも書き戻す。
    丸めないと、ハッシュやファイル名が実際の書き出しと食い違い、
@@ -1246,7 +1274,10 @@ function doRender(){
     const t0=performance.now();
     try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
     lastSVG=svgFromDots(W,H,dots,currentPaint("fg"),op,bg,deg);
-    $("preview").innerHTML=lastSVG;
+    const preview=$("preview");
+    const formulaOverlay=pendingFormula===cur ? preview.querySelector(".formula-intro") : null;
+    preview.innerHTML=lastSVG;
+    if(formulaOverlay){ preview.append(formulaOverlay); startFormulaTransition(cur); }
     // 生成だけでなく、文字列の組み立てと DOM への反映まで含めて測る。
     // 密なパターンはここが支配的で、生成だけ見ると「軽い」と誤判定する
     lastDrawMs=performance.now()-t0;
@@ -1260,6 +1291,33 @@ function doRender(){
     updateScaleOptions(W,H);
     $("recipe").value = cur+" / "+W+"×"+H+"\n"
       + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
+}
+
+function prepareFormulaTransition(key){
+  const preview=$("preview"), equation=formulaFor(key,P);
+  clearTimeout(formulaTimer);
+  preview.classList.remove("formula-transition");
+  preview.querySelector(".formula-intro")?.remove();
+  pendingFormula=null;
+  if(!equation||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const overlay=document.createElement("div");
+  overlay.className="formula-intro"; overlay.setAttribute("aria-hidden","true");
+  const bg=$("transparent").checked ? "#f5f5f1" : currentPaint("bg");
+  overlay.style.background=Array.isArray(bg)?"linear-gradient("+$("angle").value+"deg,"+bg.join(",")+")":bg;
+  overlay.style.color=$("fg").value;
+  const inner=document.createElement("div"); inner.className="formula-intro-inner";
+  const kicker=document.createElement("div"); kicker.className="formula-kicker"; kicker.textContent="GENERATING RULE";
+  const code=document.createElement("div"); code.className="formula-equation"; code.textContent=equation;
+  const name=document.createElement("div"); name.className="formula-name"; name.textContent=T(S[key].label);
+  inner.append(kicker,code,name); overlay.append(inner); preview.append(overlay);
+  pendingFormula=key;
+}
+function startFormulaTransition(key){
+  const preview=$("preview"),overlay=preview.querySelector(".formula-intro");
+  if(pendingFormula!==key||!overlay)return;
+  pendingFormula=null;
+  void preview.offsetWidth; preview.classList.add("formula-transition");
+  formulaTimer=setTimeout(()=>{preview.classList.remove("formula-transition");overlay.remove();},900);
 }
 
 /* 幅高さに一致するプリセットを選び直す。無ければカスタム */
@@ -1302,7 +1360,7 @@ function readHash(){
   }catch(e){ return false; }
 }
 
-$("struct").addEventListener("change",()=>{ cur=$("struct").value; P=defaults(cur); buildParams(); render(); });
+$("struct").addEventListener("change",()=>{ cur=$("struct").value; P=defaults(cur); buildParams(); prepareFormulaTransition(cur); render(); });
 $("reset").addEventListener("click",()=>{ P=defaults(cur); buildParams(); render(); });
 $("shuffle").addEventListener("click",()=>{
   for(const s of S[cur].params){

@@ -1,6 +1,6 @@
 :root{color-scheme:light;--ink:#20211f;--muted:#6b6e68;--line:#e0e3da;--blue:#1644dd}
 *{box-sizing:border-box}body{margin:0;background:#f5f5f1;color:var(--ink);font:13px/1.7 "Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.01em}
-a{color:inherit}header{min-height:76px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#fff;border-bottom:1px solid var(--line)}
+a{color:inherit}header{min-height:76px;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#fffffff5;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;box-shadow:0 8px 24px #1d251408;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .brand{display:block;width:283.5px;max-width:48%;flex-shrink:1;line-height:0}.brand>svg{display:block;width:100%;height:auto}
 nav{display:flex;align-items:center;gap:22px;flex:none}.back{font-size:12px;text-decoration:none}.back:hover{color:var(--blue)}
 .lang{display:flex;border:1px solid #e6e7e1;border-radius:5px;overflow:hidden}.lang button{font:inherit;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--muted);border:0;padding:5px 9px}.lang button[aria-pressed=true]{background:var(--ink);color:#fff}

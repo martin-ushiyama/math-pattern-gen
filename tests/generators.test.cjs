@@ -1,11 +1,20 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {root,loadCore,defaults}=require('../scripts/core.cjs');
-const {S,ORDER,svgFromDots,normalizeParams}=loadCore();
+const {S,ORDER,svgFromDots,normalizeParams,FORMULAS,formulaFor}=loadCore();
 const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
 function valid(dots){assert(dots.length>0);assert(dots.every(d=>Number.isFinite(d.x)&&Number.isFinite(d.y)&&Number.isFinite(d.r)&&d.r>0));}
 for(const id of ORDER)test(id+': deterministic finite output',()=>{
   const p=defaults(S,id),a=S[id].gen(p,1200,900),b=S[id].gen(p,1200,900);valid(a);
   assert.equal(JSON.stringify(a),JSON.stringify(b));
+});
+test('every structure has a concise generating rule',()=>{
+  for(const id of ORDER){
+    const formula=formulaFor(id,defaults(S,id));
+    assert.equal(typeof formula,'string');assert(formula.length>2,id);
+  }
+  assert.equal(formulaFor('conformal',{fn:'z2'}),'w = z²');
+  assert.equal(formulaFor('conformal',{fn:'jouk'}),'w = z + 1/z');
+  assert.deepEqual(new Set([...Object.keys(FORMULAS),'conformal']),new Set(ORDER));
 });
 for(const id of ['truchet','voronoi']){
   test(id+': every parameter boundary and wide/tall canvases',()=>{
