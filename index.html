@@ -1067,6 +1067,10 @@ function syncPreset(){
 
 /* URL ハッシュに状態を持つ */
 function writeHash(){
+  // ドラッグ中は書かない。Safari は replaceState の呼び出し頻度に制限があり、
+  // 毎フレーム呼ぶと数秒で SecurityError を投げて描画ごと止まる。
+  // 離したときに endDrag から render() が走るので、そこで書かれる
+  if(drag) return;
   const o={s:cur,w:$("cw").value,h:$("ch").value,fg:$("fg").value,bg:$("bg").value,
     f2:$("fg2").value,b2:$("bg2").value,fG:$("fgGrad").checked?1:0,bG:$("bgGrad").checked?1:0,
     ang:$("angle").value,pal:$("palette").value,
