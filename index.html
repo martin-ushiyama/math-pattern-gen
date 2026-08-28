@@ -130,6 +130,66 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 @media (min-width:901px){
   .stage{position:sticky;top:0;align-self:start}
 }
+
+/* ── UI study: quiet controls, a generous canvas ── */
+:root{--ink:#20211f;--gray:#6b6e68;--line:#e4e5df;--card:#f0f1ed;--accent:#252823;--bg:#f5f5f1;--panel:#fafaf8}
+body{font-size:13px;letter-spacing:.01em}
+header{min-height:76px;padding:20px 28px;background:#fff;gap:20px}
+header .sub{font-size:11px;letter-spacing:.045em}
+header .right{gap:16px}
+header .gh{border-color:transparent;background:#f5f5f2;border-radius:5px}
+.lang{border-color:#e6e7e1;border-radius:5px}
+.lang button{font-weight:600;padding:5px 8px}
+.wrap{grid-template-columns:344px minmax(0,1fr)}
+.panel{padding:24px 22px 0;background:#fff;min-height:0;display:flex;flex-direction:column;height:calc(100dvh - 76px);overflow:hidden}
+.panel > fieldset{flex:none;margin:0 0 20px}
+fieldset{margin:0 0 26px;min-width:0}
+legend{border:0;font-size:11px;font-weight:600;letter-spacing:.06em;padding:0;margin-bottom:12px;color:#6b6e68}
+#struct{font-weight:600;font-size:12px;padding:11px 12px;background:#f7f8f4;border-color:#eceee6}
+#structNote{font-size:11px;line-height:1.85;margin:10px 2px 0}
+.control-tabs{display:flex;border-bottom:1px solid var(--line);gap:0;flex:none}
+.control-tabs button{flex:1;border:0;border-radius:0;background:transparent;color:var(--gray);font-weight:500;font-size:12px;padding:12px 0;position:relative}
+.control-tabs button[aria-selected="true"]{color:var(--ink);font-weight:700}
+.control-tabs button[aria-selected="true"]::after{content:"";height:2px;background:var(--ink);position:absolute;bottom:-1px;left:16px;right:16px}
+.control-pane{overflow:auto;min-height:0;padding:24px 4px 28px 0;scrollbar-width:thin;scrollbar-color:#d4d7cd transparent}
+.control-pane[hidden]{display:none}
+#pane-shape > fieldset > legend,#pane-color > fieldset > legend{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+label{margin-bottom:15px}
+.row .name{font-size:11px;letter-spacing:.02em}
+.row .val{font-family:ui-monospace,monospace;font-size:10px;background:#f4f5f0;border-radius:3px;padding:2px 5px;width:auto;min-width:46px;color:#53584d}
+input[type=range]{appearance:none;-webkit-appearance:none;height:18px;background:transparent;margin:3px 0 0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:#d8dbd1;border-radius:1px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:#33382e;margin-top:-4.5px;box-shadow:0 0 0 3px #fff}
+input[type=range]::-moz-range-track{height:2px;background:#d8dbd1}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:#33382e}
+select,input[type=number],input[type=text]{border-color:#e3e5dc;border-radius:5px;background:#fafbf7;padding:9px 10px}
+button{border-color:#dedfd8;border-radius:5px;font-size:11px;font-weight:600;padding:10px 9px;transition:background .15s,color .15s}
+button:hover{background:#f0f2ea}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,[role=tabpanel]:focus-visible{outline:2px solid #1644dd;outline-offset:3px}
+#shuffle{background:#f0f2eb;border-color:#e8eadf}#reset{color:#6b6e68;border-color:transparent}
+.math-notes{border-top:1px solid var(--line);padding:18px 0;font-size:11px;color:var(--gray)}
+.math-notes summary{cursor:pointer;color:#454a40}.docs{margin-top:16px}.hint{border:0;border-radius:4px;padding:12px;line-height:1.9}
+.stage{padding:26px 36px 36px;top:0;min-height:calc(100dvh - 76px)}
+.canvas-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.canvas-label{font-size:11px;color:#6b6e68;letter-spacing:.08em}
+.canvas-export{background:var(--ink);color:#fff;border-color:var(--ink);padding:10px 17px}.canvas-export:hover{background:#454b3e}
+.preview{border:0;border-radius:3px;box-shadow:0 2px 5px #1d25140a,0 18px 50px #1d251410;outline:1px solid #1d25140a}
+.meta{font-size:10px;margin:18px 0 0;gap:20px;color:#818579}.meta b{font-weight:500;color:#505649}
+.canvas-tip{font-size:10px;color:#7d8174;line-height:1.8;border-top:1px solid #e3e5dc;padding-top:20px;margin:32px 0 0}
+.palette-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 1px 22px}
+.palette-swatches button{padding:0;display:flex;height:37px;overflow:hidden;border:0;border-radius:4px;outline:1px solid #00000012;outline-offset:0}
+.palette-swatches button span{width:50%;height:100%;pointer-events:none}
+.palette-swatches button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:3px}
+.palette-swatches button:focus-visible{outline:2px solid #1644dd;outline-offset:3px}
+input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding:4px;background:#fff;cursor:pointer}
+.hex-value{display:block;font:10px ui-monospace,monospace;color:#73796b;margin-top:6px;letter-spacing:.04em}
+.grid2{gap:10px}.grid3{gap:8px}.note{line-height:1.85;font-size:11px}
+@media(max-width:1050px){header .sub{display:none}.stage{padding:24px}.wrap{grid-template-columns:320px minmax(0,1fr)}}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{height:auto;overflow:visible;padding:22px;display:block}.control-pane{max-height:none;overflow:visible}.stage{min-height:0;position:static;padding:22px 22px 26px}.canvas-head{margin-bottom:18px}.canvas-tip{margin-top:20px;padding-top:15px}.control-tabs{position:sticky;top:0;background:#fff;z-index:2}.control-pane[hidden]{display:none}}
+@media(max-width:620px){header{padding:14px 18px;gap:10px;min-height:0}header .right{gap:6px}header .lang button{padding:4px 6px}.stage{padding:18px 18px 22px}.panel{padding:20px 18px 0}.meta{gap:12px;font-size:9px}.canvas-tip{font-size:10px}.canvas-export{padding:9px 13px}}
+@media(max-width:420px){header{display:grid;gap:8px 10px}header h1{max-width:283.5px}header .right{display:contents}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -149,53 +209,31 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 </header>
 
 <div class="wrap">
-<div class="panel">
-
-  <fieldset>
+<div class="panel">  <fieldset>
     <legend id="uiLegStruct"></legend>
     <select id="struct"></select>
     <p class="note" id="structNote"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset><div class="control-tabs" role="tablist" aria-label="Controls"><button type="button" role="tab" id="tab-shape" aria-controls="pane-shape" aria-selected="true" tabindex="0"></button><button type="button" role="tab" id="tab-color" aria-controls="pane-color" aria-selected="false" tabindex="-1"></button><button type="button" role="tab" id="tab-export" aria-controls="pane-export" aria-selected="false" tabindex="-1"></button></div><div id="pane-shape" class="control-pane" role="tabpanel" aria-labelledby="tab-shape" tabindex="0" >  <fieldset>
     <legend id="uiLegParams"></legend>
     <div id="params"></div>
     <div class="grid2" style="margin-top:12px">
       <button id="shuffle"></button>
       <button id="reset"></button>
     </div>
-  </fieldset>
-
-  <fieldset>
-    <legend id="uiLegCanvas"></legend>
-    <label>
-      <select id="preset">
-        <option value="1200x630"></option>
-        <option value="1280x670"></option>
-        <option value="1111x278"></option>
-        <option value="1920x1080"></option>
-        <option value="1080x1080"></option>
-        <option value="1080x1920"></option>
-        <option value="custom"></option>
-      </select>
-    </label>
-    <div class="grid2">
-      <label><span class="name" id="uiW"></span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
-      <label><span class="name" id="uiH"></span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
-    </div>
-  </fieldset>
-
-  <fieldset>
+  </fieldset><details class="math-notes"><summary id="uiMathDetails"></summary>  <div class="docs">
+    <div id="doc" class="hint" style="background:#fff"></div>
+    <div class="hint" id="uiPrinciples"></div></div></details></div><div id="pane-color" class="control-pane" role="tabpanel" aria-labelledby="tab-color" tabindex="0" hidden>  <fieldset>
     <legend id="uiLegColor"></legend>
+    <div id="paletteSwatches" class="palette-swatches"></div>
     <label>
       <span class="name" id="uiPalette"></span>
       <select id="palette"></select>
     </label>
     <div class="grid2">
       <label><span class="name" id="uiFg"></span>
-        <span class="pair"><input type="color" id="fg" value="#1644dd"><input type="color" id="fg2" value="#1644dd"></span></label>
+        <span class="pair"><input type="color" id="fg" value="#1644dd"><input type="color" id="fg2" value="#1644dd"></span><output id="fgHex" class="hex-value"></output></label>
       <label><span class="name" id="uiBg"></span>
-        <span class="pair"><input type="color" id="bg" value="#f3eedf"><input type="color" id="bg2" value="#f3eedf"></span></label>
+        <span class="pair"><input type="color" id="bg" value="#f3eedf"><input type="color" id="bg2" value="#f3eedf"></span><output id="bgHex" class="hex-value"></output></label>
     </div>
     <div class="grid2">
       <label class="row"><input type="checkbox" id="fgGrad" style="width:auto;accent-color:var(--accent)"><span class="name" id="uiFgGrad"></span></label>
@@ -215,9 +253,24 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
       <label><span class="name" style="font-size:11px" id="uiOp2"></span><input type="number" id="op2" value="1.00" min="0" max="1" step="0.02"></label>
     </div>
     <p class="note" id="uiNoteOp"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset></div><div id="pane-export" class="control-pane" role="tabpanel" aria-labelledby="tab-export" tabindex="0" hidden>  <fieldset>
+    <legend id="uiLegCanvas"></legend>
+    <label>
+      <select id="preset">
+        <option value="1200x630"></option>
+        <option value="1280x670"></option>
+        <option value="1111x278"></option>
+        <option value="1920x1080"></option>
+        <option value="1080x1080"></option>
+        <option value="1080x1920"></option>
+        <option value="custom"></option>
+      </select>
+    </label>
+    <div class="grid2">
+      <label><span class="name" id="uiW"></span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
+      <label><span class="name" id="uiH"></span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
+    </div>
+  </fieldset>  <fieldset>
     <legend id="uiLegExport"></legend>
     <div class="grid2">
       <button class="primary" id="dlsvg"></button>
@@ -234,22 +287,14 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     </div>
     <p class="note" id="uiNotePng"></p>
     <p class="note" id="uiNoteExport"></p>
-  </fieldset>
-
-  <fieldset>
+  </fieldset>  <fieldset>
     <legend id="uiLegRecipe"></legend>
     <textarea id="recipe" readonly spellcheck="false"></textarea>
     <p class="note" id="uiNoteRecipe"></p>
-  </fieldset>
-
-  <div class="docs">
-    <div id="doc" class="hint" style="background:#fff"></div>
-    <div class="hint" id="uiPrinciples"></div>
-  </div>
-
-</div>
+  </fieldset></div></div>
 
 <div class="stage">
+  <div class="canvas-head"><span class="canvas-label" id="uiPreview"></span><button type="button" class="canvas-export" id="quickExport"></button></div>
   <div class="preview" id="preview"></div>
   <div class="meta">
     <span><span id="uiMCount"></span> <b id="mCount">–</b></span>
@@ -257,6 +302,7 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
     <span>SVG <b id="mBytes">–</b></span>
     <span id="mBusy"></span>
   </div>
+  <p class="canvas-tip" id="uiCanvasTip"></p>
 </div>
 </div>
 
@@ -883,6 +929,10 @@ let LANG = (function(){
 const T = o => (o && typeof o === "object" && (o.ja || o.en)) ? (o[LANG] || o.ja) : o;
 
 const UI = {
+  tabShape:{ja:"かたち",en:"Shape"},tabColor:{ja:"配色",en:"Color"},tabExport:{ja:"書き出し",en:"Export"},
+  preview:{ja:"プレビュー",en:"Preview"},quickExport:{ja:"書き出す ↗",en:"Export ↗"},
+  mathDetails:{ja:"この模様のしくみ",en:"Behind the pattern"},
+  canvasTip:{ja:"気に入ったら、このURLをブックマーク。かたちと配色を残せます。",en:"Bookmark this URL to keep the shape and colors."},
   title:{ja:"Math Pattern Gen — 数学から、模様が生まれる。",en:"Math Pattern Gen — Patterns, born from math."},
   sub:{ja:"数学から、模様が生まれる。",en:"Patterns, born from math."},
   legStruct:{ja:"構造",en:"Structure"},
@@ -969,6 +1019,7 @@ function syncPaintUI(){
   $("fg").parentElement.classList.toggle("solid",!fg);
   $("bg").parentElement.classList.toggle("solid",!bg);
   $("angleWrap").style.display=(fg||bg)?"":"none";
+  syncPaletteSwatches();
 }
 function currentPaint(which){
   return $(which+"Grad").checked ? [$(which).value,$(which+"2").value] : $(which).value;
@@ -979,6 +1030,8 @@ function applyLang(){
   document.title = T(UI.title);
   const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
   set("uiSub","sub");
+  set("tab-shape","tabShape"); set("tab-color","tabColor"); set("tab-export","tabExport");
+  set("uiPreview","preview"); set("quickExport","quickExport"); set("uiMathDetails","mathDetails"); set("uiCanvasTip","canvasTip");
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
   set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
   set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy");
@@ -995,6 +1048,7 @@ function applyLang(){
   $("bg2").setAttribute("aria-label", T(UI.bg)+" — "+T(UI.gradEnd));
   $("palette").setAttribute("aria-label", T(UI.paletteLabel));
   const keepPal=$("palette").value; buildPaletteSelect(); $("palette").value=keepPal;
+  buildPaletteSwatches();
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
   set("uiNoteOp","noteOp"); set("uiNoteExport","noteExport"); set("uiNoteRecipe","noteRecipe");
@@ -1402,6 +1456,44 @@ $("copysvg").addEventListener("click",async()=>{
   catch(e){ $("copysvg").textContent=T(UI.copyFail); }
   setTimeout(()=>{$("copysvg").textContent=T(UI.copy);},1400);
 });
+
+
+/* ── 操作パネル: 設定値は保持したまま、作業ごとに切り替える ── */
+function showControlPane(key){
+  for(const id of ["shape","color","export"]){
+    const active=id===key;
+    $("tab-"+id).setAttribute("aria-selected",active);
+    $("tab-"+id).tabIndex=active?0:-1;
+    $("pane-"+id).hidden=!active;
+  }
+}
+function syncPaletteSwatches(){
+  if(!$("paletteSwatches")) return;
+  for(const button of $("paletteSwatches").querySelectorAll("button"))button.setAttribute("aria-pressed",button.dataset.palette===$("palette").value);
+  $("fgHex").textContent=$("fg").value.toUpperCase();
+  $("bgHex").textContent=$("bg").value.toUpperCase();
+}
+function buildPaletteSwatches(){
+  $("paletteSwatches").replaceChildren();
+  const paint=v=>Array.isArray(v)?"linear-gradient(135deg,"+v.join(",")+")":v;
+  for(const p of PALETTES){
+    const button=document.createElement("button");button.type="button";button.dataset.palette=p.id;
+    button.setAttribute("aria-label",T(p.name));button.title=T(p.name);
+    for(const v of [p.bg,p.fg]){const chip=document.createElement("span");chip.style.background=paint(v);button.appendChild(chip);}
+    button.addEventListener("click",()=>{$("palette").value=p.id;$("palette").dispatchEvent(new Event("change"));});
+    $("paletteSwatches").appendChild(button);
+  }
+  syncPaletteSwatches();
+}
+const controlKeys=["shape","color","export"];
+controlKeys.forEach((key,index)=>{
+  $("tab-"+key).addEventListener("click",()=>showControlPane(key));
+  $("tab-"+key).addEventListener("keydown",event=>{
+    const next=event.key==="ArrowRight"?(index+1)%3:event.key==="ArrowLeft"?(index+2)%3:event.key==="Home"?0:event.key==="End"?2:null;
+    if(next===null)return;event.preventDefault();showControlPane(controlKeys[next]);$("tab-"+controlKeys[next]).focus();
+  });
+});
+$("quickExport").addEventListener("click",()=>{showControlPane("export");$("tab-export").focus();});
 
 $("logo").innerHTML=brandLogoSVG();
 $("langJa").addEventListener("click",()=>setLang("ja"));
