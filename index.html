@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pattern Lab</title>
+<style>
+:root{
+  --ink:#1B1B26; --gray:#6E6E78; --line:#DCDCE3; --card:#ECECF1;
+  --accent:#1B1B26; --bg:#FFFFFF; --panel:#F7F7F9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;line-height:1.6}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header h1{margin:0;font-size:0;line-height:0}
+header h1 svg{display:block;height:26px;width:auto}
+header .sub{color:var(--gray);font-size:12px}
+header .by{margin-left:auto;color:var(--gray);font-size:12px;white-space:nowrap}
+header .by a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+header .by a:hover{border-bottom-color:var(--ink)}
+.wrap{display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+.panel{border-right:1px solid var(--line);padding:16px 18px 40px;min-height:calc(100vh - 52px)}
+.stage{padding:20px 24px 60px;min-width:0}
+fieldset{border:0;padding:0;margin:0 0 20px}
+legend{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gray);text-transform:uppercase;
+  padding:0 0 6px;border-bottom:1px solid var(--line);width:100%;margin-bottom:10px}
+label{display:block;margin-bottom:9px}
+.row{display:flex;align-items:center;gap:8px}
+.row .name{flex:1;min-width:0;font-size:12px}
+.row .val{font-variant-numeric:tabular-nums;font-size:11px;color:var(--gray);width:56px;text-align:right;flex:none}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 0}
+select,input[type=number],input[type=text]{width:100%;padding:6px 8px;border:1px solid var(--line);
+  border-radius:5px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+input[type=color]{width:100%;height:30px;padding:2px;border:1px solid var(--line);border-radius:5px;background:#fff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{font:inherit;font-size:12px;font-weight:700;padding:8px 10px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--ink)}
+button:hover{background:var(--card)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{filter:brightness(.94)}
+.preview{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:
+  linear-gradient(45deg,#eee 25%,transparent 25%,transparent 75%,#eee 75%),
+  linear-gradient(45deg,#eee 25%,transparent 25%,transparent 75%,#eee 75%);
+  background-size:16px 16px;background-position:0 0,8px 8px}
+.preview svg{display:block;width:100%;height:auto}
+.meta{display:flex;gap:16px;flex-wrap:wrap;color:var(--gray);font-size:11px;
+  font-variant-numeric:tabular-nums;margin:8px 2px 18px}
+.note{color:var(--gray);font-size:11px;margin:6px 0 0}
+.hint{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:9px 11px;
+  color:var(--gray);font-size:11px;margin:0 0 16px}
+code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:11px;
+  background:var(--card);padding:1px 4px;border-radius:3px;color:var(--ink)}
+#params:empty::after{content:"パラメータなし";color:var(--gray);font-size:12px}
+#recipe{width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;line-height:1.5;
+  border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--panel);color:var(--gray);
+  resize:vertical;min-height:64px}
+.busy{color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="logo" aria-label="Pattern Lab"></h1>
+  <span class="sub">数学的な背景パターンの生成器 — 乱数を使わないので、同じパラメータからは常に同じ絵が出る</span>
+  <span class="by">by <a href="https://x.com/mrtn" target="_blank" rel="noopener noreferrer">@mrtn</a></span>
+</header>
+
+<div class="wrap">
+<div class="panel">
+
+  <fieldset>
+    <legend>構造</legend>
+    <select id="struct"></select>
+    <p class="note" id="structNote"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>パラメータ</legend>
+    <div id="params"></div>
+    <div class="grid2" style="margin-top:12px">
+      <button id="shuffle">振ってみる</button>
+      <button id="reset">既定値に戻す</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>キャンバス</legend>
+    <label>
+      <select id="preset">
+        <option value="1200x630">OGP・SNS 1200 × 630</option>
+        <option value="1280x670">note 見出し 1280 × 670</option>
+        <option value="1111x278">帯バナー 1111 × 278</option>
+        <option value="1920x1080">スライド 1920 × 1080</option>
+        <option value="1080x1080">正方形 1080 × 1080</option>
+        <option value="1080x1920">縦 1080 × 1920</option>
+        <option value="custom">カスタム</option>
+      </select>
+    </label>
+    <div class="grid2">
+      <label><span class="name">幅</span><input type="number" id="cw" value="1200" min="100" max="4000" step="1"></label>
+      <label><span class="name">高さ</span><input type="number" id="ch" value="630" min="100" max="4000" step="1"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>色</legend>
+    <div class="grid2">
+      <label><span class="name">ドット</span><input type="color" id="fg" value="#1b1b26"></label>
+      <label><span class="name">地</span><input type="color" id="bg" value="#f4f4f5"></label>
+    </div>
+    <label class="row" style="margin-top:4px">
+      <input type="checkbox" id="transparent" style="width:auto;accent-color:var(--accent)">
+      <span class="name">地を透明にする（他の絵に重ねるとき）</span>
+    </label>
+    <div class="grid3" style="margin-top:6px">
+      <label><span class="name" style="font-size:11px">小</span><input type="number" id="op0" value="0.30" min="0" max="1" step="0.02"></label>
+      <label><span class="name" style="font-size:11px">中</span><input type="number" id="op1" value="0.68" min="0" max="1" step="0.02"></label>
+      <label><span class="name" style="font-size:11px">大</span><input type="number" id="op2" value="1.00" min="0" max="1" step="0.02"></label>
+    </div>
+    <p class="note">粒径で3段に分け、段ごとに不透明度を変えている。レンジを広げるほど濃淡が強い。</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>書き出し</legend>
+    <div class="grid2">
+      <button class="primary" id="dlsvg">SVG を保存</button>
+      <button id="copysvg">SVG をコピー</button>
+    </div>
+    <p class="note">デザインツールへはファイルを読み込むか、コピーしてそのままペースト。ベクターなので拡大しても粗くならない。</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>レシピ</legend>
+    <textarea id="recipe" readonly spellcheck="false"></textarea>
+    <p class="note">気に入った設定はこれごと控えておく。URL のハッシュにも同じ状態が入る。</p>
+  </fieldset>
+
+</div>
+
+<div class="stage">
+  <div class="hint">
+    設計原則 — <strong>粒立ちを残す</strong>（最大粒径 ≦ 格子間隔 × 0.55。潰れたら分割数を減らす）／
+    <strong>四辺を貫いて画面全体を覆う</strong>／
+    <strong>中心・特異点は画面の外に置く</strong>。中心が画面内に見えると「物体が置いてある」絵になる。
+  </div>
+  <div class="preview" id="preview"></div>
+  <div class="meta">
+    <span>ドット <b id="mCount">–</b></span>
+    <span>サイズ <b id="mSize">–</b></span>
+    <span>SVG <b id="mBytes">–</b></span>
+    <span id="mBusy"></span>
+  </div>
+  <div id="doc" class="hint" style="background:#fff"></div>
+</div>
+</div>
+
+<script>
+"use strict";
+
+/* ── ロゴ: 3×5 のドットマトリクス書体 ─────────────────────────
+   このツール自身が作る絵と同じ「点の集合」で字を組む。1 が点、0 が空白。
+   N は斜めを引かず、左上の肩だけで折る。 */
+const GLYPH={
+  P:["110","101","111","100","100"],
+  A:["110","101","111","101","101"],
+  T:["111","010","010","010","010"],
+  E:["011","100","111","100","011"],
+  R:["110","101","111","110","101"],
+  N:["110","101","101","101","101"],
+  L:["100","100","100","100","111"],
+  B:["110","101","110","101","110"]
+};
+function logoSVG(text,opt){
+  const o=Object.assign({cell:5, r:1.9, gap:1, space:3, color:"#1B1B26", fade:0}, opt||{});
+  const rows=5, on=[], off=[];
+  let cx=0;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i].toUpperCase(), g=GLYPH[ch];
+    if(!g){ cx+=o.space; continue; }   // 未定義の字と空白は送りだけ進める
+    const w=g[0].length;
+    for(let y=0;y<rows;y++) for(let x=0;x<w;x++){
+      const px=(cx+x)*o.cell+o.cell/2, py=y*o.cell+o.cell/2;
+      (g[y][x]==="1" ? on : off).push([px,py]);
+    }
+    cx += w + o.gap;
+  }
+  const W=Math.max(0,(cx-o.gap))*o.cell, H=rows*o.cell;
+  const circles = a => a.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+o.r+'"/>').join("");
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">'
+    // 消えているセルも薄く残す。格子が見えて「点で組んだ」ことが伝わる
+    + '<g fill="'+o.color+'" fill-opacity="'+o.fade+'">'+circles(off)+'</g>'
+    + '<g fill="'+o.color+'">'+circles(on)+'</g></svg>';
+}
+
+/* ── 共通: ドット配列 → 濃淡3段の SVG ───────────────────────── */
+function svgFromDots(W,H,dots,color,op,bg){
+  const tiers=[[],[],[]];
+  for(const d of dots){
+    if(!isFinite(d.x)||!isFinite(d.y)||!isFinite(d.r)) continue;
+    if(d.x<-d.r||d.x>W+d.r||d.y<-d.r||d.y>H+d.r) continue;
+    const i = d.r<1.7 ? 0 : (d.r<3.4 ? 1 : 2), r=d.r;
+    tiers[i].push('M'+(d.x-r).toFixed(1)+' '+d.y.toFixed(1)
+      +'a'+r.toFixed(2)+' '+r.toFixed(2)+' 0 1 0 '+(2*r).toFixed(2)+' 0'
+      +'a'+r.toFixed(2)+' '+r.toFixed(2)+' 0 1 0 '+(-2*r).toFixed(2)+' 0');
+  }
+  const rect = bg ? '<rect width="'+W+'" height="'+H+'" fill="'+bg+'"/>' : '';
+  const paths = tiers.map((t,i)=> t.length
+    ? '<path d="'+t.join('')+'" fill="'+color+'" fill-opacity="'+op[i]+'"/>' : '').join('');
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H
+    +'" viewBox="0 0 '+W+' '+H+'">'+rect+paths+'</svg>';
+}
+
+const clamp01 = x => Math.max(0, Math.min(1, x));
+// 内外を滑らかに閉じる窓（両端でゼロ）
+function win(a,b,p){ return r=>{ const t=(r-a)/(b-a); return (t<0||t>1)?0:Math.pow(Math.sin(Math.PI*t), p||0.6); }; }
+
+/* ── 構造の定義 ──────────────────────────────────────────── */
+const S = {};
+
+/* 極格子（ギヨシェ）。半径も角度も一定ピッチ、濃淡は解析関数だけ */
+S.polar = {
+  label:"極格子（ギヨシェ）",
+  note:"同心円を一定ピッチで並べ、cos(kθ + ar) で濃淡をかける。平坦部を作ると帯が塗りに変わり、縁は同じ式から連続的にハーフトーンになる。",
+  doc:"<b>極格子</b> — <code>r = r₀ + i·dr</code>／<code>dθ = ds/r</code>（等弧長。点の間隔が全域で一定でスポークが出ない）または <code>dθ</code> 一定（等角。放射状のスジが立つ）。濃淡は <code>0.5 + 0.5·cos(k·θ + a·r)</code>。<br><b>平坦部</b> <code>hi</code> を 1 未満にするとそこから上は粒径が最大に張り付いて<b>塗り</b>になる。0.58 で画面のおよそ半分、0.26 で大半。塗りにするには <code>rmax</code> を 8 前後まで上げる。<br><b>被覆</b> <code>r0</code> ≦ 中心に最も近い画面内の点までの距離、<code>r1</code> ≧ 四隅までの最大距離。満たさないと画面のどこかに届かない。",
+  params:[
+    {k:"cx",  l:"中心 x",        min:-1200,max:2600,step:10, d:1300},
+    {k:"cy",  l:"中心 y",        min:-1200,max:2200,step:10, d:760},
+    {k:"r0",  l:"内半径 r0",     min:20,  max:900,  step:10, d:160},
+    {k:"r1",  l:"外半径 r1",     min:200, max:2600, step:10, d:1520},
+    {k:"dr",  l:"リング間隔 dr", min:6,   max:60,   step:1,  d:15},
+    {k:"ds",  l:"弧の点間隔 ds", min:4,   max:40,   step:1,  d:11},
+    {k:"mode",l:"角度ピッチ",    opts:[["arc","等弧長（スポークなし）"],["angle","等角（スポークが立つ）"]], d:"arc"},
+    {k:"dth", l:"等角の分割数",  min:80,  max:1400, step:20, d:560},
+    {k:"k",   l:"周方向の本数 k",min:1,   max:14,   step:1,  d:3},
+    {k:"a",   l:"ねじれ a",      min:0,   max:0.08, step:0.002,d:0.014},
+    {k:"ph",  l:"位相",          min:0,   max:6.28, step:0.05, d:0.9},
+    {k:"beat",l:"うなり",        min:0,   max:1.2,  step:0.05, d:0},
+    {k:"lo",  l:"平坦部 lo",     min:0,   max:0.6,  step:0.02, d:0},
+    {k:"hi",  l:"平坦部 hi",     min:0.2, max:1,    step:0.02, d:1},
+    {k:"rmin",l:"最小粒径",      min:0.2, max:3,    step:0.1,  d:0.6},
+    {k:"rmax",l:"最大粒径",      min:1,   max:10,   step:0.2,  d:4.6},
+    {k:"pow", l:"階調カーブ",    min:0.4, max:3,    step:0.05, d:1.7}
+  ],
+  gen(p,W,H){
+    const out=[], env=win(p.r0-20, p.r1+20, 0.6);
+    for(let i=0, r=p.r0; r<=p.r1; i++, r=p.r0+i*p.dr){
+      const step = (p.mode==="angle") ? (Math.PI*2/p.dth) : (p.ds/r);
+      for(let th=0; th<Math.PI*2; th+=step){
+        const x=p.cx+r*Math.cos(th), y=p.cy+r*Math.sin(th);
+        if(x<-25||x>W+25||y<-25||y>H+25) continue;
+        let base = p.k*th + p.a*r + p.ph;
+        if(p.beat>0) base += p.beat*Math.sin(2*th - r*0.006);
+        const raw = 0.5+0.5*Math.cos(base);
+        const m = clamp01((raw-p.lo)/Math.max(1e-6, p.hi-p.lo)) * clamp01(env(r));
+        const rd = p.rmin+(p.rmax-p.rmin)*Math.pow(m, p.pow);
+        if(rd>0.42) out.push({x,y,r:rd});
+      }
+    }
+    return out;
+  }
+};
+
+/* ねじれたリボン。射影の潰れがそのまま濃淡になる */
+S.ribbon = {
+  label:"ねじれたリボン（線織面の正射影）",
+  note:"3次元のリボンを正射影する。edge-on になった瞬間に幅方向の格子が軸へ潰れ、そこが自動的に濃くなる。濃淡を塗っているのではない。",
+  doc:"<b>ねじれたリボン</b> — 軸 <code>P(u)</code> に沿って幅方向 <code>v</code> を伸ばし、その方向を軸まわりに <code>τ(u)</code> だけ回す。正射影すると <code>cos τ → 0</code> で格子が潰れて濃くなる。<br>粒径は <b>射影の潰れ</b> <code>|cos τ|</code> と <b>奥行き</b> の2要素。<br>⚠ <b>幅の分割</b>を増やすと行間より粒が大きくなり塗りに潰れる。17〜22 が適正。",
+  params:[
+    {k:"Nu",  l:"軸方向の分割",  min:60, max:600, step:10, d:300},
+    {k:"Nv",  l:"幅方向の分割",  min:6,  max:60,  step:1,  d:17},
+    {k:"HW",  l:"半幅",          min:40, max:400, step:5,  d:210},
+    {k:"len", l:"軸の長さ",      min:600,max:2600,step:20, d:1760},
+    {k:"x0",  l:"始点 x",        min:-800,max:600,step:10, d:-260},
+    {k:"y0",  l:"始点 y",        min:-200,max:900, step:10, d:430},
+    {k:"drop",l:"軸の下り",      min:-600,max:600, step:10, d:250},
+    {k:"bend",l:"軸の反り",      min:0,  max:400, step:10, d:150},
+    {k:"bf",  l:"反りの周期",    min:0.4,max:3,   step:0.1, d:1.1},
+    {k:"turn",l:"ねじれ回転数",  min:0.2,max:4,   step:0.1, d:2.2},
+    {k:"tau0",l:"ねじれ初期角",  min:0,  max:6.28,step:0.05,d:0.2},
+    {k:"persp",l:"遠近の強さ",   min:600,max:6000,step:100,d:1600},
+    {k:"rmin",l:"最小粒径",      min:0.2,max:3,   step:0.05,d:0.45},
+    {k:"rmax",l:"最大粒径",      min:1,  max:8,   step:0.1, d:3.45},
+    {k:"fpow",l:"潰れのカーブ",  min:0.3,max:2,   step:0.05,d:0.75}
+  ],
+  gen(p,W,H){
+    const out=[];
+    for(let iu=0; iu<=p.Nu; iu++){
+      const u=iu/p.Nu;
+      const px=p.x0+u*p.len, py=p.y0-u*p.drop+p.bend*Math.sin(Math.PI*u*p.bf);
+      const tx=p.len/p.Nu, ty=(-p.drop/p.Nu)+p.bend*Math.PI*p.bf*Math.cos(Math.PI*u*p.bf)/p.Nu;
+      const tl=Math.hypot(tx,ty)||1, nx=-ty/tl, ny=tx/tl;
+      const tau=p.tau0+p.turn*Math.PI*u, ct=Math.cos(tau), st=Math.sin(tau);
+      for(let iv=0; iv<=p.Nv; iv++){
+        const v=-1+2*iv/p.Nv, off=v*p.HW, z=off*st;
+        const s=p.persp/Math.max(1,(p.persp-z));
+        const x=(px+off*ct*nx-W/2)*s+W/2, y=(py+off*ct*ny-H/2)*s+H/2;
+        if(x<-20||x>W+20||y<-20||y>H+20) continue;
+        const fore=Math.abs(ct), depth=(z/p.HW+1)/2;
+        out.push({x,y,r:(p.rmin+(p.rmax-p.rmin)*Math.pow(fore,p.fpow))*(0.62+0.55*depth)});
+      }
+    }
+    return out;
+  }
+};
+
+/* ひらっとした布。射影の潰れ＋法線陰影 */
+S.cloth = {
+  label:"ひらっとした布（波打つ面＋法線陰影）",
+  note:"ねじり切らずに面を波打たせ、浅い俯角から正射影する。密度（潰れ）と陰影（法線と光の内積）の2つが揃うと「面」に見える。",
+  doc:"<b>布</b> — 高さ場 <code>h(u,v)</code> を持つ面を浅い俯角 <code>α</code> で正射影。<br>粒径はランバート陰影 <code>max(0, N·L)</code>。法線は数値微分で求める。<br>⚠ <b>幅の分割</b>は 20 前後まで落とすこと。64 では塗りに潰れて陰影が見えない。<br>⚠ 微分の探り点は定義域に収める（端で片側差分）。はみ出すと <code>Math.pow(負,小数)</code> が NaN になりパスごと壊れる。",
+  params:[
+    {k:"Nu",  l:"横の分割",      min:60, max:600, step:10, d:270},
+    {k:"Nv",  l:"奥行きの分割",  min:6,  max:60,  step:1,  d:22},
+    {k:"Lx",  l:"横の広がり",    min:600,max:2600,step:20, d:1620},
+    {k:"Lz",  l:"奥行きの広がり",min:300,max:2000,step:20, d:960},
+    {k:"alpha",l:"俯角",         min:0.05,max:1.2,step:0.02,d:0.24},
+    {k:"amp0",l:"振幅（基準）",  min:0,  max:300, step:5,  d:70},
+    {k:"amp1",l:"振幅（端で増）",min:0,  max:300, step:5,  d:95},
+    {k:"apow",l:"振幅のカーブ",  min:0.3,max:3,   step:0.1, d:1.6},
+    {k:"fu",  l:"横の波の数",    min:0.3,max:5,   step:0.05,d:1.65},
+    {k:"fv",  l:"奥行きの波の数",min:0,  max:5,   step:0.05,d:1.25},
+    {k:"tw",  l:"ねじり",        min:0,  max:1.6, step:0.05,d:0.55},
+    {k:"lx",  l:"光 x",          min:-1, max:1,   step:0.05,d:-0.30},
+    {k:"ly",  l:"光 y",          min:-1, max:1,   step:0.05,d:0.42},
+    {k:"rmin",l:"最小粒径",      min:0.2,max:3,   step:0.05,d:0.5},
+    {k:"rmax",l:"最大粒径",      min:1,  max:8,   step:0.1, d:3.4},
+    {k:"gamma",l:"陰影のカーブ", min:0.4,max:3,   step:0.05,d:1.6}
+  ],
+  gen(p,W,H){
+    const h=(u,v)=>{
+      const tw=p.tw*Math.PI*(u-0.5);
+      const amp=p.amp0+p.amp1*Math.pow(Math.max(0,u), p.apow);
+      return amp*Math.sin(p.fu*Math.PI*u + p.fv*Math.PI*v + tw);
+    };
+    const ca=Math.cos(p.alpha), sa=Math.sin(p.alpha), e=0.004, out=[];
+    // 光ベクトルは必ず正規化する。lx²+ly²>1 のとき lz を 0 で止めるだけだと
+    // 長さが 1 を超え、ランバート項が 1 を超えて粒径が rmax を突き抜ける
+    const lz0=Math.sqrt(Math.max(0, 1-p.lx*p.lx-p.ly*p.ly));
+    const ll=Math.hypot(p.lx, p.ly, lz0)||1;
+    const Lx_=p.lx/ll, Ly_=p.ly/ll, Lz_=lz0/ll;
+    for(let iv=0; iv<=p.Nv; iv++){ const v=iv/p.Nv;
+      for(let iu=0; iu<=p.Nu; iu++){ const u=iu/p.Nu;
+        const X=(u-0.5)*p.Lx, Y=(v-0.5)*p.Lz, Z=h(u,v);
+        // 探り点を定義域に収める（端は片側差分）
+        const u0=Math.max(0,u-e), u1=Math.min(1,u+e);
+        const v0=Math.max(0,v-e), v1=Math.min(1,v+e);
+        const hu=(h(u1,v)-h(u0,v))/((u1-u0)*p.Lx), hv=(h(u,v1)-h(u,v0))/((v1-v0)*p.Lz);
+        let nx=-hu, ny=-hv, nz=1; const nl=Math.hypot(nx,ny,nz)||1; nx/=nl; ny/=nl; nz/=nl;
+        const lam=Math.max(0, nx*Lx_+ny*Ly_+nz*Lz_);
+        const sx=W/2+X, sy=H/2+(Y*sa-Z*ca);
+        if(sx<-25||sx>W+25||sy<-25||sy>H+25) continue;
+        out.push({x:sx, y:sy, r:p.rmin+(p.rmax-p.rmin)*Math.pow(0.18+0.82*lam, p.gamma)});
+      }}
+    return out;
+  }
+};
+
+/* 等角写像。角度を保つので歪んでも破綻しない */
+S.conformal = {
+  label:"等角写像（z² / z+1/z）",
+  note:"正方格子を複素解析関数で写す。等角なので歪んでも直交性が残る。特異点は必ず画面外に置くこと。",
+  doc:"<b>等角写像</b> — <code>w = z²</code> は直交格子を放物線の網に写す。<code>w = z + 1/z</code>（ジューコフスキー）は円のまわりの一様流を翼のまわりの流れに写す。<br>粒径は <code>|dw/dz|</code>（幾何）だけだと振幅が足りないので、位置ランプを混ぜる。<br>⚠ 原点・特異点が画面内に見えると即座に「物体」に見える。外へ出す。",
+  params:[
+    {k:"fn", l:"写像",       opts:[["z2","w = z²"],["jouk","w = z + 1/z"]], d:"z2"},
+    {k:"cx", l:"配置 x",     min:-1200,max:2600,step:10, d:1180},
+    {k:"cy", l:"配置 y",     min:-1200,max:2200,step:10, d:880},
+    {k:"sc", l:"スケール",   min:40,  max:800, step:10, d:226},
+    {k:"Na", l:"a の分割",   min:60,  max:900, step:20, d:460},
+    {k:"Nb", l:"b の分割",   min:12,  max:260, step:4,  d:96},
+    {k:"a0", l:"a 下限",     min:-4,  max:2,   step:0.05,d:-2.85},
+    {k:"a1", l:"a 上限",     min:-2,  max:4,   step:0.05,d:0.90},
+    {k:"b0", l:"b 下限",     min:0.02,max:3,   step:0.02,d:0.42},
+    {k:"b1", l:"b 上限",     min:0.2, max:5,   step:0.05,d:2.77},
+    {k:"mix",l:"幾何と位置の配合",min:0,max:1,step:0.05,d:0.45},
+    {k:"rmin",l:"最小粒径",  min:0.2, max:3,   step:0.05,d:0.30},
+    {k:"rmax",l:"最大粒径",  min:1,   max:8,   step:0.1, d:2.95},
+    {k:"pow", l:"階調カーブ",min:0.4, max:3,   step:0.05,d:2.0}
+  ],
+  gen(p,W,H){
+    const out=[];
+    for(let ia=0; ia<=p.Na; ia++){
+      const a=p.a0+(p.a1-p.a0)*ia/p.Na;
+      for(let ib=0; ib<=p.Nb; ib++){
+        const b=p.b0+(p.b1-p.b0)*ib/p.Nb;
+        let wx,wy,jac;
+        if(p.fn==="jouk"){
+          const d=a*a+b*b; if(d<1e-6) continue;
+          wx=a+a/d; wy=b-b/d;
+          // |dw/dz| = |1 − 1/z²|。z² = (a²−b²) + i·2ab、1/z² = conj(z²)/|z²|²
+          const d2=d*d;
+          jac=Math.hypot(1-(a*a-b*b)/d2, 2*a*b/d2);
+        }else{
+          wx=a*a-b*b; wy=2*a*b; jac=2*Math.hypot(a,b);
+        }
+        const x=p.cx+wx*p.sc, y=p.cy-wy*p.sc;
+        if(x<-25||x>W+25||y<-25||y>H+25) continue;
+        const geo=clamp01(2.6/(0.5+jac));
+        const ramp=clamp01((x/W)*0.55+(y/H)*0.62);
+        const r=p.rmin+(p.rmax-p.rmin)*Math.pow(geo*p.mix+ramp*(1-p.mix), p.pow);
+        if(r>0.42) out.push({x,y,r});
+      }
+    }
+    return out;
+  }
+};
+
+/* 歪ませた等高線（水面） */
+S.contour = {
+  label:"歪ませた等高線（水面）",
+  note:"低周波の波を数枚重ねて面をうねらせ、その上に等値線の帯を置く。断面を非対称にすると帯の中に方向のある階調が出る。",
+  doc:"<b>等高線</b> — <code>f</code> の小数部を帯の断面に通す。<code>Math.pow(ph, skew)</code> で立ち上がりを急に、抜けを緩くすると帯に方向が出る。<br><b>帯の細さ</b>が重さを決める。1.5 だとうねりは読めるが画面が埋まり、2.6 だと軽いがうねりが弱い。2.0 前後が中間。",
+  params:[
+    {k:"step",l:"格子の間隔",   min:4,  max:20,  step:0.5, d:7.5},
+    {k:"a1", l:"波1 振幅",      min:0,  max:2,   step:0.05,d:1.00},
+    {k:"f1u",l:"波1 横周波数",  min:0,  max:8,   step:0.1, d:2.1},
+    {k:"f1v",l:"波1 縦周波数",  min:0,  max:8,   step:0.1, d:0.9},
+    {k:"a2", l:"波2 振幅",      min:0,  max:2,   step:0.05,d:0.62},
+    {k:"f2u",l:"波2 横周波数",  min:-8, max:8,   step:0.1, d:-1.6},
+    {k:"f2v",l:"波2 縦周波数",  min:0,  max:8,   step:0.1, d:3.4},
+    {k:"a3", l:"波3 振幅",      min:0,  max:2,   step:0.05,d:0.38},
+    {k:"f3u",l:"波3 横周波数",  min:0,  max:12,  step:0.1, d:5.3},
+    {k:"f3v",l:"波3 縦周波数",  min:0,  max:12,  step:0.1, d:3.1},
+    {k:"gain",l:"うねりの強さ", min:0.2,max:4,   step:0.05,d:1.55},
+    {k:"tx", l:"帯の傾き x",    min:0,  max:0.02,step:0.0002,d:0.0042},
+    {k:"ty", l:"帯の傾き y",    min:0,  max:0.02,step:0.0002,d:0.0026},
+    {k:"skew",l:"断面の非対称", min:0.2,max:2,   step:0.02,d:0.62},
+    {k:"width",l:"帯の細さ",    min:0.6,max:5,   step:0.1, d:2.0},
+    {k:"rmin",l:"最小粒径",     min:0.2,max:3,   step:0.05,d:0.28},
+    {k:"rmax",l:"最大粒径",     min:1,  max:8,   step:0.1, d:2.85}
+  ],
+  gen(p,W,H){
+    const out=[];
+    const surf=(x,y)=>{ const u=x/W, v=y/H;
+      return p.a1*Math.sin(p.f1u*u+p.f1v*v+0.4)
+           + p.a2*Math.sin(p.f2v*v+p.f2u*u+2.1)
+           + p.a3*Math.sin(p.f3u*u+p.f3v*v-1.2); };
+    for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
+      const f=surf(x,y)*p.gain + (p.tx*x + p.ty*y);
+      const ph=f-Math.floor(f);
+      const prof=Math.pow(Math.sin(Math.PI*Math.pow(ph, p.skew)), p.width);
+      const r=p.rmin+(p.rmax-p.rmin)*prof;
+      if(r>0.5) out.push({x,y,r});
+    }}
+    return out;
+  }
+};
+
+/* モアレ */
+S.moire = {
+  label:"モアレ（二重格子）",
+  note:"ピッチの近い2枚の正方格子を微小角ずらして重ねる。小さな規則から大きな周期が立ち上がる。",
+  doc:"<b>モアレ</b> — 格子1の各点で、回転・拡大した格子2の最寄り格子点までの距離を粒径に使う。<code>p1</code> と <code>p2</code> の差、そして角度が干渉縞の周期を決める。差を小さくするほど縞が大きくなる。",
+  params:[
+    {k:"p1",  l:"格子1 ピッチ", min:6,  max:40, step:0.5, d:15},
+    {k:"p2",  l:"格子2 ピッチ", min:6,  max:40, step:0.1, d:15.9},
+    {k:"ang", l:"角度（度）",   min:0,  max:30, step:0.1, d:7.5},
+    {k:"rmin",l:"最小粒径",     min:0.2,max:3,  step:0.05,d:0.5},
+    {k:"rmax",l:"最大粒径",     min:1,  max:9,  step:0.1, d:5.1},
+    {k:"pow", l:"階調カーブ",   min:0.4,max:3,  step:0.05,d:1.5}
+  ],
+  gen(p,W,H){
+    const out=[], a=p.ang*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a);
+    for(let y=-20; y<H+20; y+=p.p1){ for(let x=-20; x<W+20; x+=p.p1){
+      const rx=(x-W/2)*ca+(y-H/2)*sa, ry=-(x-W/2)*sa+(y-H/2)*ca;
+      const fx=rx/p.p2-Math.round(rx/p.p2), fy=ry/p.p2-Math.round(ry/p.p2);
+      const d=Math.hypot(fx,fy)/0.7071;
+      const m=Math.max(0,1-d);
+      out.push({x,y,r:p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow)});
+    }}
+    return out;
+  }
+};
+
+/* 準結晶 */
+S.quasi = {
+  label:"準結晶（N枚の平面波の和）",
+  note:"周期が無いのに完全に決定的。N=5 は5回対称で平面充填できない＝永遠に繰り返さない。",
+  doc:"<b>準結晶</b> — <code>Σⱼ cos(k·(x cosθⱼ + y sinθⱼ) + ψⱼ)</code>、<code>θⱼ = 2πj/N</code>。<br>N=4 なら周期的、<b>N=5・7 は非周期</b>。k が構造の細かさを決める。",
+  params:[
+    {k:"N",   l:"波の枚数",   min:3,  max:9,   step:1,   d:5},
+    {k:"k",   l:"波数 k",     min:0.01,max:0.2,step:0.005,d:0.055},
+    {k:"step",l:"格子の間隔", min:4,  max:20,  step:0.5, d:9},
+    {k:"bias",l:"しきい値",   min:0,  max:1,   step:0.02,d:0.45},
+    {k:"span",l:"レンジ",     min:0.4,max:2.5, step:0.05,d:1.3},
+    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.4},
+    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:4.8},
+    {k:"pow", l:"階調カーブ", min:0.4,max:4,   step:0.05,d:2.2}
+  ],
+  gen(p,W,H){
+    const out=[], N=Math.round(p.N), ph=[];
+    for(let j=0;j<N;j++) ph.push((j*1.17)%(Math.PI*2));   // 位相は固定（決定的）
+    for(let y=0; y<H; y+=p.step){ for(let x=0; x<W; x+=p.step){
+      let s=0;
+      for(let j=0;j<N;j++){ const a=Math.PI*2*j/N;
+        s+=Math.cos(p.k*((x-W*0.47)*Math.cos(a)+(y-H*0.48)*Math.sin(a))+ph[j]); }
+      const m=clamp01((s+N*p.bias)/(N*p.span));
+      const r=p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow);
+      if(r>0.55) out.push({x,y,r});
+    }}
+    return out;
+  }
+};
+
+/* ギブス現象 */
+S.gibbs = {
+  label:"ギブス現象（フーリエ部分和）",
+  note:"矩形波を N 項で打ち切ると、不連続の近くに消えない振動が残る。行ごとに N を増やすと収束していく様子がそのまま絵になる。",
+  doc:"<b>ギブス現象</b> — <code>(4/π)·Σ_{n odd ≤ N} sin(nkx)/n</code>。<br>N を増やすと矩形に近づくが、<b>不連続の近くの行き過ぎ（約9%）は消えない</b>。それがリンギングとして残る。",
+  params:[
+    {k:"rows",l:"行数",       min:12, max:140, step:2,  d:64},
+    {k:"cols",l:"横の分割",   min:60, max:600, step:10, d:300},
+    {k:"Nmax",l:"最大項数",   min:3,  max:80,  step:1,  d:41},
+    {k:"npow",l:"項数の増え方",min:0.4,max:4,  step:0.1, d:1.6},
+    {k:"kx",  l:"波数",       min:0.004,max:0.05,step:0.0005,d:0.0155},
+    {k:"amp", l:"振幅",       min:5,  max:150, step:1,  d:46},
+    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.5},
+    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.4},
+    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.3}
+  ],
+  gen(p,W,H){
+    const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
+    for(let j=0;j<=rows;j++){
+      const v=j/rows, N=1+Math.round(Math.pow(v,p.npow)*p.Nmax), y0=-H*0.06+v*H*1.13;
+      for(let i=0;i<=cols;i++){
+        const x=-W*0.03+i/cols*W*1.06;
+        let s=0; for(let n=1;n<=N;n+=2) s+=Math.sin(n*(x*p.kx))/n;
+        s*=4/Math.PI;
+        const y=y0+s*p.amp;
+        if(x<-25||x>W+25||y<-25||y>H+25) continue;
+        const ring=Math.min(1,Math.abs(s));
+        out.push({x,y,r:p.rmin+(p.rmax-p.rmin)*Math.pow(ring,p.pow)});
+      }
+    }
+    return out;
+  }
+};
+
+/* ねじれ格子 */
+S.twist = {
+  label:"ねじれ格子",
+  note:"行ごとに回転角と伸縮を進める。流線より静かで、布のたわみのようなテクスチャになる。",
+  doc:"<b>ねじれ格子</b> — 行が進むごとに回転 <code>ang(v)</code> と伸縮 <code>sc(v)</code> をかける。局所の詰まり具合を粒径に反映させて濃淡を出す。<br>濃淡のレンジが狭いと薄く見えるので <code>コントラスト</code> を上げる。",
+  params:[
+    {k:"rows",l:"行数",       min:10, max:160, step:2,  d:54},
+    {k:"cols",l:"列数",       min:20, max:300, step:5,  d:110},
+    {k:"a0",  l:"開始角",     min:-1.5,max:1.5,step:0.05,d:-0.55},
+    {k:"a1",  l:"終了角",     min:-1.5,max:1.5,step:0.05,d:0.95},
+    {k:"sc",  l:"伸縮",       min:0,  max:1,   step:0.02,d:0.42},
+    {k:"sf",  l:"伸縮の周期", min:0.3,max:3,   step:0.1, d:1.3},
+    {k:"spanx",l:"横の広がり",min:600,max:2600,step:20, d:1500},
+    {k:"spany",l:"縦の広がり",min:300,max:1600,step:20, d:760},
+    {k:"shear",l:"せん断",    min:0,  max:1,   step:0.02,d:0.42},
+    {k:"con", l:"コントラスト",min:0.2,max:2.5,step:0.05,d:1.4},
+    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.4},
+    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.6}
+  ],
+  gen(p,W,H){
+    const out=[], rows=Math.round(p.rows), cols=Math.round(p.cols);
+    for(let j=0;j<=rows;j++){
+      const v=j/rows;
+      const ang=(p.a0+(p.a1-p.a0)*v);
+      const s=1+p.sc*Math.sin(Math.PI*v*p.sf);
+      const ca=Math.cos(ang), sa=Math.sin(ang);
+      for(let i=0;i<=cols;i++){
+        const u=i/cols;
+        const lx=(u-0.5)*p.spanx*s, ly=(v-0.5)*p.spany;
+        const x=W/2+lx*ca-ly*sa*0.28, y=H/2+lx*sa*p.shear+ly;
+        if(x<-20||x>W+20||y<-20||y>H+20) continue;
+        const dens=Math.abs(ca)*s;
+        const m=clamp01((1.15-dens*0.62)*p.con);
+        out.push({x,y,r:p.rmin+(p.rmax-p.rmin)*m});
+      }
+    }
+    return out;
+  }
+};
+
+/* 焦線（コースティクス） */
+S.caustics = {
+  label:"焦線（コースティクス）",
+  note:"滑らかな写像の局所面積 |J| の逆数を濃度に使う。|J| がゼロを跨ぐと折り目が明るい筋として立つ。",
+  doc:"<b>焦線</b> — <code>F(x,y) = (x + A sin(k₁y + k₃x), y + B sin(k₂x − k₃y))</code> のヤコビアン <code>|J|</code>。<br>⚠ <b>振幅が小さいと <code>J</code> がゼロを跨がず、折り目が立たずただの霞になる。</b> A・B を大きく取ること。",
+  params:[
+    {k:"step",l:"格子の間隔", min:4,  max:20,  step:0.5, d:8.5},
+    {k:"A",   l:"振幅 A",     min:0,  max:400, step:5,  d:180},
+    {k:"B",   l:"振幅 B",     min:0,  max:400, step:5,  d:150},
+    {k:"k1",  l:"k₁",         min:0.001,max:0.03,step:0.0005,d:0.0068},
+    {k:"k2",  l:"k₂",         min:0.001,max:0.03,step:0.0005,d:0.0091},
+    {k:"k3",  l:"k₃",         min:0.001,max:0.03,step:0.0005,d:0.0055},
+    {k:"gain",l:"感度",       min:0.1,max:3,   step:0.05,d:0.62},
+    {k:"floor",l:"下駄",      min:0.01,max:1,  step:0.01,d:0.10},
+    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.35},
+    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.65},
+    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.5}
+  ],
+  gen(p,W,H){
+    const out=[];
+    const J=(x,y)=>{
+      const c1=Math.cos(p.k1*y+p.k3*x), c2=Math.cos(p.k2*x-p.k3*y);
+      const fxx=1+p.A*p.k3*c1, fxy=p.A*p.k1*c1;
+      const fyx=p.B*p.k2*c2,   fyy=1-p.B*p.k3*c2;
+      return Math.abs(fxx*fyy-fxy*fyx);
+    };
+    for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
+      const m=clamp01(p.gain/(J(x,y)+p.floor));
+      const r=p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow);
+      if(r>0.5) out.push({x,y,r});
+    }}
+    return out;
+  }
+};
+
+/* 反応拡散（Gray-Scott） */
+S.turing = {
+  label:"反応拡散（Gray-Scott）",
+  note:"決定的な偏微分方程式なのに有機的な模様が出る。種と (F,K) を外すと反応が立ち上がらず真っ白になる。重いので少し待つ。",
+  doc:"<b>反応拡散</b> — <code>∂u/∂t = Dᵤ∇²u − uv² + F(1−u)</code>／<code>∂v/∂t = D_v∇²v + uv² − (F+K)v</code>。<br>⚠ <b>種は塊で撒く。</b> 孤立した1セルは減衰して消える。<br>⚠ <code>(F,K)</code> が領域から外れると死ぬ。<b>迷路なら (0.030, 0.057)</b>、斑点なら (0.035, 0.062) あたり。<br>結果が空なら下の <code>v の最大値</code> を見る。ほぼ 0 なら死んでいる。",
+  params:[
+    {k:"GW", l:"格子 幅",     min:60, max:260, step:10, d:160},
+    {k:"GH", l:"格子 高さ",   min:40, max:160, step:4,  d:84},
+    {k:"IT", l:"反復回数",    min:200,max:5000,step:100,d:3000},
+    {k:"F",  l:"供給 F",      min:0.010,max:0.070,step:0.001,d:0.030},
+    {k:"K",  l:"消失 K",      min:0.040,max:0.075,step:0.001,d:0.057},
+    {k:"Du", l:"拡散 Du",     min:0.05,max:0.24,step:0.01,d:0.16},
+    {k:"Dv", l:"拡散 Dv",     min:0.02,max:0.24,step:0.01,d:0.08},
+    {k:"seed",l:"種の間隔",   min:5,  max:30,  step:1,  d:11},
+    {k:"sdens",l:"種の密度",  min:0.1,max:1,   step:0.05,d:0.55},
+    {k:"rmin",l:"最小粒径",   min:0.2,max:3,   step:0.05,d:0.35},
+    {k:"rmax",l:"最大粒径",   min:1,  max:8,   step:0.1, d:3.95},
+    {k:"pow", l:"階調カーブ", min:0.4,max:3,   step:0.05,d:1.1}
+  ],
+  gen(p,W,H){
+    // 陽解法・4近傍ラプラシアン・dt=1 の安定条件は D < 0.25。
+    // 超えると値が発散して NaN になり、反応が死んだのと見分けがつかなくなる
+    const Du=Math.min(p.Du, 0.24), Dv=Math.min(p.Dv, 0.24);
+    const GW=Math.round(p.GW), GH=Math.round(p.GH), IT=Math.round(p.IT), n=GW*GH;
+    let u=new Float32Array(n), v=new Float32Array(n), u2=new Float32Array(n), v2=new Float32Array(n);
+    const hash=(i,j)=>{ const s=Math.sin(i*12.9898+j*78.233)*43758.5453; return s-Math.floor(s); };
+    u.fill(1);
+    const sp=Math.round(p.seed);
+    for(let j=3;j<GH-3;j+=sp) for(let i=3;i<GW-3;i+=sp){
+      if(hash(i,j)>p.sdens) continue;
+      for(let b=-2;b<=2;b++) for(let a=-2;a<=2;a++){ const k=(j+b)*GW+(i+a); u[k]=0.25; v[k]=0.55; }
+    }
+    const idx=(i,j)=>((j+GH)%GH)*GW+((i+GW)%GW);
+    for(let t=0;t<IT;t++){
+      for(let j=0;j<GH;j++) for(let i=0;i<GW;i++){
+        const k=j*GW+i;
+        const lu=u[idx(i-1,j)]+u[idx(i+1,j)]+u[idx(i,j-1)]+u[idx(i,j+1)]-4*u[k];
+        const lv=v[idx(i-1,j)]+v[idx(i+1,j)]+v[idx(i,j-1)]+v[idx(i,j+1)]-4*v[k];
+        const uvv=u[k]*v[k]*v[k];
+        u2[k]=u[k]+Du*lu-uvv+p.F*(1-u[k]);
+        v2[k]=v[k]+Dv*lv+uvv-(p.F+p.K)*v[k];
+      }
+      let tmp=u; u=u2; u2=tmp; tmp=v; v=v2; v2=tmp;
+    }
+    let mx=0; for(let k=0;k<n;k++) if(v[k]>mx) mx=v[k];
+    S.turing.lastMax = mx;
+    const out=[], sx=W/GW, sy=H/GH;
+    for(let j=0;j<GH;j++) for(let i=0;i<GW;i++){
+      const m = mx>0.01 ? clamp01(v[j*GW+i]/mx) : 0;
+      const r=p.rmin+(p.rmax-p.rmin)*Math.pow(m,p.pow);
+      if(r>0.6) out.push({x:(i+0.5)*sx, y:(j+0.5)*sy, r});
+    }
+    return out;
+  }
+};
+
+/* ── UI ─────────────────────────────────────────────────── */
+const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing"];
+const $ = id => document.getElementById(id);
+let cur="polar", P={};
+
+function defaults(key){
+  const o={}; for(const s of S[key].params) o[s.k]=s.d; return o;
+}
+function buildStructSelect(){
+  $("struct").innerHTML = ORDER.map(k=>'<option value="'+k+'">'+S[k].label+'</option>').join("");
+  $("struct").value=cur;
+}
+function buildParams(){
+  const box=$("params"); box.innerHTML="";
+  for(const s of S[cur].params){
+    const lab=document.createElement("label");
+    if(s.opts){
+      lab.innerHTML='<div class="row"><span class="name">'+s.l+'</span></div>';
+      const sel=document.createElement("select");
+      sel.innerHTML=s.opts.map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join("");
+      sel.value=P[s.k];
+      sel.addEventListener("change",()=>{ P[s.k]=sel.value; render(); });
+      lab.appendChild(sel);
+    }else{
+      const dec = s.step<0.01 ? 4 : (s.step<1 ? (String(s.step).split(".")[1]||"").length : 0);
+      lab.innerHTML='<div class="row"><span class="name">'+s.l+'</span>'
+        +'<span class="val" id="v_'+s.k+'">'+Number(P[s.k]).toFixed(dec)+'</span></div>';
+      const inp=document.createElement("input");
+      inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=P[s.k];
+      inp.addEventListener("input",()=>{
+        P[s.k]=parseFloat(inp.value);
+        $("v_"+s.k).textContent=Number(P[s.k]).toFixed(dec);
+        render();
+      });
+      lab.appendChild(inp);
+    }
+    box.appendChild(lab);
+  }
+  $("structNote").textContent=S[cur].note;
+  $("doc").innerHTML=S[cur].doc;
+}
+
+let timer=null, lastSVG="";
+
+/* 幅高さを宣言どおりの範囲に丸め、コントロールにも書き戻す。
+   丸めないと、ハッシュやファイル名が実際の書き出しと食い違い、
+   上限を超えた値では生成ループが膨らんでページが固まる */
+const DIM={min:100, max:4000};
+function normDims(){
+  const fix=(id,fb)=>{
+    let v=parseInt($(id).value);
+    if(!isFinite(v)) v=fb;
+    v=Math.max(DIM.min, Math.min(DIM.max, v));
+    if(String(v)!==$(id).value) $(id).value=v;
+    return v;
+  };
+  return [fix("cw",1200), fix("ch",630)];
+}
+
+function render(){
+  if(timer) clearTimeout(timer);
+  $("mBusy").innerHTML='<span class="busy">計算中…</span>';
+  timer=setTimeout(doRender,60);
+}
+/* 保留中の描画を今すぐ流す。書き出し前に呼ぶ */
+function flush(){
+  if(timer){ clearTimeout(timer); timer=null; doRender(); }
+}
+function doRender(){
+    timer=null;
+    const [W,H]=normDims();
+    writeHash();
+    const op=[parseFloat($("op0").value),parseFloat($("op1").value),parseFloat($("op2").value)];
+    const bg=$("transparent").checked ? null : $("bg").value;
+    let dots=[];
+    try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent="生成エラー: "+e.message; return; }
+    lastSVG=svgFromDots(W,H,dots,$("fg").value,op,bg);
+    $("preview").innerHTML=lastSVG;
+    $("mCount").textContent=dots.length.toLocaleString();
+    $("mSize").textContent=W+" × "+H;
+    $("mBytes").textContent=(lastSVG.length/1024).toFixed(0)+" KB";
+    $("mBusy").innerHTML = (cur==="turing" && S.turing.lastMax!==undefined)
+      ? ("v の最大値 "+S.turing.lastMax.toExponential(2)
+         + (S.turing.lastMax<0.01 ? " — 反応が死んでいる。(F,K) と種を見直す" : ""))
+      : "";
+    $("recipe").value = cur+" / "+W+"×"+H+"\n"
+      + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
+}
+
+/* 幅高さに一致するプリセットを選び直す。無ければカスタム */
+function syncPreset(){
+  const key=$("cw").value+"x"+$("ch").value;
+  const sel=$("preset");
+  sel.value = Array.from(sel.options).some(o=>o.value===key) ? key : "custom";
+}
+
+/* URL ハッシュに状態を持つ */
+function writeHash(){
+  const o={s:cur,w:$("cw").value,h:$("ch").value,fg:$("fg").value,bg:$("bg").value,
+    t:$("transparent").checked?1:0,op:[$("op0").value,$("op1").value,$("op2").value],p:P};
+  history.replaceState(null,"","#"+encodeURIComponent(JSON.stringify(o)));
+}
+function readHash(){
+  if(!location.hash || location.hash.length<3) return false;
+  try{
+    const o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
+    if(!S[o.s]) return false;
+    cur=o.s; P=Object.assign(defaults(cur), o.p||{});
+    $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
+    $("transparent").checked=!!o.t;
+    if(o.op){ $("op0").value=o.op[0]; $("op1").value=o.op[1]; $("op2").value=o.op[2]; }
+    normDims();
+    syncPreset();
+    return true;
+  }catch(e){ return false; }
+}
+
+$("struct").addEventListener("change",()=>{ cur=$("struct").value; P=defaults(cur); buildParams(); render(); });
+$("reset").addEventListener("click",()=>{ P=defaults(cur); buildParams(); render(); });
+$("shuffle").addEventListener("click",()=>{
+  for(const s of S[cur].params){
+    if(s.opts){ P[s.k]=s.opts[Math.floor(Math.random()*s.opts.length)][0]; continue; }
+    if(/^(GW|GH|IT|Nu|Nv|rows|cols|Na|Nb|step)$/.test(s.k)) continue;   // 重さに効くものは振らない
+    const v=s.min+Math.random()*(s.max-s.min);
+    P[s.k]= s.step>=1 ? Math.round(v/s.step)*s.step : parseFloat(v.toFixed(4));
+  }
+  buildParams(); render();
+});
+$("preset").addEventListener("change",()=>{
+  const v=$("preset").value; if(v==="custom") return;
+  const [w,h]=v.split("x"); $("cw").value=w; $("ch").value=h; render();
+});
+for(const id of ["cw","ch","fg","bg","transparent","op0","op1","op2"]){
+  $(id).addEventListener("input",()=>{
+    if(id==="cw"||id==="ch") syncPreset();
+    render();
+  });
+}
+$("dlsvg").addEventListener("click",()=>{
+  flush();
+  const blob=new Blob([lastSVG],{type:"image/svg+xml"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+$("copysvg").addEventListener("click",async()=>{
+  flush();
+  try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent="コピーした"; }
+  catch(e){ $("copysvg").textContent="コピー失敗"; }
+  setTimeout(()=>{$("copysvg").textContent="SVG をコピー";},1400);
+});
+
+$("logo").innerHTML=logoSVG("PATTERN LAB");
+
+if(!readHash()) P=defaults(cur);
+buildStructSelect(); $("struct").value=cur; buildParams(); render();
+</script>
+</body>
+</html>
