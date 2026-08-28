@@ -1289,6 +1289,9 @@ $("preview").addEventListener("pointerdown",(e)=>{
          px:P[keys[0]], py:P[keys[1]],
          scale: W/Math.max(1,rect.width),   // 表示は縮んでいるのでキャンバス座標へ直す
          light: lastDrawMs<40 };            // 軽い構造は即時、重い構造は離してから
+  // 直前の操作で仕込まれた描画が残っていると、ドラッグ開始後に
+  // 更新済みの値で描き直され、そこへさらに平行移動が乗って二重にずれる
+  if(timer){ clearTimeout(timer); timer=null; }
   $("preview").setPointerCapture(e.pointerId);
   $("preview").style.cursor="grabbing";
   e.preventDefault();
