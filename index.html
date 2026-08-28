@@ -12,7 +12,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;line-height:1.6}
-header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 header h1{margin:0;font-size:0;line-height:0}
 header h1 svg{display:block;height:26px;width:auto}
 header .sub{color:var(--gray);font-size:12px}
@@ -27,8 +27,6 @@ header .by a:hover{border-bottom-color:var(--ink)}
 .wrap{display:grid;grid-template-columns:330px 1fr;gap:0;align-items:start}
 .main{min-width:0}
 .docs{padding:0 24px 60px}
-
-}
 .panel{border-right:1px solid var(--line);padding:16px 18px 40px;min-height:calc(100vh - 52px)}
 .stage{padding:20px 24px 60px;min-width:0}
 fieldset{border:0;padding:0;margin:0 0 20px}
@@ -78,7 +76,12 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
   header{padding:12px 16px}
 }
 @media (max-width:620px){
+  /* ロゴ・言語切替・作者名を1行に収める。折り返すと縦位置が揃わない */
+  header{padding:12px 16px;gap:10px}
   header .sub{display:none}
+  header h1 svg{height:20px}
+  header .right{gap:10px}
+}
 </style>
 </head>
 <body>
