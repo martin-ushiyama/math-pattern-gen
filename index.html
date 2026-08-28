@@ -43,6 +43,9 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 0}
 select,input[type=number],input[type=text]{width:100%;padding:6px 8px;border:1px solid var(--line);
   border-radius:5px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
 input[type=color]{width:100%;height:30px;padding:2px;border:1px solid var(--line);border-radius:5px;background:#fff}
+.pair{display:flex;gap:4px}
+.pair input[type=color]{min-width:0}
+.pair.solid input:last-child{display:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 button{font:inherit;font-size:12px;font-weight:700;padding:8px 10px;border-radius:6px;cursor:pointer;
@@ -151,10 +154,23 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
 
   <fieldset>
     <legend id="uiLegColor"></legend>
+    <label>
+      <select id="palette"></select>
+    </label>
     <div class="grid2">
-      <label><span class="name" id="uiFg"></span><input type="color" id="fg" value="#1b1b26"></label>
-      <label><span class="name" id="uiBg"></span><input type="color" id="bg" value="#f4f4f5"></label>
+      <label><span class="name" id="uiFg"></span>
+        <span class="pair"><input type="color" id="fg" value="#1b1b26"><input type="color" id="fg2" value="#1b1b26"></span></label>
+      <label><span class="name" id="uiBg"></span>
+        <span class="pair"><input type="color" id="bg" value="#f4f4f5"><input type="color" id="bg2" value="#f4f4f5"></span></label>
     </div>
+    <div class="grid2">
+      <label class="row"><input type="checkbox" id="fgGrad" style="width:auto;accent-color:var(--accent)"><span class="name" id="uiFgGrad"></span></label>
+      <label class="row"><input type="checkbox" id="bgGrad" style="width:auto;accent-color:var(--accent)"><span class="name" id="uiBgGrad"></span></label>
+    </div>
+    <label id="angleWrap">
+      <div class="row"><span class="name" id="uiAngle"></span><span class="val" id="v_angle">90</span></div>
+      <input type="range" id="angle" min="0" max="360" step="5" value="90">
+    </label>
     <label class="row" style="margin-top:4px">
       <input type="checkbox" id="transparent" style="width:auto;accent-color:var(--accent)">
       <span class="name" id="uiTransparent"></span>
@@ -249,7 +265,26 @@ function logoSVG(text,opt){
 }
 
 /* ── 共通: ドット配列 → 濃淡3段の SVG ───────────────────────── */
-function svgFromDots(W,H,dots,color,op,bg){
+/* 角度から、キャンバス全体を覆うグラデーションの始点と終点を出す。
+   objectBoundingBox だとドットの塊の外接矩形が基準になって意図とずれるので、
+   userSpaceOnUse で画面座標に固定する。 */
+function gradLine(W,H,deg){
+  const t=deg*Math.PI/180, c=Math.cos(t), n=Math.sin(t);
+  const L=Math.abs(W*c)+Math.abs(H*n);
+  return {x1:(W-L*c)/2, y1:(H-L*n)/2, x2:(W+L*c)/2, y2:(H+L*n)/2};
+}
+/* paint = 文字列なら単色、[a,b] なら2色のグラデーション */
+function paintDef(id,paint,W,H,deg){
+  if(!Array.isArray(paint)) return {ref:paint, def:""};
+  const g=gradLine(W,H,deg);
+  return {ref:"url(#"+id+")",
+    def:'<linearGradient id="'+id+'" gradientUnits="userSpaceOnUse" x1="'+g.x1.toFixed(1)
+      +'" y1="'+g.y1.toFixed(1)+'" x2="'+g.x2.toFixed(1)+'" y2="'+g.y2.toFixed(1)+'">'
+      +'<stop offset="0" stop-color="'+paint[0]+'"/><stop offset="1" stop-color="'+paint[1]+'"/>'
+      +'</linearGradient>'};
+}
+
+function svgFromDots(W,H,dots,color,op,bg,deg){
   const tiers=[[],[],[]];
   for(const d of dots){
     if(!isFinite(d.x)||!isFinite(d.y)||!isFinite(d.r)) continue;
@@ -259,11 +294,14 @@ function svgFromDots(W,H,dots,color,op,bg){
       +'a'+r.toFixed(2)+' '+r.toFixed(2)+' 0 1 0 '+(2*r).toFixed(2)+' 0'
       +'a'+r.toFixed(2)+' '+r.toFixed(2)+' 0 1 0 '+(-2*r).toFixed(2)+' 0');
   }
-  const rect = bg ? '<rect width="'+W+'" height="'+H+'" fill="'+bg+'"/>' : '';
+  deg = (deg==null) ? 90 : deg;
+  const fp=paintDef("fgG",color,W,H,deg), bp=paintDef("bgG",bg,W,H,deg);
+  const defs=(fp.def||bp.def) ? "<defs>"+bp.def+fp.def+"</defs>" : "";
+  const rect = bg ? '<rect width="'+W+'" height="'+H+'" fill="'+bp.ref+'"/>' : '';
   const paths = tiers.map((t,i)=> t.length
-    ? '<path d="'+t.join('')+'" fill="'+color+'" fill-opacity="'+op[i]+'"/>' : '').join('');
+    ? '<path d="'+t.join('')+'" fill="'+fp.ref+'" fill-opacity="'+op[i]+'"/>' : '').join('');
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H
-    +'" viewBox="0 0 '+W+' '+H+'">'+rect+paths+'</svg>';
+    +'" viewBox="0 0 '+W+' '+H+'">'+defs+rect+paths+'</svg>';
 }
 
 const clamp01 = x => Math.max(0, Math.min(1, x));
@@ -723,6 +761,36 @@ S.turing = {
 };
 
 /* ── UI ─────────────────────────────────────────────────── */
+/* 配色プリセット。単色は文字列、グラデーションは [開始, 終了]。
+   地のグラデーションは「ごく近い2色」に寄せてある。模様が主役なので、
+   地が主張すると喧嘩する。ドット側は移動が見えるので少し振ってよい。 */
+const PALETTES=[
+ {id:"ink",     name:{ja:"墨",              en:"Ink"},
+  fg:"#1B1B26", bg:"#F4F4F5", deg:90},
+ {id:"paper",   name:{ja:"インク＆ペーパー", en:"Ink & paper"},
+  fg:"#16161E", bg:["#FBFAF7","#ECE9E2"], deg:110},
+ {id:"pink",    name:{ja:"ブランドピンク",   en:"Brand pink"},
+  fg:"#FD4497", bg:"#FBF7F4", deg:90},
+ {id:"teal",    name:{ja:"ブルーグリーン",   en:"Blue-green"},
+  fg:["#0E9488","#2563EB"], bg:["#F3F8F7","#E7F0F1"], deg:120},
+ {id:"aurora",  name:{ja:"オーロラ",         en:"Aurora"},
+  fg:["#67E8F9","#A78BFA"], bg:["#0E1020","#171A33"], deg:130},
+ {id:"sunset",  name:{ja:"サンセット",       en:"Sunset"},
+  fg:["#FF6B4A","#FFB03A"], bg:"#1B1B26", deg:150},
+ {id:"violet",  name:{ja:"ハイパーバイオレット", en:"Hyper violet"},
+  fg:["#7C3AED","#EC4899"], bg:["#F7F4FC","#EFE9F8"], deg:120},
+ {id:"acid",    name:{ja:"アシッドグリーン", en:"Acid green"},
+  fg:"#C7F53B", bg:["#141619","#1E2126"], deg:100},
+ {id:"terra",   name:{ja:"テラコッタ",       en:"Terracotta"},
+  fg:"#C4593B", bg:["#F9F1E7","#F0E2D1"], deg:115},
+ {id:"forest",  name:{ja:"フォレスト",       en:"Forest"},
+  fg:"#1F5E4A", bg:["#F0F4F0","#E2EAE3"], deg:105},
+ {id:"cobalt",  name:{ja:"コバルト",         en:"Cobalt"},
+  fg:["#1B4FD8","#5B8DF8"], bg:["#F0F2F7","#E6EAF3"], deg:125},
+ {id:"noir",    name:{ja:"反転モノクローム", en:"Inverted mono"},
+  fg:"#F4F4F5", bg:["#1B1B26","#2E2E3D"], deg:110}
+];
+
 const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing"];
 const $ = id => document.getElementById(id);
 
@@ -761,6 +829,11 @@ const UI = {
   w:{ja:"幅",en:"Width"},
   h:{ja:"高さ",en:"Height"},
   fg:{ja:"ドット",en:"Dots"},
+  paletteLabel:{ja:"配色",en:"Palette"},
+  custom:{ja:"カスタム",en:"Custom"},
+  fgGrad:{ja:"ドットをグラデに",en:"Gradient dots"},
+  bgGrad:{ja:"地をグラデに",en:"Gradient ground"},
+  angle:{ja:"グラデの角度",en:"Gradient angle"},
   bg:{ja:"地",en:"Ground"},
   transparent:{ja:"地を透明にする（他の絵に重ねるとき）",en:"Transparent ground (for layering)"},
   op0:{ja:"小",en:"S"}, op1:{ja:"中",en:"M"}, op2:{ja:"大",en:"L"},
@@ -790,6 +863,36 @@ const UI = {
   }
 };
 
+/* 配色まわり。paint は単色なら文字列、グラデーションなら [開始, 終了] */
+function buildPaletteSelect(){
+  const sel=$("palette");
+  sel.innerHTML = PALETTES.map(p=>'<option value="'+p.id+'">'+T(p.name)+'</option>').join("")
+    + '<option value="custom">'+T(UI.custom)+'</option>';
+}
+function applyPalette(id){
+  const p=PALETTES.find(x=>x.id===id); if(!p) return;
+  const set=(a,b,chk,paint)=>{
+    const grad=Array.isArray(paint);
+    $(chk).checked=grad;
+    $(a).value=(grad?paint[0]:paint).toLowerCase();
+    $(b).value=(grad?paint[1]:paint).toLowerCase();
+  };
+  set("fg","fg2","fgGrad",p.fg);
+  set("bg","bg2","bgGrad",p.bg);
+  $("angle").value=p.deg; $("v_angle").textContent=p.deg;
+  syncPaintUI();
+}
+/* 2色目の出し入れと、角度の要否 */
+function syncPaintUI(){
+  const fg=$("fgGrad").checked, bg=$("bgGrad").checked;
+  $("fg").parentElement.classList.toggle("solid",!fg);
+  $("bg").parentElement.classList.toggle("solid",!bg);
+  $("angleWrap").style.display=(fg||bg)?"":"none";
+}
+function currentPaint(which){
+  return $(which+"Grad").checked ? [$(which).value,$(which+"2").value] : $(which).value;
+}
+
 function applyLang(){
   document.documentElement.lang = LANG;
   const set=(id,key)=>{ const e=$(id); if(e) e.textContent=T(UI[key]); };
@@ -801,6 +904,8 @@ function applyLang(){
   $("ghlink").title = T(UI.starTitle);
   $("ghlink").setAttribute("aria-label", T(UI.starTitle));
   set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
+  set("uiFgGrad","fgGrad"); set("uiBgGrad","bgGrad"); set("uiAngle","angle");
+  const keepPal=$("palette").value; buildPaletteSelect(); $("palette").value=keepPal;
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
   set("uiNoteOp","noteOp"); set("uiNoteExport","noteExport"); set("uiNoteRecipe","noteRecipe");
@@ -891,10 +996,11 @@ function doRender(){
     const [W,H]=normDims();
     writeHash();
     const op=[parseFloat($("op0").value),parseFloat($("op1").value),parseFloat($("op2").value)];
-    const bg=$("transparent").checked ? null : $("bg").value;
+    const bg=$("transparent").checked ? null : currentPaint("bg");
+    const deg=parseInt($("angle").value)||90;
     let dots=[];
     try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
-    lastSVG=svgFromDots(W,H,dots,$("fg").value,op,bg);
+    lastSVG=svgFromDots(W,H,dots,currentPaint("fg"),op,bg,deg);
     $("preview").innerHTML=lastSVG;
     $("mCount").textContent=dots.length.toLocaleString();
     $("mSize").textContent=W+" × "+H;
@@ -918,6 +1024,8 @@ function syncPreset(){
 /* URL ハッシュに状態を持つ */
 function writeHash(){
   const o={s:cur,w:$("cw").value,h:$("ch").value,fg:$("fg").value,bg:$("bg").value,
+    f2:$("fg2").value,b2:$("bg2").value,fG:$("fgGrad").checked?1:0,bG:$("bgGrad").checked?1:0,
+    ang:$("angle").value,pal:$("palette").value,
     t:$("transparent").checked?1:0,op:[$("op0").value,$("op1").value,$("op2").value],p:P};
   history.replaceState(null,"","#"+encodeURIComponent(JSON.stringify(o)));
 }
@@ -928,7 +1036,12 @@ function readHash(){
     if(!S[o.s]) return false;
     cur=o.s; P=Object.assign(defaults(cur), o.p||{});
     $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
+    if(o.f2) $("fg2").value=o.f2;
+    if(o.b2) $("bg2").value=o.b2;
+    $("fgGrad").checked=!!o.fG; $("bgGrad").checked=!!o.bG;
+    if(o.ang){ $("angle").value=o.ang; $("v_angle").textContent=o.ang; }
     $("transparent").checked=!!o.t;
+    syncPaintUI();
     if(o.op){ $("op0").value=o.op[0]; $("op1").value=o.op[1]; $("op2").value=o.op[2]; }
     normDims();
     syncPreset();
@@ -951,7 +1064,17 @@ $("preset").addEventListener("change",()=>{
   const v=$("preset").value; if(v==="custom") return;
   const [w,h]=v.split("x"); $("cw").value=w; $("ch").value=h; render();
 });
-for(const id of ["cw","ch","fg","bg","transparent","op0","op1","op2"]){
+$("palette").addEventListener("change",()=>{
+  if($("palette").value!=="custom"){ applyPalette($("palette").value); render(); }
+});
+for(const id of ["fgGrad","bgGrad"]){
+  $(id).addEventListener("change",()=>{ syncPaintUI(); $("palette").value="custom"; render(); });
+}
+$("angle").addEventListener("input",()=>{ $("v_angle").textContent=$("angle").value; render(); });
+for(const id of ["fg","fg2","bg","bg2"]){
+  $(id).addEventListener("input",()=>{ $("palette").value="custom"; render(); });
+}
+for(const id of ["cw","ch","transparent","op0","op1","op2"]){
   $(id).addEventListener("input",()=>{
     if(id==="cw"||id==="ch") syncPreset();
     render();
@@ -1073,7 +1196,14 @@ $("logo").innerHTML=logoSVG("PATTERN LAB");
 $("langJa").addEventListener("click",()=>setLang("ja"));
 $("langEn").addEventListener("click",()=>setLang("en"));
 
-if(!readHash()) P=defaults(cur);
+buildPaletteSelect();
+if(readHash()){
+  if($("palette").value==="custom" || PALETTES.some(x=>x.id===$("palette").value)){}
+}else{
+  P=defaults(cur);
+  applyPalette("ink");
+}
+syncPaintUI();
 buildStructSelect(); $("struct").value=cur;
 applyLang();
 </script>
