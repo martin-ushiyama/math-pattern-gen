@@ -155,6 +155,7 @@ code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-siz
   <fieldset>
     <legend id="uiLegColor"></legend>
     <label>
+      <span class="name" id="uiPalette"></span>
       <select id="palette"></select>
     </label>
     <div class="grid2">
@@ -905,6 +906,8 @@ function applyLang(){
   $("ghlink").setAttribute("aria-label", T(UI.starTitle));
   set("uiW","w"); set("uiH","h"); set("uiFg","fg"); set("uiBg","bg");
   set("uiFgGrad","fgGrad"); set("uiBgGrad","bgGrad"); set("uiAngle","angle");
+  set("uiPalette","paletteLabel");
+  $("palette").setAttribute("aria-label", T(UI.paletteLabel));
   const keepPal=$("palette").value; buildPaletteSelect(); $("palette").value=keepPal;
   set("uiTransparent","transparent");
   set("uiOp0","op0"); set("uiOp1","op1"); set("uiOp2","op2");
@@ -1067,7 +1070,9 @@ $("preset").addEventListener("change",()=>{
   const [w,h]=v.split("x"); $("cw").value=w; $("ch").value=h; render();
 });
 $("palette").addEventListener("change",()=>{
-  if($("palette").value!=="custom"){ applyPalette($("palette").value); render(); }
+  // カスタムは色を変えないが、選んだこと自体はハッシュに残す
+  if($("palette").value!=="custom") applyPalette($("palette").value);
+  render();
 });
 for(const id of ["fgGrad","bgGrad"]){
   $(id).addEventListener("change",()=>{ syncPaintUI(); $("palette").value="custom"; render(); });
