@@ -2,7 +2,7 @@
 
 [日本語](README.md) | **English**
 
-[![Math Pattern Gen — a cobalt polar-lattice pattern with a dot-matrix logo](assets/readme/key-visual.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
+[![Math Pattern Gen — a cobalt polar-lattice pattern with a dot-matrix logo](assets/readme/key-visual-en.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
 
 ## Patterns, born from math.
 
@@ -23,13 +23,13 @@ No installation or account required. It opens with the cobalt-and-cream pattern 
 
 The interface separates shape, color, and export so you can refine the pattern while watching it change.
 
-![The Math Pattern Gen editor, with color controls on the left and a cobalt polar-lattice pattern on cream](assets/readme/screen.png)
+![The English Math Pattern Gen editor, with color controls on the left and a cobalt polar-lattice pattern on cream](assets/readme/screen-en.png)
 
 ## Start with the look, not the equation
 
 The collection includes connected Truchet arcs, cellular Voronoi fields, reaction–diffusion patterns, moiré, warped contours, and more. Every structure appears in the same cobalt-and-cream palette in the gallery, making their shapes easy to compare.
 
-[![A thumbnail gallery showing all 13 mathematical structures](assets/readme/structures.png)](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)
+[![The English structure gallery showing all 13 mathematical structures](assets/readme/structures-en.png)](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)
 
 Selecting a card opens the editor with that card’s exact shape, palette, and canvas size. Use “Back to editor” at the top of the gallery to return to the pattern you were editing.
 
