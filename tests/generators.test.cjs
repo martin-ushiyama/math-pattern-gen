@@ -27,6 +27,15 @@ test('focus styling stays inside form controls and follows the quiet UI palette'
   assert.match(source,/:where\(select,input\[type=number\],input\[type=text\],input\[type=color\]\):focus-visible\{outline:0;[^}]*box-shadow:inset/);
   assert.doesNotMatch(source,/:focus-visible\{[^}]*#1644dd/);
 });
+test('the address bar stays clean while exact pattern links remain available on demand',()=>{
+  const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  assert.doesNotMatch(source,/function writeHash/);
+  assert.doesNotMatch(source,/\bwriteHash\(\)/);
+  assert.match(source,/function stateHash\(\)/);
+  assert.match(source,/history\.replaceState\(null,"",url\.href\)/);
+  assert.match(source,/navigator\.clipboard\.writeText\(patternURL\(\)\)/);
+  assert.match(source,/sessionStorage\.setItem\("mpg\.editorHash",stateHash\(\)\)/);
+});
 for(const id of ['truchet','voronoi']){
   test(id+': every parameter boundary and wide/tall canvases',()=>{
     for(const spec of S[id].params){for(const value of spec.opts?spec.opts.map(o=>o[0]):[spec.min,spec.max])valid(S[id].gen({...defaults(S,id),[spec.k]:value},480,320));}

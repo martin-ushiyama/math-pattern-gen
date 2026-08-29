@@ -53,7 +53,7 @@ From top left: **Draped cloth / Conformal map / Quasicrystal / Caustics**.
 
 **The same settings produce the same pattern.** Each result is determined by its structure, parameters, dimensions, and colors. “Try another shape” changes the parameter combination, but a given set of values remains reproducible.
 
-Shape and color settings are stored in the URL. Bookmark a pattern you like and return to it later. The editor’s recipe view also exposes the values behind the current shape.
+The address bar stays short and easy to share. To keep an exact pattern, use “Copy link to this pattern” in the Export tab. Opening that link restores the same shape and colors. The editor’s recipe view also exposes the values behind the current shape.
 
 A saved URL’s palette takes priority over the default palette. If you replace one recipe URL with another in the same tab, reload the page to apply every setting.
 
