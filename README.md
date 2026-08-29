@@ -1,5 +1,7 @@
 # Math Pattern Gen
 
+**日本語** | [English](README.en.md)
+
 [![Math Pattern Gen — 数学から、模様が生まれる。青い極格子の背景とドットロゴ](assets/readme/key-visual.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
 
 ## 数学から、模様が生まれる。
