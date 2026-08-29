@@ -20,6 +20,13 @@ test('palette names do not retain the former Funho branding',()=>{
   const pink=loadCore().PALETTES.find(p=>p.id==='pink');
   assert.deepEqual(JSON.parse(JSON.stringify(pink.name)),{ja:'ピンク',en:'Pink'});
 });
+
+test('focus styling stays inside form controls and follows the quiet UI palette',()=>{
+  const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  assert.match(source,/--focus:#5f6758/);
+  assert.match(source,/:where\(select,input\[type=number\],input\[type=text\],input\[type=color\]\):focus-visible\{outline:0;[^}]*box-shadow:inset/);
+  assert.doesNotMatch(source,/:focus-visible\{[^}]*#1644dd/);
+});
 for(const id of ['truchet','voronoi']){
   test(id+': every parameter boundary and wide/tall canvases',()=>{
     for(const spec of S[id].params){for(const value of spec.opts?spec.opts.map(o=>o[0]):[spec.min,spec.max])valid(S[id].gen({...defaults(S,id),[spec.k]:value},480,320));}
