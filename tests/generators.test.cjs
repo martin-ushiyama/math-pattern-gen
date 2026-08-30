@@ -1,4 +1,4 @@
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),vm=require('node:vm');
 const {root,loadCore,defaults}=require('../scripts/core.cjs');
 const {S,ORDER,svgFromDots,normalizeParams,FORMULAS,formulaFor}=loadCore();
 const sha=value=>crypto.createHash('sha256').update(value).digest('hex');
@@ -35,6 +35,40 @@ test('the address bar stays clean while exact pattern links remain available on 
   assert.match(source,/history\.replaceState\(null,"",url\.href\)/);
   assert.match(source,/navigator\.clipboard\.writeText\(patternURL\(\)\)/);
   assert.match(source,/sessionStorage\.setItem\("mpg\.editorHash",stateHash\(\)\)/);
+});
+test('GA4 tracks use without sending recipe hashes or personalized-ad signals',()=>{
+  const analytics=fs.readFileSync(path.join(root,'assets','analytics.js'),'utf8');
+  const editor=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const gallery=fs.readFileSync(path.join(root,'structures.html'),'utf8');
+  assert.match(analytics,/G-0Q97CVXXHQ/);
+  assert.match(analytics,/location\.origin\+location\.pathname\+location\.search/);
+  assert.doesNotMatch(analytics,/location\.href/);
+  assert.match(analytics,/allow_google_signals:false/);
+  assert.match(analytics,/allow_ad_personalization_signals:false/);
+  assert.match(editor,/assets\/analytics\.js/);
+  assert.match(gallery,/assets\/analytics\.js/);
+
+  const context={
+    location:{origin:'https://example.com',pathname:'/math-pattern-gen/',search:'',hash:'#private-recipe'},
+    document:{documentElement:{lang:'en'},createElement:()=>({}),head:{appendChild(){}}},
+    Date,Object
+  };
+  context.window=context;
+  vm.runInNewContext(analytics,context);
+  const calls=context.dataLayer.map(args=>Array.from(args));
+  assert.equal(calls[1][0],'config');
+  assert.equal(calls[1][2].page_location,'https://example.com/math-pattern-gen/');
+  assert.equal(calls[1][2].allow_google_signals,false);
+  context.mpgTrack('pattern_engaged',{structure:'polar'});
+  const event=Array.from(context.dataLayer.at(-1));
+  assert.deepEqual(event.slice(0,2),['event','pattern_engaged']);
+  assert.equal(event[2].interface_language,'en');
+});
+test('analytics separates visits, meaningful editing, choices and exports',()=>{
+  const editor=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const gallery=fs.readFileSync(path.join(root,'assets','gallery','gallery.js'),'utf8');
+  for(const event of ['pattern_engaged','structure_select','palette_select','pattern_export','pattern_link_copy'])assert.match(editor,new RegExp(event));
+  assert.match(gallery,/mpgTrack\('structure_select'/);
 });
 for(const id of ['truchet','voronoi']){
   test(id+': every parameter boundary and wide/tall canvases',()=>{
