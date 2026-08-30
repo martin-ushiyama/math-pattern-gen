@@ -115,6 +115,12 @@ For gallery copy or layout changes, edit [`scripts/structures.template.html`](sc
 
 The logo is built from dots, too. Its letters use a 3×5 dot matrix, while the favicon shows blue dots flowing along a curve. Social images and icons live in [`assets/brand/`](assets/brand/).
 
+## Usage analytics
+
+The published site uses GA4 to distinguish visits from actual use. Alongside page views, it records when someone starts editing, chooses a structure or palette, exports SVG or PNG, or copies a pattern link.
+
+Pattern recipes, URL hashes, and selected color values are not sent. Google Signals and ad personalization are disabled. The tracking setup and event definitions live in [`assets/analytics.js`](assets/analytics.js) and [`index.html`](index.html).
+
 ## Made by
 
 [@mrtn](https://x.com/mrtn)

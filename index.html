@@ -6,6 +6,7 @@
 <title>Math Pattern Gen — 数学から、模様が生まれる。</title>
 <meta name="description" content="点の間隔を変える。波を重ねる。色を選ぶ。13種類の数学的な構造から、背景パターンをつくる小さな実験室。ブラウザで調整して、SVG・PNGで持ち出せます。">
 <link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
+<script src="assets/analytics.js"></script>
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Math Pattern Gen">
@@ -1204,6 +1205,15 @@ function setLang(v){
   applyLang();
 }
 let cur="polar", P={};
+let analyticsEngaged=false;
+function trackEvent(name,parameters){
+  if(typeof window.mpgTrack==="function") window.mpgTrack(name,parameters);
+}
+function trackEngagement(firstAction){
+  if(analyticsEngaged) return;
+  analyticsEngaged=true;
+  trackEvent("pattern_engaged",{first_action:firstAction,structure:cur});
+}
 
 function defaults(key){
   const o={}; for(const s of S[key].params) o[s.k]=s.d; return o;
@@ -1221,7 +1231,7 @@ function buildParams(){
       const sel=document.createElement("select");
       sel.innerHTML=s.opts.map(o=>'<option value="'+o[0]+'">'+T(o[1])+'</option>').join("");
       sel.value=P[s.k];
-      sel.addEventListener("change",()=>{ P[s.k]=sel.value; render(); });
+      sel.addEventListener("change",()=>{ P[s.k]=sel.value; trackEngagement("shape_parameter"); render(); });
       lab.appendChild(sel);
     }else{
       const dec = s.step<0.01 ? 4 : (s.step<1 ? (String(s.step).split(".")[1]||"").length : 0);
@@ -1233,6 +1243,7 @@ function buildParams(){
       inp.addEventListener("input",()=>{
         P[s.k]=parseFloat(inp.value);
         $("v_"+s.k).textContent=Number(P[s.k]).toFixed(dec);
+        trackEngagement("shape_parameter");
         render();
       });
       lab.appendChild(inp);
@@ -1376,8 +1387,14 @@ function readHash(){
   }catch(e){ return false; }
 }
 
-$("struct").addEventListener("change",()=>{ cur=$("struct").value; P=defaults(cur); buildParams(); prepareFormulaTransition(cur); render(); });
-$("reset").addEventListener("click",()=>{ P=defaults(cur); buildParams(); render(); });
+$("struct").addEventListener("change",()=>{
+  cur=$("struct").value; P=defaults(cur); buildParams(); prepareFormulaTransition(cur);
+  trackEngagement("structure"); trackEvent("structure_select",{structure:cur,selection_source:"editor"}); render();
+});
+$("reset").addEventListener("click",()=>{
+  P=defaults(cur); buildParams(); trackEngagement("shape_reset");
+  trackEvent("shape_reset",{structure:cur}); render();
+});
 $("shuffle").addEventListener("click",()=>{
   for(const s of S[cur].params){
     if(s.opts){ P[s.k]=s.opts[Math.floor(Math.random()*s.opts.length)][0]; continue; }
@@ -1386,28 +1403,32 @@ $("shuffle").addEventListener("click",()=>{
     const v=s.min+Math.random()*(s.max-s.min);
     P[s.k]= s.step>=1 ? Math.round(v/s.step)*s.step : parseFloat(v.toFixed(4));
   }
-  buildParams(); render();
+  buildParams(); trackEngagement("shape_randomize");
+  trackEvent("shape_randomize",{structure:cur}); render();
 });
 $("preset").addEventListener("change",()=>{
   const v=$("preset").value; if(v==="custom") return;
-  const [w,h]=v.split("x"); $("cw").value=w; $("ch").value=h; render();
+  const [w,h]=v.split("x"); $("cw").value=w; $("ch").value=h;
+  trackEngagement("canvas_size"); trackEvent("canvas_size_select",{preset:v}); render();
 });
 $("palette").addEventListener("change",()=>{
   // カスタムは色を変えないが、選んだこと自体はハッシュに残す
   if($("palette").value!=="custom") applyPalette($("palette").value);
+  trackEngagement("palette"); trackEvent("palette_select",{palette:$("palette").value});
   render();
 });
 for(const id of ["fgGrad","bgGrad"]){
-  $(id).addEventListener("change",()=>{ $("palette").value="custom"; syncPaintUI(); render(); });
+  $(id).addEventListener("change",()=>{ $("palette").value="custom"; trackEngagement("color_customization"); syncPaintUI(); render(); });
 }
 $("angle").addEventListener("input",()=>{
-  $("v_angle").textContent=$("angle").value; $("palette").value="custom"; render(); });
+  $("v_angle").textContent=$("angle").value; $("palette").value="custom"; trackEngagement("color_customization"); render(); });
 for(const id of ["fg","fg2","bg","bg2"]){
-  $(id).addEventListener("input",()=>{ $("palette").value="custom"; render(); });
+  $(id).addEventListener("input",()=>{ $("palette").value="custom"; trackEngagement("color_customization"); render(); });
 }
 for(const id of ["cw","ch","transparent","op0","op1","op2"]){
   $(id).addEventListener("input",()=>{
     if(id==="cw"||id==="ch") syncPreset();
+    trackEngagement(id==="cw"||id==="ch"?"canvas_size":"color_customization");
     render();
   });
 }
@@ -1418,6 +1439,7 @@ $("dlsvg").addEventListener("click",()=>{
   a.href=URL.createObjectURL(blob);
   a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  trackEvent("pattern_export",{format:"svg",structure:cur,width:Number($("cw").value),height:Number($("ch").value)});
 });
 /* canvas の上限は実装ごとに違う。iOS Safari は面積 16,777,216px で
    頭打ちだが、デスクトップの Chrome はその十数倍まで通る。
@@ -1505,6 +1527,7 @@ function exportPNG(){
         a.href=URL.createObjectURL(bl);
         a.download="pattern-"+cur+"-"+W+"x"+H+".png";
         a.click();
+        trackEvent("pattern_export",{format:"png",structure:cur,width:W,height:H,scale:scale});
         setTimeout(()=>URL.revokeObjectURL(a.href),1000);
         cleanup();
         done(scale<want ? T(UI.pngReduced).replace("{n}",scale) : null);
@@ -1610,6 +1633,7 @@ $("preview").addEventListener("pointermove",(e)=>{
 
 function endDrag(e){
   if(!drag || (e && e.pointerId!==drag.id)) return;
+  trackEngagement("canvas_drag");
   drag=null; lastDragDraw=0;
   $("preview").style.cursor=dragEnabled()?"grab":"";
   // 平行移動を先に外すと、描き直すまでの間だけ元の位置が見えて瞬く。
@@ -1625,13 +1649,13 @@ $("preview").addEventListener("pointercancel",endDrag);
 
 $("copysvg").addEventListener("click",async()=>{
   flush();
-  try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent=T(UI.copied); }
+  try{ await navigator.clipboard.writeText(lastSVG); $("copysvg").textContent=T(UI.copied); trackEvent("pattern_export",{format:"svg_copy",structure:cur}); }
   catch(e){ $("copysvg").textContent=T(UI.copyFail); }
   setTimeout(()=>{$("copysvg").textContent=T(UI.copy);},1400);
 });
 $("copylink").addEventListener("click",async()=>{
   flush();
-  try{ await navigator.clipboard.writeText(patternURL()); $("copylink").textContent=T(UI.linkCopied); }
+  try{ await navigator.clipboard.writeText(patternURL()); $("copylink").textContent=T(UI.linkCopied); trackEvent("pattern_link_copy",{structure:cur}); }
   catch(e){ $("copylink").textContent=T(UI.linkCopyFail); }
   setTimeout(()=>{$("copylink").textContent=T(UI.copyLink);},1600);
 });
@@ -1675,6 +1699,7 @@ controlKeys.forEach((key,index)=>{
 $("quickExport").addEventListener("click",()=>{showControlPane("export");$("tab-export").focus();});
 $("browseStructures").addEventListener("click",()=>{
   flush();
+  trackEvent("structure_gallery_open",{structure:cur});
   try{
     sessionStorage.setItem("mpg.editorHash",stateHash());
     sessionStorage.setItem("mpg.galleryReturn","1");

@@ -17,6 +17,10 @@
   const saved=read('mpg.editorHash');
   if(saved&&saved.startsWith('#'))document.getElementById('backToEditor').href='index.html'+saved;
   for(const card of document.querySelectorAll('.card'))card.addEventListener('click',()=>{
+    try{
+      const state=JSON.parse(decodeURIComponent(new URL(card.href).hash.slice(1)));
+      if(typeof window.mpgTrack==='function')window.mpgTrack('structure_select',{structure:state.s,selection_source:'gallery'});
+    }catch(e){}
     try{sessionStorage.setItem('mpg.galleryScroll',String(scrollY));}catch(e){}
   });
   if(read('mpg.galleryReturn')==='1'){
