@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://martin-ushiyama.github.io/math-pattern-gen/sitemap.xml
