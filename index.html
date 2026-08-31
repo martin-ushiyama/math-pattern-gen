@@ -195,7 +195,6 @@ input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px #fff,0 0 
 @keyframes pattern-form{0%,18%{clip-path:circle(0 at 50% 50%);opacity:.08}100%{clip-path:circle(145% at 50% 50%);opacity:1}}
 @keyframes formula-away{0%,26%{opacity:1}70%{opacity:.22}100%{opacity:0}}
 .meta{font-size:10px;margin:18px 0 0;gap:20px;color:#818579}.meta b{font-weight:500;color:#505649}
-.canvas-tip{font-size:10px;color:#7d8174;line-height:1.8;border-top:1px solid #e3e5dc;padding-top:20px;margin:32px 0 0}
 .palette-swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 1px 22px}
 .palette-swatches button{padding:0;display:flex;height:37px;overflow:hidden;border:0;border-radius:4px;outline:1px solid #00000012;outline-offset:0}
 .palette-swatches button span{width:50%;height:100%;pointer-events:none}
@@ -205,8 +204,8 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
 .hex-value{display:block;font:10px ui-monospace,monospace;color:#73796b;margin-top:6px;letter-spacing:.04em}
 .grid2{gap:10px}.grid3{gap:8px}.note{line-height:1.85;font-size:11px}
 @media(max-width:1050px){header .sub{display:none}.stage{padding:24px}.wrap{grid-template-columns:320px minmax(0,1fr)}}
-@media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{height:auto;overflow:visible;padding:22px;display:block}.control-pane{max-height:none;overflow:visible}.stage{min-height:0;position:sticky;top:0;z-index:3;align-self:start;padding:22px 22px 26px;background:var(--bg);box-shadow:0 1px 0 var(--line)}.canvas-head{margin-bottom:18px}.canvas-tip{margin-top:20px;padding-top:15px}.control-tabs{position:static;background:#fff}.control-pane[hidden]{display:none}}
-@media(max-width:620px){header{padding:14px 18px;gap:10px;min-height:0}header .right{gap:6px}header .lang button{padding:4px 6px}.stage{padding:18px 18px 22px}.panel{padding:20px 18px 0}.meta{gap:12px;font-size:9px}.canvas-tip{font-size:10px}.canvas-export{padding:9px 13px}}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{height:auto;overflow:visible;padding:22px;display:block}.control-pane{max-height:none;overflow:visible}.stage{min-height:0;position:sticky;top:0;z-index:3;align-self:start;padding:22px 22px 26px;background:var(--bg);box-shadow:0 1px 0 var(--line)}.canvas-head{margin-bottom:18px}.control-tabs{position:static;background:#fff}.control-pane[hidden]{display:none}}
+@media(max-width:620px){header{padding:14px 18px;gap:10px;min-height:0}header .right{gap:6px}header .lang button{padding:4px 6px}.stage{padding:18px 18px 22px}.panel{padding:20px 18px 0}.meta{gap:12px;font-size:9px}.canvas-export{padding:9px 13px}}
 @media(max-width:420px){header{display:grid;gap:8px 10px}header h1{max-width:283.5px}header .right{display:contents}}
 @media(prefers-reduced-motion:reduce){button{transition:none}.preview.formula-transition>svg,.formula-intro{animation:none}}
 
@@ -323,7 +322,6 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
     <span>SVG <b id="mBytes">–</b></span>
     <span id="mBusy"></span>
   </div>
-  <p class="canvas-tip" id="uiCanvasTip"></p>
 </div>
 </div>
 
@@ -1065,7 +1063,6 @@ const UI = {
   tabShape:{ja:"かたち",en:"Shape"},tabColor:{ja:"配色",en:"Color"},tabExport:{ja:"書き出し",en:"Export"},
   preview:{ja:"プレビュー",en:"Preview"},quickExport:{ja:"書き出す ↗",en:"Export ↗"},
   mathDetails:{ja:"この模様のしくみ",en:"Behind the pattern"},
-  canvasTip:{ja:"このページは短いURLのままシェアできます。模様ごと残すなら、書き出しタブからリンクをコピー。",en:"Share this page with its short URL. To keep this exact pattern, copy its link from Export."},
   title:{ja:"Math Pattern Gen — 数学から、模様が生まれる。",en:"Math Pattern Gen — Patterns, born from math."},
   sub:{ja:"数学から、模様が生まれる。",en:"Patterns, born from math."},
   legStruct:{ja:"構造",en:"Structure"},
@@ -1168,7 +1165,7 @@ function applyLang(){
   set("uiSub","sub");
   set("browseStructures","browseStructures");
   set("tab-shape","tabShape"); set("tab-color","tabColor"); set("tab-export","tabExport");
-  set("uiPreview","preview"); set("quickExport","quickExport"); set("uiMathDetails","mathDetails"); set("uiCanvasTip","canvasTip");
+  set("uiPreview","preview"); set("quickExport","quickExport"); set("uiMathDetails","mathDetails");
   set("uiLegStruct","legStruct"); set("uiLegParams","legParams"); set("uiLegCanvas","legCanvas");
   set("uiLegColor","legColor"); set("uiLegExport","legExport"); set("uiLegRecipe","legRecipe");
   set("shuffle","shuffle"); set("reset","reset"); set("dlsvg","save"); set("copysvg","copy"); set("copylink","copyLink");
