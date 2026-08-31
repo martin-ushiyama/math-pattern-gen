@@ -1,7 +1,7 @@
 "use strict";
 (function(){
   function read(key){try{return sessionStorage.getItem(key);}catch(e){return null;}}
-  let language=(navigator.language||"").startsWith("ja")?"ja":"en";
+  let language="en";
   try{const saved=localStorage.getItem("math-pattern-gen.lang")||localStorage.getItem("patternlab.lang");if(saved==="ja"||saved==="en")language=saved;}catch(e){}
   function applyLanguage(value){
     language=value;document.documentElement.lang=value;

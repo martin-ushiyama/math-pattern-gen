@@ -21,6 +21,30 @@ test('palette names do not retain the former Funho branding',()=>{
   assert.deepEqual(JSON.parse(JSON.stringify(pink.name)),{ja:'ピンク',en:'Pink'});
 });
 
+test('first visits open in English while explicit language choices remain supported',()=>{
+  const editor=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const gallery=fs.readFileSync(path.join(root,'assets','gallery','gallery.js'),'utf8');
+  const galleryTemplate=fs.readFileSync(path.join(root,'scripts','structures.template.html'),'utf8');
+  assert.match(editor,/<html lang="en"/);
+  assert.match(editor,/let LANG = \(function\(\)\{[\s\S]*return "en";[\s\S]*\}\)\(\);/);
+  assert.doesNotMatch(editor,/navigator\.language/);
+  assert.match(editor,/localStorage\.getItem\("math-pattern-gen\.lang"\)/);
+  assert.match(gallery,/let language="en";/);
+  assert.doesNotMatch(gallery,/navigator\.language/);
+  assert.match(gallery,/localStorage\.getItem\("math-pattern-gen\.lang"\)/);
+  assert.match(galleryTemplate,/<html lang="en"/);
+  assert.match(galleryTemplate,/>Start with a pattern\.<\/h1>/);
+});
+
+test('GitHub README is English-first with a maintained Japanese version',()=>{
+  const english=fs.readFileSync(path.join(root,'README.md'),'utf8');
+  const japanese=fs.readFileSync(path.join(root,'README.ja.md'),'utf8');
+  assert.match(english,/\*\*English\*\* \| \[日本語\]\(README\.ja\.md\)/);
+  assert.match(english,/## Patterns, born from math\./);
+  assert.match(japanese,/\[English\]\(README\.md\) \| \*\*日本語\*\*/);
+  assert.match(japanese,/## 数学から、模様が生まれる。/);
+});
+
 test('focus styling stays inside form controls and follows the quiet UI palette',()=>{
   const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
   assert.match(source,/--focus:#5f6758/);

@@ -1,109 +1,109 @@
 # Math Pattern Gen
 
-**日本語** | [English](README.en.md)
+**English** | [日本語](README.ja.md)
 
-[![Math Pattern Gen — 数学から、模様が生まれる。青い極格子の背景とドットロゴ](assets/readme/key-visual.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
+[![Math Pattern Gen — a cobalt polar-lattice pattern with a dot-matrix logo](assets/readme/key-visual-en.png)](https://martin-ushiyama.github.io/math-pattern-gen/)
 
-## 数学から、模様が生まれる。
+## Patterns, born from math.
 
-点の間隔を変える。波を重ねる。色を選ぶ。
+Change the spacing. Layer the waves. Choose the colors.
 
-Math Pattern Genは、数学のしくみから背景パターンをつくる、小さな実験室です。13種類の構造を触りながら、波や布、干渉模様の表情を探れます。気に入ったら、SVGやPNGで持ち出して、バナーやスライドの背景に。
+Math Pattern Gen is a small browser tool for creating background patterns from mathematical structures. Explore 13 structures, tune their geometry, and export the result as SVG or PNG for covers, social graphics, slides, and more.
 
-**[ブラウザでつくってみる →](https://martin-ushiyama.github.io/math-pattern-gen/)**
+**[Create a pattern in your browser →](https://martin-ushiyama.github.io/math-pattern-gen/)**
 
-インストールも、アカウント登録も不要。青とクリーム色の模様から始まります。
+No installation or account required. It opens with the cobalt-and-cream pattern shown above.
 
-## 触って、変えて、持ち出す
+## Choose, shape, and export
 
-1. **構造を選ぶ。** [構造一覧](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)のサムネイルから、気になる模様をひとつ。そのまま同じ設定で編集を始められます。
-2. **かたちを整える。** スライダーを少しずつ動かして、間隔やねじれを調整。「別のかたちを試す」で思いがけない組み合わせも探せます。
-3. **色を選ぶ。** 「配色」タブで、色見本を見比べながら。単色もグラデーションも選べます。
-4. **できた模様を使う。** 「書き出し」タブでサイズを決め、PNGやSVGで保存。背景を透明にすれば、写真にも重ねられます。
+1. **Choose a structure.** Browse the thumbnails in the [structure gallery](https://martin-ushiyama.github.io/math-pattern-gen/structures.html), then open any pattern directly in the editor.
+2. **Shape the geometry.** Move the sliders to adjust spacing, twist, density, and other parameters. “Try another shape” gives you a new combination to explore.
+3. **Choose the colors.** Compare palettes in the Color tab, or build your own solid or gradient combination.
+4. **Export the result.** Set the size in the Export tab and save it as PNG or SVG. Transparent backgrounds are available for both formats.
 
-かたち、配色、書き出し。操作を3つに分けて、模様を見ながら少しずつ整えられる画面にしました。
+The interface separates shape, color, and export so you can refine the pattern while watching it change.
 
-![Math Pattern Genの操作画面。左に配色の色見本、右に青とクリーム色の極格子](assets/readme/screen.png)
+![The English Math Pattern Gen editor, with color controls on the left and a cobalt polar-lattice pattern on cream](assets/readme/screen-en.png)
 
-## 数式の名前より、見た目から
+## Start with the look, not the equation
 
-円弧がつながる「トルーシェ」、細胞や石組みのような「ボロノイ」も加わりました。構造一覧は、すべて同じ青とクリーム色で。かたちの違いを見比べられます。
+The collection includes connected Truchet arcs, cellular Voronoi fields, reaction–diffusion patterns, moiré, warped contours, and more. Every structure appears in the same cobalt-and-cream palette in the gallery, making their shapes easy to compare.
 
-[![13種類の構造をサムネイルで選べる一覧。トルーシェ、ボロノイ、極格子が並ぶ](assets/readme/structures.png)](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)
+[![The English structure gallery showing all 13 mathematical structures](assets/readme/structures-en.png)](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)
 
-一覧から選ぶと、そのカードのかたち・配色・サイズで開きます。編集中の模様を続けたいときは、一覧上部の「エディタに戻る」へ。
+Selecting a card opens the editor with that card’s exact shape, palette, and canvas size. Use “Back to editor” at the top of the gallery to return to the pattern you were editing.
 
-## ひとつの道具から、こんな表情
+## One tool, many moods
 
-同じ点の集まりでも、数式と配色が変わると、印象も変わる。どれもMath Pattern Genでつくった背景です。
+The same set of dots can feel completely different when the structure and palette change. Every background below was created with Math Pattern Gen.
 
-### 色を効かせる
+### Bold color
 
-![コバルトと生成りの極格子、朱と薄桃の等高線、ライムと墨緑のモアレ、アプリコットと茄子紺の反応拡散](assets/readme/patterns-vivid.png)
+![A cobalt polar lattice, pink contours, lime moiré, and orange reaction–diffusion pattern](assets/readme/patterns-vivid.png)
 
-左上から右へ：**極格子／等高線／モアレ／反応拡散**。
+From top left: **Polar lattice / Warped contours / Moiré / Reaction–diffusion**.
 
-### 静かな動きをつくる
+### Quiet movement
 
-![深緑とミントの布、生成りとグラファイトの等角写像、薄紫とプラムの準結晶、青と氷色の焦線](assets/readme/patterns-quiet.png)
+![Green cloth, graphite conformal map, violet quasicrystal, and blue caustics](assets/readme/patterns-quiet.png)
 
-左上から右へ：**布／等角写像／準結晶／焦線**。
+From top left: **Draped cloth / Conformal map / Quasicrystal / Caustics**.
 
-## 気に入った模様に、また戻れる
+## Return to any pattern
 
-**同じ設定なら、同じ模様に。** 生成結果は、構造・パラメータ・サイズ・色で決まります。「別のかたちを試す」は設定の組み合わせを変える機能で、決まった設定から描く模様は再現できます。
+**The same settings produce the same pattern.** Each result is determined by its structure, parameters, dimensions, and colors. “Try another shape” changes the parameter combination, but a given set of values remains reproducible.
 
-普段のアドレスバーは、シェアしやすい短いURLのままです。設定ごと残したいときは、書き出しタブの「この模様のリンクをコピー」へ。コピーしたURLを開くと、同じかたちと配色から続けられます。画面の「レシピ」には、かたちを決める数値もまとめています。
+The address bar stays short and easy to share. To keep an exact pattern, use “Copy link to this pattern” in the Export tab. Opening that link restores the same shape and colors. The editor’s recipe view also exposes the values behind the current shape.
 
-保存済みURLの配色は、初期配色より優先されます。同じタブのURLを別のレシピに差し替えたときは、ページを再読み込みしてください。
+A saved URL’s palette takes priority over the default palette. If you replace one recipe URL with another in the same tab, reload the page to apply every setting.
 
-## 使う場所に合わせて保存
+## Export for the layout you need
 
-| 形式 | こんなときに |
+| Format | Best for |
 | --- | --- |
-| **PNG** | SNS、スライド、SVGを使えない場所へ。×1〜×4で保存できます。端末の上限によっては倍率が制限されます。 |
-| **SVG** | 大きなサイズや、デザインツールでの作業に。拡大しても点の輪郭を保てます。コピーして貼り付けることもできます。 |
-| **透明な背景** | 写真や他のデザインと重ねたいときに。SVG・PNGの両方で使えます。 |
+| **PNG** | Social graphics, slides, and places that do not accept SVG. Export at ×1 to ×4, subject to the device’s canvas limits. |
+| **SVG** | Large formats and further editing in design tools. Dots stay crisp at any scale, and the SVG can also be copied directly. |
+| **Transparent background** | Layering the pattern over photography or another design. Available for both SVG and PNG. |
 
-OGP・SNS、noteの見出し、帯バナー、スライド、正方形、縦長のサイズプリセットを用意しています。幅と高さの直接指定も可能です。表示言語は日本語・英語を切り替えられます。
+The editor includes presets for OGP/social images, note covers, banners, slides, square posts, and portrait graphics. You can also enter any width and height directly. The interface is available in Japanese and English.
 
-## 模様の向こうにある、13のしくみ
+## The 13 structures
 
-数式を知らなくても使えます。気になったら、画面内の解説をのぞいてみてください。
+You do not need to know the math to use them. If you are curious, each structure includes a short explanation inside the editor.
 
-| 構造 | しくみと表情 |
+| Structure | How it works and what it looks like |
 | --- | --- |
-| **極格子（ギヨシェ）** | 同心円に点を並べ、`cos(kθ + ar)`で濃淡を作る。大きな波から細かな織り目まで。 |
-| **ねじれたリボン** | 3次元のリボンを平面へ投影。点列が重なる場所に、自然な濃さが生まれる。 |
-| **ひらっとした布** | 波打つ面を斜めから見る。点の密度と光の向きが、やわらかな陰影を作る。 |
-| **等角写像** | `w = z²`や`w = z + 1/z`で格子を変形。交わる角度を保ちながら、曲線の網へ。 |
-| **歪ませた等高線** | いくつかの波を重ねた場に、等値線の帯を置く。水面や地形のような流れに。 |
-| **ねじれ格子** | 点の列を、行ごとに回して伸ばす。整った格子が、ゆるやかにたわむ。 |
-| **モアレ** | 2枚の格子の間隔と角度をわずかに変える。小さなずれが、大きな干渉模様になる。 |
-| **準結晶** | 複数方向の平面波を重ねる。5方向や7方向では、規則がありながら繰り返さない模様に。 |
-| **ギブス現象** | 矩形波をフーリエ部分和で近似。角の近くに残る小さな揺れを、点の列で描く。 |
-| **焦線（コースティクス）** | 写像の局所面積から濃淡を作る。水底に集まる光を思わせる弧が現れる。 |
-| **反応拡散** | Gray-Scottモデルで2成分の反応と拡散を計算。斑点や迷路のような、有機的な模様に。 |
-| **トルーシェ** | 正方形ごとに円弧の向きを変える。隣のタイルとつながり、輪や迷路が現れる。 |
-| **ボロノイ** | 近い2つの母点までの距離の差から濃淡を作る。境界を描く網目と、内側を描くセル模様。 |
+| **Polar lattice (guilloché)** | Places dots on concentric circles and uses `cos(kθ + ar)` for tone, ranging from broad waves to a fine weave. |
+| **Twisted ribbon** | Projects a three-dimensional ruled ribbon onto a plane. Overlapping point rows create natural changes in density. |
+| **Draped cloth** | Views a wavy surface at an angle. Point density and the direction of light create soft shading. |
+| **Conformal map** | Warps a grid with `w = z²` or `w = z + 1/z`, preserving crossing angles while turning straight lines into curved nets. |
+| **Warped contours** | Places bands of level curves on a field made from layered waves, producing a flow that resembles water or terrain. |
+| **Twisted grid** | Rotates and stretches each row of points, bending an orderly grid into a gentle sweep. |
+| **Moiré** | Overlays two grids with slightly different spacing and angles, turning tiny offsets into large interference patterns. |
+| **Quasicrystal** | Adds plane waves from several directions. Five- and seven-fold combinations feel ordered without repeating. |
+| **Gibbs phenomenon** | Approximates a square wave with a Fourier partial sum, drawing the remaining oscillation near each edge as rows of dots. |
+| **Caustics** | Derives tone from the local area of a mapping, creating arcs reminiscent of focused light at the bottom of a pool. |
+| **Reaction–diffusion** | Runs a two-component Gray–Scott model to produce organic spots and maze-like forms. |
+| **Truchet** | Rotates circular arcs within square tiles so neighboring tiles connect into loops and paths. |
+| **Voronoi** | Uses the difference between the distances to the two nearest sites to draw either cellular boundaries or filled cells. |
 
-## 背景に仕上げる、3つのヒント
+## Three tips for stronger backgrounds
 
-**点の隙間を残す。** 密なところと疎なところがあると、模様に奥行きが出ます。点がつながりすぎたら、粒径や分割数を少し下げてみてください。
+**Leave space between the dots.** Alternating dense and open areas gives the pattern depth. If the dots merge too much, reduce their size or the number of divisions.
 
-**画面の外へ続ける。** 模様が四辺を越えていくと、切り取った先にも広がりを感じられます。
+**Let the pattern continue beyond the frame.** When it crosses all four edges, the crop feels like part of something larger.
 
-**中心をずらす。** 渦の芯や特異点を画面外へ動かすと、中心の形よりも流れが引き立ちます。
+**Move the center off canvas.** Shifting a vortex or singularity outside the frame emphasizes its flow instead of its central shape.
 
-## 中身も、小さく
+## Small on the inside, too
 
-生成器は、単一の[`index.html`](index.html)。ビルドも外部ライブラリも不要で、ファイルをブラウザで開けば動きます。
+The generator lives in a single [`index.html`](index.html). It has no build step or runtime dependencies and works by opening the file in a browser.
 
-構造一覧は[`structures.html`](structures.html)と事前生成した画像で表示する静的ページです。一覧を開くたびに13種類の生成計算を走らせることはありません。画像とリンクは同じ代表レシピから作っています。
+The structure gallery is a static page made from [`structures.html`](structures.html) and pre-generated images. It does not recalculate all 13 structures every time it opens; its thumbnails and links come from the same representative recipes.
 
-各構造の`gen(p, W, H)`がドットの配列`{x, y, r}`を返し、共通処理が粒径を3段階に分けてSVGのパスへまとめます。構造を追加するには、パラメータの定義と生成関数を書いて`ORDER`へ名前を加えるだけ。数万個の点も、最大3本のパスで描きます。
+Each structure’s `gen(p, W, H)` function returns an array of dots shaped like `{x, y, r}`. Shared rendering code groups their radii into three levels and combines them into SVG paths. Adding a structure requires a parameter definition, a generator function, and one new entry in `ORDER`. Even tens of thousands of dots render in at most three paths.
 
-一覧も更新する場合は、[`assets/gallery/recipes.json`](assets/gallery/recipes.json)に代表レシピを追加して、以下を実行します。Node.js 22以降を使用してください。`sharp`は画像を生成する開発時だけの依存で、公開サイトでは使いません。
+To update the gallery, add a representative recipe to [`assets/gallery/recipes.json`](assets/gallery/recipes.json), then run the following with Node.js 22 or later. `sharp` is used only to generate images during development and is not shipped with the site.
 
 ```sh
 npm ci
@@ -111,22 +111,22 @@ npm run build:gallery
 npm test
 ```
 
-一覧の文言やレイアウトを変えるときは、[`scripts/structures.template.html`](scripts/structures.template.html)・[`assets/gallery/gallery.css`](assets/gallery/gallery.css)を編集します。テストでは生成結果の再現性、パラメータ範囲、新構造の点数上限、既存11構造の保存済みレシピ、一覧画像とレシピの対応を確認しています。
+For gallery copy or layout changes, edit [`scripts/structures.template.html`](scripts/structures.template.html) and [`assets/gallery/gallery.css`](assets/gallery/gallery.css). Tests cover deterministic output, parameter bounds, maximum dot counts, saved recipes, and the correspondence between gallery images and recipes.
 
-ロゴも、模様と同じ点の集まり。3×5のドットで字を組み、faviconには、青い点が曲線に沿って流れる小さな模様を使っています。共有用のOGP画像とアイコンは[`assets/brand/`](assets/brand/)に置いています。
+The logo is built from dots, too. Its letters use a 3×5 dot matrix, while the favicon shows blue dots flowing along a curve. Social images and icons live in [`assets/brand/`](assets/brand/).
 
-## 利用状況の計測
+## Usage analytics
 
-公開サイトではGA4を使い、ページ表示に加えて「編集を始めた」「構造や配色を選んだ」「SVG・PNGを書き出した」「模様のリンクをコピーした」を計測しています。アクセスした人と、実際に道具として使った人を分けて見るためです。
+The published site uses GA4 to distinguish visits from actual use. Alongside page views, it records when someone starts editing, chooses a structure or palette, exports SVG or PNG, or copies a pattern link.
 
-模様のレシピ、URLのハッシュ、選んだ色コードは送信しません。Googleシグナルと広告のパーソナライズも無効にしています。計測コードとイベント定義は[`assets/analytics.js`](assets/analytics.js)と[`index.html`](index.html)にあります。
+Pattern recipes, URL hashes, and selected color values are not sent. Google Signals and ad personalization are disabled. The tracking setup and event definitions live in [`assets/analytics.js`](assets/analytics.js) and [`index.html`](index.html).
 
-## つくった人
+## Made by
 
 [@mrtn](https://x.com/mrtn)
 
-気に入ったら、[GitHubのスター](https://github.com/martin-ushiyama/math-pattern-gen)で応援してもらえるとうれしいです。
+If you find the tool useful, a [GitHub star](https://github.com/martin-ushiyama/math-pattern-gen) is always appreciated.
 
-## ライセンス
+## License
 
 [MIT](LICENSE)

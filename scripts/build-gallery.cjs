@@ -4,7 +4,7 @@ const {S,ORDER,svgFromDots,brandLogoSVG}=loadCore();
 const dir=path.join(root,'assets/gallery'),recipes=JSON.parse(fs.readFileSync(path.join(dir,'recipes.json'),'utf8'));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const hash=data=>crypto.createHash('sha256').update(data).digest('hex');
-const text=(tag,value,extra='')=>`<${tag} ${extra} data-ja="${esc(value.ja)}" data-en="${esc(value.en)}">${esc(value.ja)}</${tag}>`;
+const text=(tag,value,extra='')=>`<${tag} ${extra} data-ja="${esc(value.ja)}" data-en="${esc(value.en)}">${esc(value.en)}</${tag}>`;
 async function main(){
   if(recipes.length!==ORDER.length||new Set(recipes.map(r=>r.id)).size!==ORDER.length||ORDER.some(id=>!recipes.some(r=>r.id===id)))throw new Error('Gallery must cover every structure exactly once');
   const cards=[],manifest=[];
@@ -20,7 +20,7 @@ async function main(){
     fs.writeFileSync(path.join(dir,item.id+'.webp'),png);
     const href='index.html#'+encodeURIComponent(JSON.stringify(st));
     const fresh=['truchet','voronoi'].includes(item.id)?'<span class="badge">NEW</span>':'';
-    cards.push(`<a class="card" href="${esc(href)}" aria-labelledby="name-${item.id}" aria-describedby="note-${item.id}"><div class="thumb"><img src="assets/gallery/${item.id}.webp" alt="" width="720" height="540" loading="${i<3?'eager':'lazy'}" decoding="async">${fresh}</div><div class="card-head">${text('h2',item.title,`id="name-${item.id}"`)}<span class="number">${String(i+1).padStart(2,'0')}</span></div>${text('p',structure.note,`id="note-${item.id}"`)}<span class="open" data-ja="この模様から作る" data-en="Make it yours">この模様から作る</span><span class="arrow" aria-hidden="true">→</span></a>`);
+    cards.push(`<a class="card" href="${esc(href)}" aria-labelledby="name-${item.id}" aria-describedby="note-${item.id}"><div class="thumb"><img src="assets/gallery/${item.id}.webp" alt="" width="720" height="540" loading="${i<3?'eager':'lazy'}" decoding="async">${fresh}</div><div class="card-head">${text('h2',item.title,`id="name-${item.id}"`)}<span class="number">${String(i+1).padStart(2,'0')}</span></div>${text('p',structure.note,`id="note-${item.id}"`)}<span class="open" data-ja="この模様から作る" data-en="Make it yours">Make it yours</span><span class="arrow" aria-hidden="true">→</span></a>`);
     manifest.push({id:item.id,href,dots:dots.length,svgSha256:hash(svg),thumbnailSha256:hash(png),bytes:png.length});
     console.log(item.id+': '+dots.length+' dots / '+png.length+' bytes / '+Math.round(performance.now()-start)+'ms');
   }
