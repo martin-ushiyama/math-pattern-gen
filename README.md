@@ -8,7 +8,7 @@
 
 Change the spacing. Layer the waves. Choose the colors.
 
-Math Pattern Gen is a small browser tool for creating background patterns from mathematical structures. Explore 14 structures, tune their geometry, and export the result as SVG or PNG for covers, social graphics, slides, and more.
+Math Pattern Gen is a small browser tool for creating background patterns from mathematical structures. Explore 13 structures, tune their geometry, and export the result as SVG or PNG for covers, social graphics, slides, and more.
 
 **[Create a pattern in your browser →](https://martin-ushiyama.github.io/math-pattern-gen/)**
 
@@ -27,7 +27,7 @@ The interface separates shape, color, and export so you can refine the pattern w
 
 ## Start with the look, not the equation
 
-The collection includes connected Truchet arcs, cellular Voronoi fields, reaction–diffusion patterns, moiré, warped contours, and more. Most examples use cobalt and cream; the new ordered-dither example uses white on blue to show its crisp pixel texture.
+The collection includes connected Truchet arcs, cellular Voronoi fields, reaction–diffusion patterns, moiré, warped contours, and more. Every structure appears in the same cobalt-and-cream palette in the gallery, making their shapes easy to compare.
 
 [![The English structure gallery showing all 13 mathematical structures](assets/readme/structures-en.png)](https://martin-ushiyama.github.io/math-pattern-gen/structures.html)
 
@@ -86,7 +86,6 @@ You do not need to know the math to use them. If you are curious, each structure
 | **Reaction–diffusion** | Runs a two-component Gray–Scott model to produce organic spots and maze-like forms. |
 | **Truchet** | Rotates circular arcs within square tiles so neighboring tiles connect into loops and paths. |
 | **Voronoi** | Uses the difference between the distances to the two nearest sites to draw either cellular boundaries or filled cells. |
-| **Ordered dither** | Compares overlapping sine waves with an 8×8 Bayer matrix to create crisp, two-color square pixels. SVG and PNG exports preserve hard edges. |
 
 ## Three tips for stronger backgrounds
 
@@ -100,7 +99,7 @@ You do not need to know the math to use them. If you are curious, each structure
 
 The generator lives in a single [`index.html`](index.html). It has no build step or runtime dependencies and works by opening the file in a browser.
 
-The structure gallery is a static page made from [`structures.html`](structures.html) and pre-generated images. It does not recalculate all 14 structures every time it opens; its thumbnails and links come from the same representative recipes.
+The structure gallery is a static page made from [`structures.html`](structures.html) and pre-generated images. It does not recalculate all 13 structures every time it opens; its thumbnails and links come from the same representative recipes.
 
 Each structure’s `gen(p, W, H)` function returns an array of dots shaped like `{x, y, r}`. Shared rendering code groups their radii into three levels and combines them into SVG paths. Adding a structure requires a parameter definition, a generator function, and one new entry in `ORDER`. Even tens of thousands of dots render in at most three paths.
 

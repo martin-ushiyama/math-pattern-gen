@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="sAArzajsZduEyEkehQRPZEPDvOdiK4H15IrU4TBQcUk">
 <title>Math Pattern Gen — Patterns, born from math.</title>
-<meta name="description" content="Create background patterns from 14 mathematical structures. Tune the geometry and colors in your browser, then export as SVG or PNG.">
+<meta name="description" content="Create background patterns from 13 mathematical structures. Tune the geometry and colors in your browser, then export as SVG or PNG.">
 <link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
 <script src="assets/analytics.js"></script>
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Math Pattern Gen">
 <meta property="og:title" content="Math Pattern Gen — Patterns, born from math.">
-<meta property="og:description" content="Create background patterns from 14 mathematical structures. Tune them in your browser and export as SVG or PNG.">
+<meta property="og:description" content="Create background patterns from 13 mathematical structures. Tune them in your browser and export as SVG or PNG.">
 <meta property="og:url" content="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp-guilloche.png">
@@ -23,7 +23,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@mrtn">
 <meta name="twitter:title" content="Math Pattern Gen — Patterns, born from math.">
-<meta name="twitter:description" content="Explore 14 mathematical structures, shape a background pattern, and export it as SVG or PNG.">
+<meta name="twitter:description" content="Explore 13 mathematical structures, shape a background pattern, and export it as SVG or PNG.">
 <meta name="twitter:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp-guilloche.png">
 <meta name="twitter:image:alt" content="A cobalt dot-matrix logo and a sweeping polar-lattice pattern on a cream background.">
 <link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
@@ -209,7 +209,7 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
 @media(max-width:420px){header{display:grid;gap:8px 10px}header h1{max-width:283.5px}header .right{display:contents}}
 @media(prefers-reduced-motion:reduce){button{transition:none}.preview.formula-transition>svg,.formula-intro{animation:none}}
 
-</style>
+#pixelSizeWrap[hidden]{display:none}</style>
 </head>
 <body>
 
@@ -234,7 +234,9 @@ input[type=color]{height:46px;border-radius:5px;border:1px solid #e3e5dc;padding
     <p class="note" id="structNote"></p>
   </fieldset><div class="control-tabs" role="tablist" aria-label="Controls"><button type="button" role="tab" id="tab-shape" aria-controls="pane-shape" aria-selected="true" tabindex="0"></button><button type="button" role="tab" id="tab-color" aria-controls="pane-color" aria-selected="false" tabindex="-1"></button><button type="button" role="tab" id="tab-export" aria-controls="pane-export" aria-selected="false" tabindex="-1"></button></div><div id="pane-shape" class="control-pane" role="tabpanel" aria-labelledby="tab-shape" tabindex="0" >  <fieldset>
     <legend id="uiLegParams"></legend>
-    <div id="params"></div>
+    <label><span class="name" id="uiOutputMode"></span><select id="outputMode"><option value="normal" id="uiNormalOutput"></option><option value="pixel" id="uiPixelOutput"></option></select></label>
+    <label id="pixelSizeWrap" hidden><span class="name" id="uiPixelSize"></span><input type="number" id="pixelSize" min="2" max="16" step="1" value="4"></label>
+    <p class="note" id="outputNote"></p><div id="params"></div>
     <div class="grid2" style="margin-top:12px">
       <button id="shuffle"></button>
       <button id="reset"></button>
@@ -652,17 +654,21 @@ S.contour = {
     {k:"ox",  l:{ja:"位置 x",en:"Offset x"}, min:-2000,max:2000,step:10, d:0},
     {k:"oy",  l:{ja:"位置 y",en:"Offset y"}, min:-2000,max:2000,step:10, d:0},
   ],
-  gen(p,W,H){
-    const out=[];
+  tone(p,x,y,W,H){
     const surf=(x,y)=>{ const u=x/W, v=y/H;
       return p.a1*Math.sin(p.f1u*u+p.f1v*v+0.4)
            + p.a2*Math.sin(p.f2v*v+p.f2u*u+2.1)
            + p.a3*Math.sin(p.f3u*u+p.f3v*v-1.2); };
-    for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
       const xs=x-p.ox, ys=y-p.oy;                 // 場だけずらす
       const f=surf(xs,ys)*p.gain + (p.tx*xs + p.ty*ys);
       const ph=f-Math.floor(f);
       const prof=Math.pow(Math.sin(Math.PI*Math.pow(ph, p.skew)), p.width);
+      return prof;
+  },
+  gen(p,W,H){
+    const out=[];
+    for(let y=2; y<H; y+=p.step){ for(let x=2; x<W; x+=p.step){
+      const prof=this.tone(p,x,y,W,H);
       const r=p.rmin+(p.rmax-p.rmin)*prof;
       if(r>0.5) out.push({x,y,r});
     }}
@@ -992,40 +998,25 @@ S.voronoi={
   }
 };
 
-/* Bayer行列のしきい値で連続した濃淡を二値の正方形に変換する。 */
-S.dither={
-  label:{ja:"順序ディザ（ピクセルドット）",en:"Ordered dither (pixel dots)"},
-  note:{ja:"波の重なりを、四角いドットの密度で描きます。輪郭をぼかさない2色の模様。グラデーションと粒径別の不透明度は使いません。",en:"Turn overlapping waves into a field of square pixels. Crisp edges and two solid colors, without gradients or size-based opacity."},
-  doc:{ja:"<b>順序ディザのしくみ</b><br>2つの正弦波から濃淡を求め、8×8のBayer行列のしきい値と比較して、点を置くかどうかを決めます。中間の濃淡は半透明ではなく、点の密度で表現します。<br><b>ドットをくっきり</b> — 点は整数座標の正方形。SVGにはcrispEdgesを指定し、PNGは整数倍で補間せず書き出します。縮小表示では点の見え方が変わるため、書き出し画像は等倍で確認してください。<br><b>変化をつける</b> — 波の大きさで模様のスケール、重なりで干渉、濃度で点の割合を調整できます。",en:"<b>How ordered dithering works</b><br>Two sine waves define a continuous tone. An 8×8 Bayer threshold matrix decides whether each pixel is filled. Intermediate tones come from pixel density, not transparency.<br><b>Keep pixels crisp</b> — Squares align to integer coordinates. SVG uses crispEdges; PNG exports at integer scales without smoothing. Reduced previews can look different: inspect exports at actual size.<br><b>Shape the field</b> — Wavelength controls scale, wave mix controls interference, and density adjusts coverage."},
-  params:[
-    {k:"pixel",l:{ja:"ドットの大きさ（px）",en:"Pixel size (px)"},min:2,max:16,step:1,d:4},
-    {k:"wave",l:{ja:"波の大きさ",en:"Wavelength"},min:80,max:1800,step:10,d:620},
-    {k:"mix",l:{ja:"波の重なり",en:"Wave mix"},min:0,max:1,step:0.05,d:0.6},
-    {k:"contrast",l:{ja:"濃淡の強さ",en:"Contrast"},min:0.2,max:3,step:0.1,d:1.4},
-    {k:"density",l:{ja:"濃度",en:"Density"},min:0,max:1,step:0.05,d:0.5},
-    {k:"phase",l:{ja:"位相",en:"Phase"},min:0,max:6.28,step:0.05,d:1.2},
-    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:0},
-    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:0}
-  ],
-  gen(p,W,H){
-    const out=[],step=Math.max(2,Math.round(p.pixel)),tau=2*Math.PI/p.wave;
-    for(let y=0,iy=0;y<H;y+=step,iy++)for(let x=0,ix=0;x<W;x+=step,ix++){
-      const u=(x-p.ox)*tau,v=(y-p.oy)*tau;
-      const field=(Math.sin(u+0.65*Math.sin(v)+p.phase)+p.mix*Math.sin(0.72*v-0.48*u-p.phase))/(1+p.mix);
-      const tone=clamp01(p.density+0.5*p.contrast*field);
-      let threshold=0;
-      for(let bit=0;bit<3;bit++){
-        const a=(ix>>bit)&1,b=(iy>>bit)&1;
-        threshold=threshold*4+((a^b)*2+b);
-      }
-      if(tone>(threshold+0.5)/64)out.push({x,y,r:step/2,pixel:step});
+/* 出力方式を構造と分離。toneを持つ構造から順にドット出力へ対応する。 */
+function normalizeOutput(input){
+  const value=Number(input?.pixel);
+  return {mode:input?.mode==='pixel'?'pixel':'normal',pixel:Number.isFinite(value)?Math.max(2,Math.min(16,Math.round(value))):4};
+}
+function pixelDots(key,p,W,H,pixel){
+  if(typeof S[key]?.tone!=='function')throw new Error('Pixel output is not available for this structure yet');
+  const out=[],step=normalizeOutput({pixel}).pixel;
+  for(let y=0,iy=0;y<H;y+=step,iy++)for(let x=0,ix=0;x<W;x+=step,ix++){
+    const tone=clamp01(S[key].tone(p,x+step/2,y+step/2,W,H));
+    let threshold=0;
+    for(let bit=0;bit<3;bit++){
+      const a=(ix>>bit)&1,b=(iy>>bit)&1;
+      threshold=threshold*4+((a^b)*2+b);
     }
-    // 空の模様でも専用レンダラーを選べるようにする。
-    out.pixel=true;
-    return out;
+    if(tone>(threshold+0.5)/64)out.push({x,y,r:step/2,pixel:step});
   }
-};
-
+  out.pixel=true;return out;
+}
 function svgFromPixels(W,H,dots,color,bg){
   // 同じ行の連続した点は1本の矩形へまとめる。整数境界を維持。
   const runs=[];let run=null;
@@ -1039,6 +1030,7 @@ function svgFromPixels(W,H,dots,color,bg){
   const d=runs.map(r=>'M'+r.x+' '+r.y+'h'+r.w+'v'+r.h+'h-'+r.w+'z').join('');
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" shape-rendering="crispEdges">'+background+'<path fill="'+fg+'" d="'+d+'"/></svg>';
 }
+
 
 const PALETTES=[
  {id:"cobalt-cream", name:{ja:"コバルト＆クリーム", en:"Cobalt & cream"},
@@ -1079,7 +1071,6 @@ function normalizeParams(key,input){
 }
 /* 構造を一目で伝える短い生成規則。詳しい式は各構造の解説に残す。 */
 const FORMULAS={
-  dither:"pixel(i,j) = tone(i,j) > (B₈(i mod 8,j mod 8) + ½)/64",
   polar:"rᵢ = r₀ + i·Δr   |   m = cos(kθ + arᵢ + φ)",
   ribbon:"X(u,v) = P(u) + v·R(τ(u))N(u)",
   cloth:"h(u,v) = A(u)·sin(fᵤu + fᵥv + τu)",
@@ -1097,7 +1088,7 @@ function formulaFor(key,p){
   if(key==="conformal")return p&&p.fn==="jouk" ? "w = z + 1/z" : "w = z²";
   return FORMULAS[key]||"";
 }
-const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi","dither"];
+const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi"];
 const $ = id => document.getElementById(id);
 
 /* ── 言語 ──────────────────────────────────────────────
@@ -1253,7 +1244,7 @@ function setLang(v){
   try{ localStorage.setItem("math-pattern-gen.lang", v); }catch(e){}
   applyLang();
 }
-let cur="polar", P={};
+let cur="polar", P={}, output={mode:"normal",pixel:4};
 let analyticsEngaged=false;
 function trackEvent(name,parameters){
   if(typeof window.mpgTrack==="function") window.mpgTrack(name,parameters);
@@ -1271,10 +1262,28 @@ function buildStructSelect(){
   $("struct").innerHTML = ORDER.map(k=>'<option value="'+k+'">'+T(S[k].label)+'</option>').join("");
   $("struct").value=cur;
 }
+
+function syncOutputUI(){
+  const supported=typeof S[cur].tone==='function';
+  if(!supported)output.mode='normal';
+  const pixel=output.mode==='pixel';
+  $('outputMode').value=output.mode;$('outputMode').disabled=!supported;
+  $('pixelSizeWrap').hidden=!pixel;$('pixelSize').value=output.pixel;
+  $('uiOutputMode').textContent=T({ja:'描画方式',en:'Rendering'});
+  $('uiNormalOutput').textContent=T({ja:'通常',en:'Original'});
+  $('uiPixelOutput').textContent=T({ja:'ドット（ぼかしなし）',en:'Pixel dots (no smoothing)'});
+  $('uiPixelSize').textContent=T({ja:'ドットの大きさ（px）',en:'Pixel size (px)'});
+  $('outputNote').textContent=T(!supported?{ja:'ドット出力は、まず「歪ませた等高線」で試せます。',en:'Try pixel output with Warped contours first.'}:pixel?{ja:'同じ等高線の濃淡を、Bayer行列で2色のドットに変換。配色は開始色を使い、不透明度・グラデーションは使いません。',en:'The same contour field, rendered as two-color dots with a Bayer matrix. Uses the starting colors without opacity or gradients.'}:{ja:'形の設定を保ったまま、通常とドットを比較できます。',en:'Compare original and pixel rendering without changing the shape settings.'});
+  for(const id of ['op0','op1','op2','fgGrad','bgGrad','fg2','bg2','angle'])$(id).disabled=pixel;
+}
+$('outputMode').addEventListener('change',()=>{output.mode=$('outputMode').value;buildParams();render();});
+$('pixelSize').addEventListener('change',()=>{output=normalizeOutput({mode:output.mode,pixel:$('pixelSize').value});syncOutputUI();render();});
+
 function buildParams(){
+  syncOutputUI();
   const box=$("params"); box.innerHTML="";
-  for(const id of ["op0","op1","op2","fgGrad","bgGrad"]){$(id).disabled=cur==="dither";}
   for(const s of S[cur].params){
+    if(output.mode==="pixel"&&["step","rmin","rmax"].includes(s.k))continue;
     const lab=document.createElement("label");
     if(s.opts){
       lab.innerHTML='<div class="row"><span class="name">'+T(s.l)+'</span></div>';
@@ -1342,7 +1351,7 @@ function doRender(){
     const deg=isFinite(a)?a:90;   // 0度は有効な値なので || で潰さない
     let dots=[];
     const t0=performance.now();
-    try{ dots=S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
+    try{ dots=output.mode==="pixel"?pixelDots(cur,P,W,H,output.pixel):S[cur].gen(P,W,H); }catch(e){ $("mBusy").textContent=T(UI.genError)+e.message; return; }
     lastSVG=svgFromDots(W,H,dots,currentPaint("fg"),op,bg,deg);
     const preview=$("preview");
     const formulaOverlay=pendingFormula===cur ? preview.querySelector(".formula-intro") : null;
@@ -1360,7 +1369,7 @@ function doRender(){
       : "";
     updateScaleOptions(W,H);
     $("recipe").value = cur+" / "+W+"×"+H+"\n"
-      + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ");
+      + S[cur].params.map(s=>s.k+": "+P[s.k]).join(", ") + "\nrender: "+output.mode+(output.mode==="pixel"?", pixel: "+output.pixel:"");
 }
 
 function prepareFormulaTransition(key){
@@ -1402,7 +1411,7 @@ function stateObject(){
   return {s:cur,w:$("cw").value,h:$("ch").value,fg:$("fg").value,bg:$("bg").value,
     f2:$("fg2").value,b2:$("bg2").value,fG:$("fgGrad").checked?1:0,bG:$("bgGrad").checked?1:0,
     ang:$("angle").value,pal:$("palette").value,
-    t:$("transparent").checked?1:0,op:[$("op0").value,$("op1").value,$("op2").value],p:P};
+    t:$("transparent").checked?1:0,op:[$("op0").value,$("op1").value,$("op2").value],p:P,output:{...output}};
 }
 function stateHash(){ return "#"+encodeURIComponent(JSON.stringify(stateObject())); }
 function patternURL(){
@@ -1421,7 +1430,8 @@ function readHash(){
   try{
     const o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
     if(!o||typeof o.s!=="string"||!Object.hasOwn(S,o.s)) return false;
-    cur=o.s; P=normalizeParams(cur,o.p);
+    cur=o.s; P=normalizeParams(cur,o.p); output=normalizeOutput(o.output);
+    if(typeof S[cur].tone!=="function")output.mode="normal";
     $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
     if(o.f2) $("fg2").value=o.f2;
     if(o.b2) $("bg2").value=o.b2;
@@ -1487,7 +1497,7 @@ $("dlsvg").addEventListener("click",()=>{
   const blob=new Blob([lastSVG],{type:"image/svg+xml"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download="pattern-"+cur+"-"+$("cw").value+"x"+$("ch").value+".svg";
+  a.download="pattern-"+cur+(output.mode==="pixel"?"-pixel":"")+"-"+$("cw").value+"x"+$("ch").value+".svg";
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   trackEvent("pattern_export",{format:"svg",structure:cur,width:Number($("cw").value),height:Number($("ch").value)});
 });
@@ -1575,7 +1585,7 @@ function exportPNG(){
         if(!bl){ cleanup(); done(T(UI.pngFail)); return; }
         const a=document.createElement("a");
         a.href=URL.createObjectURL(bl);
-        a.download="pattern-"+cur+"-"+W+"x"+H+".png";
+        a.download="pattern-"+cur+(output.mode==="pixel"?"-pixel":"")+"-"+W+"x"+H+".png";
         a.click();
         trackEvent("pattern_export",{format:"png",structure:cur,width:W,height:H,scale:scale});
         setTimeout(()=>URL.revokeObjectURL(a.href),1000);
