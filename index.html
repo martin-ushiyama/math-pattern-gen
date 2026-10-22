@@ -998,16 +998,57 @@ S.voronoi={
   }
 };
 
-/* 出力方式を構造と分離。toneを持つ構造から順にドット出力へ対応する。 */
+/* 全構造共通の出力方式。構造ごとの階調または投影された点列を二値化。 */
 function normalizeOutput(input){
   const value=Number(input?.pixel);
   return {mode:input?.mode==='pixel'?'pixel':'normal',pixel:Number.isFinite(value)?Math.max(2,Math.min(16,Math.round(value))):4};
 }
+
+// 格子上の濃淡は補間し、投影された点列は元の位置と円の面積を使う。
+const PIXEL_FIELDS=new Set(['moire','quasi','caustics','turing','truchet','voronoi']);
+function preparePixelTone(key,p,W,H,step){
+  if(typeof S[key]?.tone==='function')return (x,y)=>S[key].tone(p,x,y,W,H);
+  if(!S[key])throw new Error('Unknown structure');
+  if(PIXEL_FIELDS.has(key)){
+    // 半径を1〜2にして、既存生成式から0〜1の階調を欠落なく取り出す。
+    const dots=S[key].gen({...p,rmin:1,rmax:2},W,H);
+    if(!dots.length)return ()=>0;
+    let nx=1;while(nx<dots.length&&dots[nx].y===dots[0].y)nx++;
+    const ny=Math.ceil(dots.length/nx),dx=nx>1?dots[1].x-dots[0].x:W,dy=ny>1?dots[nx].y-dots[0].y:H;
+    const scale=['truchet','voronoi'].includes(key)?fieldSampling(p,W,H).scale:1;
+    const values=Float32Array.from(dots,d=>clamp01(d.r/scale-1));
+    return (x,y)=>{
+      const gx=Math.max(0,Math.min(nx-1,(x-dots[0].x)/dx)),gy=Math.max(0,Math.min(ny-1,(y-dots[0].y)/dy));
+      const x0=Math.floor(gx),y0=Math.floor(gy),x1=Math.min(nx-1,x0+1),y1=Math.min(ny-1,y0+1),a=gx-x0,b=gy-y0;
+      return (values[y0*nx+x0]*(1-a)+values[y0*nx+x1]*a)*(1-b)+(values[y1*nx+x0]*(1-a)+values[y1*nx+x1]*a)*b;
+    };
+  }
+  const nx=Math.ceil(W/step),ny=Math.ceil(H/step),coverage=new Float32Array(nx*ny);
+  const dots=S[key].gen(p,W,H);
+  for(const d of dots){
+    if(!Number.isFinite(d.x+d.y+d.r)||d.r<=0)continue;
+    const x0=Math.max(0,Math.floor((d.x-d.r)/step)),x1=Math.min(nx-1,Math.floor((d.x+d.r)/step));
+    const y0=Math.max(0,Math.floor((d.y-d.r)/step)),y1=Math.min(ny-1,Math.floor((d.y+d.r)/step));
+    for(let j=y0;j<=y1;j++)for(let i=x0;i<=x1;i++){
+      const k=j*nx+i;if(coverage[k]>=1)continue;
+      let covered=0;
+      for(let sy=0;sy<4;sy++)for(let sx=0;sx<4;sx++){
+        const x=(i+(sx+.5)/4)*step-d.x,y=(j+(sy+.5)/4)*step-d.y;
+        if(x*x+y*y<=d.r*d.r)covered++;
+      }
+      // 重なりは濃くなるが、最大密度は1。最終出力は半透明を使わない。
+      coverage[k]=Math.min(1,coverage[k]+covered/16);
+    }
+  }
+  return (x,y)=>coverage[Math.min(ny-1,Math.floor(y/step))*nx+Math.min(nx-1,Math.floor(x/step))]||0;
+}
+
 function pixelDots(key,p,W,H,pixel){
-  if(typeof S[key]?.tone!=='function')throw new Error('Pixel output is not available for this structure yet');
+
   const out=[],step=normalizeOutput({pixel}).pixel;
+  const sample=preparePixelTone(key,p,W,H,step);
   for(let y=0,iy=0;y<H;y+=step,iy++)for(let x=0,ix=0;x<W;x+=step,ix++){
-    const tone=clamp01(S[key].tone(p,x+step/2,y+step/2,W,H));
+    const tone=clamp01(sample(x+step/2,y+step/2));
     let threshold=0;
     for(let bit=0;bit<3;bit++){
       const a=(ix>>bit)&1,b=(iy>>bit)&1;
@@ -1264,7 +1305,7 @@ function buildStructSelect(){
 }
 
 function syncOutputUI(){
-  const supported=typeof S[cur].tone==='function';
+  const supported=!!S[cur];
   if(!supported)output.mode='normal';
   const pixel=output.mode==='pixel';
   $('outputMode').value=output.mode;$('outputMode').disabled=!supported;
@@ -1273,17 +1314,21 @@ function syncOutputUI(){
   $('uiNormalOutput').textContent=T({ja:'通常',en:'Original'});
   $('uiPixelOutput').textContent=T({ja:'ドット（ぼかしなし）',en:'Pixel dots (no smoothing)'});
   $('uiPixelSize').textContent=T({ja:'ドットの大きさ（px）',en:'Pixel size (px)'});
-  $('outputNote').textContent=T(!supported?{ja:'ドット出力は、まず「歪ませた等高線」で試せます。',en:'Try pixel output with Warped contours first.'}:pixel?{ja:'同じ等高線の濃淡を、Bayer行列で2色のドットに変換。配色は開始色を使い、不透明度・グラデーションは使いません。',en:'The same contour field, rendered as two-color dots with a Bayer matrix. Uses the starting colors without opacity or gradients.'}:{ja:'形の設定を保ったまま、通常とドットを比較できます。',en:'Compare original and pixel rendering without changing the shape settings.'});
+  $('outputNote').textContent=T(!supported?{ja:'ドット出力は、まず「歪ませた等高線」で試せます。',en:'Try pixel output with Warped contours first.'}:pixel?{ja:'元の模様を2色のドットで描きます。配色は開始色を使い、不透明度・グラデーションは使いません。',en:'Render this pattern as two-color pixel dots. Uses the starting colors without opacity or gradients.'}:{ja:'形の設定を保ったまま、通常とドットを比較できます。',en:'Compare original and pixel rendering without changing the shape settings.'});
   for(const id of ['op0','op1','op2','fgGrad','bgGrad','fg2','bg2','angle'])$(id).disabled=pixel;
 }
 $('outputMode').addEventListener('change',()=>{output.mode=$('outputMode').value;buildParams();render();});
 $('pixelSize').addEventListener('change',()=>{output=normalizeOutput({mode:output.mode,pixel:$('pixelSize').value});syncOutputUI();render();});
 
+$('pixelSize').addEventListener('input',()=>{
+  const value=Number($('pixelSize').value);
+  if(Number.isInteger(value)&&value>=2&&value<=16){output.pixel=value;render();}
+});
 function buildParams(){
   syncOutputUI();
   const box=$("params"); box.innerHTML="";
   for(const s of S[cur].params){
-    if(output.mode==="pixel"&&["step","rmin","rmax"].includes(s.k))continue;
+    if(output.mode==="pixel"&&((cur==="contour"&&["step","rmin","rmax"].includes(s.k))||(PIXEL_FIELDS.has(cur)&&["rmin","rmax"].includes(s.k))))continue;
     const lab=document.createElement("label");
     if(s.opts){
       lab.innerHTML='<div class="row"><span class="name">'+T(s.l)+'</span></div>';
@@ -1431,7 +1476,7 @@ function readHash(){
     const o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
     if(!o||typeof o.s!=="string"||!Object.hasOwn(S,o.s)) return false;
     cur=o.s; P=normalizeParams(cur,o.p); output=normalizeOutput(o.output);
-    if(typeof S[cur].tone!=="function")output.mode="normal";
+    if(!S[cur])output.mode="normal";
     $("cw").value=o.w; $("ch").value=o.h; $("fg").value=o.fg; $("bg").value=o.bg;
     if(o.f2) $("fg2").value=o.f2;
     if(o.b2) $("bg2").value=o.b2;

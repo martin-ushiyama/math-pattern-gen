@@ -3,7 +3,7 @@ const {loadCore,defaults}=require('../scripts/core.cjs');
 const {S,ORDER,svgFromDots,pixelDots,normalizeOutput}=loadCore();
 test('pixel rendering is an output mode, not an additional structure',()=>{
   assert.equal(ORDER.length,13);assert(!ORDER.includes('dither'));
-  assert.throws(()=>pixelDots('polar',defaults(S,'polar'),100,100,4),/not available/);
+  assert.throws(()=>pixelDots('missing',{},100,100,4),/Unknown structure/);
 });
 test('original contour dots and pixel output use the same underlying tone field',()=>{
   const p=defaults(S,'contour'),original=JSON.stringify(p);
@@ -40,4 +40,12 @@ test('old recipes default to normal; malformed output options are bounded',()=>{
   assert.equal(normalizeOutput({mode:'pixel',pixel:100}).pixel,16);
   assert.equal(normalizeOutput({mode:'pixel',pixel:NaN}).pixel,4);
   assert.equal(normalizeOutput({mode:'pixel',pixel:3.6}).pixel,4);
+});
+
+for(const key of ORDER)test(key+': pixel output is deterministic, bounded, and does not alter shape parameters',()=>{
+  const p=defaults(S,key),before=JSON.stringify(p);
+  const a=pixelDots(key,p,1200,630,4),b=pixelDots(key,p,1200,630,4);
+  assert(a.length>0,key);assert(a.length<=300*158);assert.equal(JSON.stringify(a),JSON.stringify(b));assert.equal(JSON.stringify(p),before);
+  assert(a.every(d=>Number.isInteger(d.x)&&Number.isInteger(d.y)&&d.pixel===4&&d.x>=0&&d.y>=0&&d.x<1200&&d.y<630));
+  const coarse=pixelDots(key,p,1200,630,12);assert.notEqual(JSON.stringify(a),JSON.stringify(coarse));
 });
