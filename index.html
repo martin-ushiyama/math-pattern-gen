@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="sAArzajsZduEyEkehQRPZEPDvOdiK4H15IrU4TBQcUk">
 <title>Math Pattern Gen — Patterns, born from math.</title>
-<meta name="description" content="Create background patterns from 13 mathematical structures. Tune the geometry and colors in your browser, then export as SVG or PNG.">
+<meta name="description" content="Create background patterns from 14 mathematical structures. Tune the geometry and colors in your browser, then export as SVG or PNG.">
 <link rel="canonical" href="https://martin-ushiyama.github.io/math-pattern-gen/">
 <script src="assets/analytics.js"></script>
 <meta name="theme-color" content="#f3eedf">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Math Pattern Gen">
 <meta property="og:title" content="Math Pattern Gen — Patterns, born from math.">
-<meta property="og:description" content="Create background patterns from 13 mathematical structures. Tune them in your browser and export as SVG or PNG.">
+<meta property="og:description" content="Create background patterns from 14 mathematical structures. Tune them in your browser and export as SVG or PNG.">
 <meta property="og:url" content="https://martin-ushiyama.github.io/math-pattern-gen/">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp-guilloche.png">
@@ -23,7 +23,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@mrtn">
 <meta name="twitter:title" content="Math Pattern Gen — Patterns, born from math.">
-<meta name="twitter:description" content="Explore 13 mathematical structures, shape a background pattern, and export it as SVG or PNG.">
+<meta name="twitter:description" content="Explore 14 mathematical structures, shape a background pattern, and export it as SVG or PNG.">
 <meta name="twitter:image" content="https://martin-ushiyama.github.io/math-pattern-gen/assets/brand/ogp-guilloche.png">
 <meta name="twitter:image:alt" content="A cobalt dot-matrix logo and a sweeping polar-lattice pattern on a cream background.">
 <link rel="icon" href="assets/brand/favicon.ico" sizes="16x16 32x32 48x48">
@@ -409,6 +409,7 @@ function paintKey(W,H,color,bg,deg){
 }
 
 function svgFromDots(W,H,dots,color,op,bg,deg){
+  if(dots.pixel)return svgFromPixels(W,H,dots,color,bg);
   const tiers=[[],[],[]];
   for(const d of dots){
     if(!isFinite(d.x)||!isFinite(d.y)||!isFinite(d.r)) continue;
@@ -990,6 +991,55 @@ S.voronoi={
     return out;
   }
 };
+
+/* Bayer行列のしきい値で連続した濃淡を二値の正方形に変換する。 */
+S.dither={
+  label:{ja:"順序ディザ（ピクセルドット）",en:"Ordered dither (pixel dots)"},
+  note:{ja:"波の重なりを、四角いドットの密度で描きます。輪郭をぼかさない2色の模様。グラデーションと粒径別の不透明度は使いません。",en:"Turn overlapping waves into a field of square pixels. Crisp edges and two solid colors, without gradients or size-based opacity."},
+  doc:{ja:"<b>順序ディザのしくみ</b><br>2つの正弦波から濃淡を求め、8×8のBayer行列のしきい値と比較して、点を置くかどうかを決めます。中間の濃淡は半透明ではなく、点の密度で表現します。<br><b>ドットをくっきり</b> — 点は整数座標の正方形。SVGにはcrispEdgesを指定し、PNGは整数倍で補間せず書き出します。縮小表示では点の見え方が変わるため、書き出し画像は等倍で確認してください。<br><b>変化をつける</b> — 波の大きさで模様のスケール、重なりで干渉、濃度で点の割合を調整できます。",en:"<b>How ordered dithering works</b><br>Two sine waves define a continuous tone. An 8×8 Bayer threshold matrix decides whether each pixel is filled. Intermediate tones come from pixel density, not transparency.<br><b>Keep pixels crisp</b> — Squares align to integer coordinates. SVG uses crispEdges; PNG exports at integer scales without smoothing. Reduced previews can look different: inspect exports at actual size.<br><b>Shape the field</b> — Wavelength controls scale, wave mix controls interference, and density adjusts coverage."},
+  params:[
+    {k:"pixel",l:{ja:"ドットの大きさ（px）",en:"Pixel size (px)"},min:2,max:16,step:1,d:4},
+    {k:"wave",l:{ja:"波の大きさ",en:"Wavelength"},min:80,max:1800,step:10,d:620},
+    {k:"mix",l:{ja:"波の重なり",en:"Wave mix"},min:0,max:1,step:0.05,d:0.6},
+    {k:"contrast",l:{ja:"濃淡の強さ",en:"Contrast"},min:0.2,max:3,step:0.1,d:1.4},
+    {k:"density",l:{ja:"濃度",en:"Density"},min:0,max:1,step:0.05,d:0.5},
+    {k:"phase",l:{ja:"位相",en:"Phase"},min:0,max:6.28,step:0.05,d:1.2},
+    {k:"ox",l:{ja:"位置 x",en:"Offset x"},min:-1000,max:1000,step:10,d:0},
+    {k:"oy",l:{ja:"位置 y",en:"Offset y"},min:-1000,max:1000,step:10,d:0}
+  ],
+  gen(p,W,H){
+    const out=[],step=Math.max(2,Math.round(p.pixel)),tau=2*Math.PI/p.wave;
+    for(let y=0,iy=0;y<H;y+=step,iy++)for(let x=0,ix=0;x<W;x+=step,ix++){
+      const u=(x-p.ox)*tau,v=(y-p.oy)*tau;
+      const field=(Math.sin(u+0.65*Math.sin(v)+p.phase)+p.mix*Math.sin(0.72*v-0.48*u-p.phase))/(1+p.mix);
+      const tone=clamp01(p.density+0.5*p.contrast*field);
+      let threshold=0;
+      for(let bit=0;bit<3;bit++){
+        const a=(ix>>bit)&1,b=(iy>>bit)&1;
+        threshold=threshold*4+((a^b)*2+b);
+      }
+      if(tone>(threshold+0.5)/64)out.push({x,y,r:step/2,pixel:step});
+    }
+    // 空の模様でも専用レンダラーを選べるようにする。
+    out.pixel=true;
+    return out;
+  }
+};
+
+function svgFromPixels(W,H,dots,color,bg){
+  // 同じ行の連続した点は1本の矩形へまとめる。整数境界を維持。
+  const runs=[];let run=null;
+  for(const d of dots){
+    const width=Math.min(d.pixel,W-d.x),height=Math.min(d.pixel,H-d.y);
+    if(run&&run.y===d.y&&run.x+run.w===d.x)run.w+=width;
+    else {run={x:d.x,y:d.y,w:width,h:height};runs.push(run);}
+  }
+  const fg=Array.isArray(color)?color[0]:color,back=Array.isArray(bg)?bg[0]:bg;
+  const background=back?'<rect width="'+W+'" height="'+H+'" fill="'+back+'"/>':'';
+  const d=runs.map(r=>'M'+r.x+' '+r.y+'h'+r.w+'v'+r.h+'h-'+r.w+'z').join('');
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" shape-rendering="crispEdges">'+background+'<path fill="'+fg+'" d="'+d+'"/></svg>';
+}
+
 const PALETTES=[
  {id:"cobalt-cream", name:{ja:"コバルト＆クリーム", en:"Cobalt & cream"},
   fg:"#1644DD", bg:"#F3EEDF", deg:90},
@@ -1029,6 +1079,7 @@ function normalizeParams(key,input){
 }
 /* 構造を一目で伝える短い生成規則。詳しい式は各構造の解説に残す。 */
 const FORMULAS={
+  dither:"pixel(i,j) = tone(i,j) > (B₈(i mod 8,j mod 8) + ½)/64",
   polar:"rᵢ = r₀ + i·Δr   |   m = cos(kθ + arᵢ + φ)",
   ribbon:"X(u,v) = P(u) + v·R(τ(u))N(u)",
   cloth:"h(u,v) = A(u)·sin(fᵤu + fᵥv + τu)",
@@ -1046,7 +1097,7 @@ function formulaFor(key,p){
   if(key==="conformal")return p&&p.fn==="jouk" ? "w = z + 1/z" : "w = z²";
   return FORMULAS[key]||"";
 }
-const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi"];
+const ORDER=["polar","ribbon","cloth","conformal","contour","twist","moire","quasi","gibbs","caustics","turing","truchet","voronoi","dither"];
 const $ = id => document.getElementById(id);
 
 /* ── 言語 ──────────────────────────────────────────────
@@ -1222,6 +1273,7 @@ function buildStructSelect(){
 }
 function buildParams(){
   const box=$("params"); box.innerHTML="";
+  for(const id of ["op0","op1","op2","fgGrad","bgGrad"]){$(id).disabled=cur==="dither";}
   for(const s of S[cur].params){
     const lab=document.createElement("label");
     if(s.opts){
@@ -1517,7 +1569,7 @@ function exportPNG(){
   img.onload=()=>{
     try{
       const ctx=c.getContext("2d");
-      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingEnabled=!lastSVG.includes('shape-rendering="crispEdges"');
       ctx.drawImage(img,0,0,W,H);
       c.toBlob(bl=>{
         if(!bl){ cleanup(); done(T(UI.pngFail)); return; }

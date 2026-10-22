@@ -534,5 +534,41 @@
         "oy": 20
       }
     }
+  },
+  {
+    "id": "dither",
+    "title": {
+      "ja": "順序ディザ",
+      "en": "Ordered dither"
+    },
+    "state": {
+      "s": "dither",
+      "w": "1200",
+      "h": "900",
+      "fg": "#ffffff",
+      "bg": "#3023dd",
+      "f2": "#ffffff",
+      "b2": "#3023dd",
+      "fG": 0,
+      "bG": 0,
+      "ang": "90",
+      "pal": "custom",
+      "t": 0,
+      "op": [
+        "1",
+        "1",
+        "1"
+      ],
+      "p": {
+        "pixel": 4,
+        "wave": 620,
+        "mix": 0.6,
+        "contrast": 1.4,
+        "density": 0.5,
+        "phase": 1.2,
+        "ox": 0,
+        "oy": 0
+      }
+    }
   }
 ]
