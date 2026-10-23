@@ -411,7 +411,7 @@ function paintKey(W,H,color,bg,deg){
 }
 
 function svgFromDots(W,H,dots,color,op,bg,deg){
-  if(dots.pixel)return svgFromPixels(W,H,dots,color,bg);
+  if(dots.pixel)return svgFromPixels(W,H,dots,color,bg,deg);
   const tiers=[[],[],[]];
   for(const d of dots){
     if(!isFinite(d.x)||!isFinite(d.y)||!isFinite(d.r)) continue;
@@ -1056,20 +1056,31 @@ function pixelDots(key,p,W,H,pixel){
     }
     if(tone>(threshold+0.5)/64)out.push({x,y,r:step/2,pixel:step});
   }
-  out.pixel=true;return out;
+  out.pixel=true;out.pixelSize=step;return out;
 }
-function svgFromPixels(W,H,dots,color,bg){
-  // 同じ行の連続した点は1本の矩形へまとめる。整数境界を維持。
+function pixelPaint(paint,W,H,deg){
+  if(!Array.isArray(paint))return ()=>paint;
+  const rgb=hex=>{hex=hex.slice(1);if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(hex.slice(i,i+2),16));};
+  const a=rgb(paint[0]),b=rgb(paint[1]),g=gradLine(W,H,deg),dx=g.x2-g.x1,dy=g.y2-g.y1;
+  return (x,y)=>{const t=clamp01(((x-g.x1)*dx+(y-g.y1)*dy)/(dx*dx+dy*dy||1));return '#'+a.map((v,i)=>Math.round(v+(b[i]-v)*t).toString(16).padStart(2,'0')).join('');};
+}
+function svgFromPixels(W,H,dots,color,bg,deg=90){
+  // グラデーションはセル中心で採色し、セル内を単色にして輪郭をぼかさない。
+  const groups=new Map(),step=dots.pixelSize||dots[0]?.pixel||4;
+  const add=(fill,x,y,w,h)=>{if(!groups.has(fill))groups.set(fill,[]);groups.get(fill).push('M'+x+' '+y+'h'+w+'v'+h+'h-'+w+'z');};
+  const fp=pixelPaint(color,W,H,deg),bp=pixelPaint(bg,W,H,deg);
+  const occupied=Array.isArray(bg)?new Set(dots.map(d=>d.x+","+d.y)):null;
+  if(Array.isArray(bg))for(let y=0;y<H;y+=step)for(let x=0;x<W;x+=step){if(occupied.has(x+","+y))continue;const w=Math.min(step,W-x),h=Math.min(step,H-y);add(bp(x+w/2,y+h/2),x,y,w,h);}
   const runs=[];let run=null;
   for(const d of dots){
-    const width=Math.min(d.pixel,W-d.x),height=Math.min(d.pixel,H-d.y);
-    if(run&&run.y===d.y&&run.x+run.w===d.x)run.w+=width;
-    else {run={x:d.x,y:d.y,w:width,h:height};runs.push(run);}
+    const width=Math.min(d.pixel,W-d.x),height=Math.min(d.pixel,H-d.y),fill=fp(d.x+width/2,d.y+height/2);
+    if(run&&run.y===d.y&&run.x+run.w===d.x&&run.h===height&&run.fill===fill)run.w+=width;
+    else {run={x:d.x,y:d.y,w:width,h:height,fill};runs.push(run);}
   }
-  const fg=Array.isArray(color)?color[0]:color,back=Array.isArray(bg)?bg[0]:bg;
-  const background=back?'<rect width="'+W+'" height="'+H+'" fill="'+back+'"/>':'';
-  const d=runs.map(r=>'M'+r.x+' '+r.y+'h'+r.w+'v'+r.h+'h-'+r.w+'z').join('');
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" shape-rendering="crispEdges">'+background+'<path fill="'+fg+'" d="'+d+'"/></svg>';
+  for(const r of runs)add(r.fill,r.x,r.y,r.w,r.h);
+  const background=bg&&!Array.isArray(bg)?'<rect width="'+W+'" height="'+H+'" fill="'+bg+'"/>':'';
+  const paths=[...groups].map(([fill,commands])=>'<path fill="'+fill+'" d="'+commands.join('')+'"/>').join('');
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" shape-rendering="crispEdges">'+background+paths+'</svg>';
 }
 
 
@@ -1314,8 +1325,8 @@ function syncOutputUI(){
   $('uiNormalOutput').textContent=T({ja:'通常',en:'Original'});
   $('uiPixelOutput').textContent=T({ja:'ドット（ぼかしなし）',en:'Pixel dots (no smoothing)'});
   $('uiPixelSize').textContent=T({ja:'ドットの大きさ（px）',en:'Pixel size (px)'});
-  $('outputNote').textContent=T(!supported?{ja:'ドット出力は、まず「歪ませた等高線」で試せます。',en:'Try pixel output with Warped contours first.'}:pixel?{ja:'元の模様を2色のドットで描きます。配色は開始色を使い、不透明度・グラデーションは使いません。',en:'Render this pattern as two-color pixel dots. Uses the starting colors without opacity or gradients.'}:{ja:'形の設定を保ったまま、通常とドットを比較できます。',en:'Compare original and pixel rendering without changing the shape settings.'});
-  for(const id of ['op0','op1','op2','fgGrad','bgGrad','fg2','bg2','angle'])$(id).disabled=pixel;
+  $('outputNote').textContent=T(!supported?{ja:'ドット出力は、まず「歪ませた等高線」で試せます。',en:'Try pixel output with Warped contours first.'}:pixel?{ja:'単色・グラデーションに対応。各ドットを単色で塗り、輪郭はぼかしません。不透明度は使いません。',en:'Use solid colors or gradients. Each pixel keeps a single color and sharp edges. Opacity is not used.'}:{ja:'形の設定を保ったまま、通常とドットを比較できます。',en:'Compare original and pixel rendering without changing the shape settings.'});
+  for(const id of ['op0','op1','op2'])$(id).disabled=pixel;
 }
 $('outputMode').addEventListener('change',()=>{output.mode=$('outputMode').value;buildParams();render();});
 $('pixelSize').addEventListener('change',()=>{output=normalizeOutput({mode:output.mode,pixel:$('pixelSize').value});syncOutputUI();render();});

@@ -42,3 +42,9 @@
 - 円弧タイルと曲線：[Truchet Tilings and Renormalization](https://wphooper.com/docs/papers/random_truchet.pdf)。本ツールでは円弧への距離を点の大きさに変換。
 - 距離によるセル状テクスチャ：Steven Worley, [A Cellular Texture Basis Function](https://cedric.cnam.fr/~cubaud/PROCEDURAL/worley.pdf), 1996。近い2つの母点までの距離差 F2 − F1 を使用。厳密な辺までの距離とは異なる。
 - 輪郭形状の次候補：Paul Bourke, [Supershapes / Superformula](https://www.paulbourke.org/geometry/supershape/)。
+
+## 2026年10月23日：ピクセルモードのグラデーション（公開前）
+
+- ドットと背景の両方にグラデーションと角度を反映。セル中心のRGBを採色し、セル内は単色、整数境界で描画する。
+- 単色時は従来どおり2色。透明背景に対応。不透明度設定は使わない。
+- 52テスト成功。異なる角度・整数倍率のラスタライズでセル内の単色性と不透明度、端のセルと空の模様を検証。ChromeでAuroraと角度変更を確認。
